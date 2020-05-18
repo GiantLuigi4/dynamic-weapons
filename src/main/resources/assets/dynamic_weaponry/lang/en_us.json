@@ -1,5 +1,6 @@
 {
   "gui.shaderscreen.name": "Shader Editor",
   "item.dynamic_weaponry.shader_orb": "Shader Orb",
+  "item.dynamic_weaponry.cube": "UNLIMITED POWAH",
   "block.dynamic_weaponry.shading_table": "Shading Table"
 }

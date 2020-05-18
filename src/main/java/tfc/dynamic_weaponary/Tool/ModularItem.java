@@ -4,19 +4,26 @@ import com.google.common.collect.Multimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.IItemTier;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolItem;
+import net.minecraft.item.UseAction;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ToolType;
 import tfc.dynamic_weaponary.Utils.DrawingUtils;
+import tfc.dynamic_weaponary.Utils.ToolShape;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -29,18 +36,20 @@ public class ModularItem extends ToolItem {
 		super(attackDamageIn, attackSpeedIn, tier, effectiveBlocksIn, builder);
 	}
 	
-	public float getEfficiency(ItemStack stack) {
+	public static float getEfficiency(ItemStack stack) {
 		return 5;
 	}
 	
-	public ToolShape getShape(ItemStack stack) {
+	public static int getHarvestLevel(ItemStack stack) {
+		return 1;
+	}
+	
+	public static ToolShape getShape(ItemStack stack) {
 		return null;
 	}
 	
-	@Override
-	public float getDestroySpeed(ItemStack stack, BlockState state) {
-		if (getToolTypes(stack).stream().anyMatch(e -> state.isToolEffective(e))) return efficiency;
-		return this.effectiveBlocks.contains(state.getBlock()) ? this.efficiency : 1.0F;
+	public static boolean canHarvest(BlockState state, ToolShape shape) {
+		return true;
 	}
 	
 	@Override
@@ -103,6 +112,52 @@ public class ModularItem extends ToolItem {
 	}
 	
 	@Override
+	public float getDestroySpeed(ItemStack stack, BlockState state) {
+		if (getToolTypes(stack).stream().anyMatch(e -> state.isToolEffective(e))) return getEfficiency(stack);
+		return state.isToolEffective(ToolType.PICKAXE) ? getEfficiency(stack) : 1.0F;
+	}
+	
+	@Override
+	public int getMaxDamage(ItemStack stack) {
+		return 0;
+	}
+	
+	@Override
+	public boolean onEntitySwing(ItemStack stack, LivingEntity entity) {
+		return super.onEntitySwing(stack, entity);
+	}
+	
+	@Override
+	public boolean canHarvestBlock(ItemStack stack, BlockState state) {
+		if (state.getHarvestLevel() <= getHarvestLevel(stack)) {
+			if (state.isToolEffective(ToolType.PICKAXE)) {
+				return true;
+			}
+		}
+		return super.canHarvestBlock(stack, state);
+	}
+	
+	@Override
+	public int getItemEnchantability(ItemStack stack) {
+		return 0;
+	}
+	
+	@Override
+	public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
+		return false;
+	}
+	
+	@Override
+	public boolean canContinueUsing(ItemStack oldStack, ItemStack newStack) {
+		return false;
+	}
+	
+	@Override
+	public boolean canDisableShield(ItemStack stack, ItemStack shield, LivingEntity entity, LivingEntity attacker) {
+		return false;
+	}
+	
+	@Override
 	public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
 		try {
 			tooltip.add(new StringTextComponent("§aShield:" + stack.getTag().getBoolean("shield")));
@@ -110,6 +165,34 @@ public class ModularItem extends ToolItem {
 			tooltip.add(new StringTextComponent("§aShield:" + "false"));
 		}
 		super.addInformation(stack, worldIn, tooltip, flagIn);
+	}
+	
+	@Override
+	public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
+		ItemStack itemstack = playerIn.getHeldItem(handIn);
+		if (itemstack.getTag().getBoolean("shield")) {
+			playerIn.setActiveHand(handIn);
+			return ActionResult.resultConsume(itemstack);
+		}
+		return super.onItemRightClick(worldIn, playerIn, handIn);
+	}
+	
+	@Override
+	public UseAction getUseAction(ItemStack stack) {
+		return stack.getTag().getBoolean("shield") ? UseAction.BLOCK : UseAction.NONE;
+	}
+	
+	@Override
+	public int getUseDuration(ItemStack stack) {
+		if (stack.getTag().getBoolean("shield")) {
+			return 1280838939;
+		}
+		return super.getUseDuration(stack);
+	}
+	
+	@Override
+	public void onPlayerStoppedUsing(ItemStack stack, World worldIn, LivingEntity entityLiving, int timeLeft) {
+		super.onPlayerStoppedUsing(stack, worldIn, entityLiving, timeLeft);
 	}
 	
 	@Override

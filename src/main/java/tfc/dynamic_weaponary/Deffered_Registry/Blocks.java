@@ -8,7 +8,8 @@ import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import tfc.dynamic_weaponary.DynamicWeapons;
-import tfc.dynamic_weaponary.block.ShadingTable;
+import tfc.dynamic_weaponary.block.ShadingTable.ShadingTable;
+import tfc.dynamic_weaponary.block.ToolForge.ToolForge;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -17,6 +18,7 @@ import java.util.function.Supplier;
 public class Blocks {
 	public static final DeferredRegister<Block> BLOCKS = new DeferredRegister<>(ForgeRegistries.BLOCKS, DynamicWeapons.ModID);
 	public static final RegistryObject<Block> SHADING_TABLE = registerNormalBlock("shading_table", () -> new ShadingTable());
+	public static final RegistryObject<Block> TOOL_FORGE = registerNormalBlock("tool_forge", () -> new ToolForge());
 	
 	//From deepwaters
 	private static <T extends Block> RegistryObject<T> baseRegister(String name, Supplier<? extends T> block, Function<RegistryObject<T>, Supplier<? extends Item>> item) {

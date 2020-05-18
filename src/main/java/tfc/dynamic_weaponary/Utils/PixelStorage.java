@@ -7,14 +7,22 @@ public class PixelStorage {
 	int width;
 	int height;
 	
-	public PixelStorage(int width, int height) {
-		for (int x = 0; x <= width; x++) {
-			for (int y = 0; y <= height; y++) {
-				image.add(new Pixel(x, y, new DrawingUtils.ColorHelper(x * 15, x * 15, x * 15)));
+	public PixelStorage(int width, int height, boolean gradient) {
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (gradient) {
+					image.add(new Pixel(x, y, new DrawingUtils.ColorHelper(255 - ((x + 1) * 15), 255 - ((x + 1) * 15), 255 - ((x + 1) * 15))));
+				} else {
+					image.add(new Pixel(x, y, new DrawingUtils.ColorHelper(0, 0, 0, 0)));
+				}
 			}
 		}
 		this.width = width;
 		this.height = height;
+	}
+	
+	public PixelStorage(int width, int height) {
+		this(width, height, true);
 	}
 	
 	public static Pixel pixelFromString(String string) {
@@ -65,5 +73,39 @@ public class PixelStorage {
 		public String toString() {
 			return "" + x + "," + y + "," + color.getRGB();
 		}
+	}
+	
+	public static PixelStorage fromString(String string) {
+		ArrayList<Pixel> pixels = new ArrayList<>();
+		String string2 = "";
+		int maxX = 0;
+		int maxY = 0;
+		for (char c : string.toCharArray()) {
+			if (c != ';') {
+				string2 += c;
+			} else {
+				pixels.add(pixelFromString(string2));
+				if (pixels.get(pixels.size() - 1).x >= maxX) {
+					maxX = pixels.get(pixels.size() - 1).x;
+				}
+				if (pixels.get(pixels.size() - 1).y >= maxY) {
+					maxY = pixels.get(pixels.size() - 1).y;
+				}
+				string2 = "";
+			}
+		}
+		PixelStorage storage = new PixelStorage(maxX + 1, maxY + 1, false);
+		for (Pixel px : pixels) {
+			storage.setPixel(px.x, px.y, px.color);
+		}
+		return storage;
+	}
+	
+	public String toString() {
+		String str = "";
+		for (Pixel px : image) {
+			str += px.toString() + ";";
+		}
+		return str;
 	}
 }
