@@ -7,7 +7,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import tfc.dynamic_weaponary.ShaderOrb.ShaderItem;
 import tfc.dynamic_weaponary.Utils.DrawingUtils;
-import tfc.dynamic_weaponary.Utils.PixelStorage;
+import tfc.dynamic_weaponary.Utils.Image.PixelStorage;
 
 //https://github.com/3TUSK/SRA/blob/bleeding/src/main/java/info/tritusk/anchor/AnchorScreen.java
 public class STScreen extends ContainerScreen<STContainer> {

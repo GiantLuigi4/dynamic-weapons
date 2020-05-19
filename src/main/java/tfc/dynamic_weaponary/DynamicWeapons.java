@@ -27,10 +27,11 @@ import tfc.dynamic_weaponary.Deffered_Registry.Items;
 import tfc.dynamic_weaponary.Deffered_Registry.TileEntities;
 import tfc.dynamic_weaponary.Packet.ImagePacket;
 import tfc.dynamic_weaponary.Utils.DrawingUtils;
-import tfc.dynamic_weaponary.Utils.Material;
-import tfc.dynamic_weaponary.Utils.PixelStorage;
+import tfc.dynamic_weaponary.Utils.Image.PixelStorage;
+import tfc.dynamic_weaponary.Utils.Tool.Material;
 import tfc.dynamic_weaponary.block.ShadingTable.STContainer;
 import tfc.dynamic_weaponary.block.ShadingTable.STScreen;
+import tfc.dynamic_weaponary.block.ToolForge.ToolForge;
 import tfc.dynamic_weaponary.block.ToolForge.ToolForgeContainer;
 import tfc.dynamic_weaponary.block.ToolForge.ToolForgeScreen;
 
@@ -64,7 +65,10 @@ public class DynamicWeapons {
 				new BiConsumer<ImagePacket, Supplier<NetworkEvent.Context>>() {
 					@Override
 					public void accept(ImagePacket imagePacket, Supplier<NetworkEvent.Context> contextSupplier) {
-						((ToolForgeContainer) contextSupplier.get().getSender().openContainer).tile.image = PixelStorage.fromString(imagePacket.info);
+						ToolForge.ForgeTE te = ((ToolForgeContainer) contextSupplier.get().getSender().openContainer).tile;
+						te.image = imagePacket.info;
+						te.markDirty();
+						te.getWorld().notifyBlockUpdate(te.getPos(), te.getBlockState(), te.getBlockState(), 3);
 					}
 				}
 		);
@@ -90,7 +94,7 @@ public class DynamicWeapons {
 		MaterialList.RegisterMaterial(net.minecraft.item.Items.GOLD_INGOT, new Material(32, 4, 5 - 3.6f, new DrawingUtils.ColorHelper(245, 244, 135)));
 		//WOODS
 		MaterialList.RegisterMaterial(net.minecraft.item.Items.OAK_PLANKS, new Material(58, 4, 5 - 1.0f, new DrawingUtils.ColorHelper(125, 101, 65)));
-		MaterialList.RegisterMaterial(net.minecraft.item.Items.SPRUCE_PLANKS, new Material(58, 4, 5 - 1.0f, new DrawingUtils.ColorHelper(66, 51, 31)));
+		MaterialList.RegisterMaterial(net.minecraft.item.Items.SPRUCE_PLANKS, new Material(58, 4, 5 - 1.0f, new DrawingUtils.ColorHelper(118, 88, 53)));
 		MaterialList.RegisterMaterial(net.minecraft.item.Items.BIRCH_PLANKS, new Material(58, 4, 5 - 1.0f, new DrawingUtils.ColorHelper(168, 153, 107)));
 		MaterialList.RegisterMaterial(net.minecraft.item.Items.JUNGLE_PLANKS, new Material(58, 4, 5 - 1.0f, new DrawingUtils.ColorHelper(145, 103, 67)));
 		MaterialList.RegisterMaterial(net.minecraft.item.Items.ACACIA_PLANKS, new Material(58, 4, 5 - 1.0f, new DrawingUtils.ColorHelper(169, 90, 50)));

@@ -1,4 +1,4 @@
-package tfc.dynamic_weaponary.Utils;
+package tfc.dynamic_weaponary.Utils.Tool;
 
 public class ToolPartShape {
 	ToolPartType type;

@@ -12,6 +12,7 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
@@ -30,8 +31,6 @@ import net.minecraftforge.common.ToolType;
 import net.minecraftforge.fml.network.NetworkHooks;
 import tfc.dynamic_weaponary.Deffered_Registry.Items;
 import tfc.dynamic_weaponary.Deffered_Registry.TileEntities;
-import tfc.dynamic_weaponary.Utils.PixelStorage;
-import tfc.dynamic_weaponary.Utils.VectorImage;
 
 import javax.annotation.Nullable;
 
@@ -110,7 +109,7 @@ public class ToolForge extends Block implements ITileEntityProvider {
 	}
 	
 	public static class ForgeTE extends TileEntity implements INamedContainerProvider {
-		public PixelStorage image = new PixelStorage(16, 16, false);
+		public String image = "";
 		
 		public ForgeTE() {
 			super(TileEntities.TOOL_FORGE.get());
@@ -132,18 +131,12 @@ public class ToolForge extends Block implements ITileEntityProvider {
 		@Override
 		public void read(CompoundNBT compound) {
 			super.read(compound);
-			try {
-				image = VectorImage.fromString(compound.getString("image"));
-			} catch (Exception err) {
-			}
+			image = compound.getString("image");
 		}
 		
 		@Override
 		public CompoundNBT write(CompoundNBT compound) {
-			try {
-				compound.putString("image", image.toString());
-			} catch (Exception err) {
-			}
+			compound.putString("image", image);
 			return super.write(compound);
 		}
 		
@@ -162,10 +155,17 @@ public class ToolForge extends Block implements ITileEntityProvider {
 			read(tag);
 		}
 		
+		@Override
+		public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+			super.onDataPacket(net, pkt);
+			this.read(pkt.getNbtCompound());
+		}
+		
 		@Nullable
 		@Override
 		public SUpdateTileEntityPacket getUpdatePacket() {
-			return super.getUpdatePacket();
+			SUpdateTileEntityPacket packet = new SUpdateTileEntityPacket(this.pos, 1, this.write(new CompoundNBT()));
+			return packet;
 		}
 		
 		@Override

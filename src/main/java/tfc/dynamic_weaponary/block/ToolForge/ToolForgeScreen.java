@@ -11,9 +11,10 @@ import tfc.dynamic_weaponary.DynamicWeapons;
 import tfc.dynamic_weaponary.MaterialList;
 import tfc.dynamic_weaponary.Packet.ImagePacket;
 import tfc.dynamic_weaponary.Utils.DrawingUtils;
-import tfc.dynamic_weaponary.Utils.Material;
-import tfc.dynamic_weaponary.Utils.PixelStorage;
-import tfc.dynamic_weaponary.Utils.VectorImage;
+import tfc.dynamic_weaponary.Utils.Image.MaterialBasedPixelStorage;
+import tfc.dynamic_weaponary.Utils.Image.MaterialVectorImage;
+import tfc.dynamic_weaponary.Utils.Image.PixelStorage;
+import tfc.dynamic_weaponary.Utils.Tool.Material;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +22,10 @@ import java.util.List;
 public class ToolForgeScreen extends ContainerScreen<ToolForgeContainer> {
 	private static final ResourceLocation GUI_BG = new ResourceLocation("dynamic_weaponry", "textures/gui/tool_forge.png");
 	PixelStorage.Pixel start = null;
-	PixelStorage.Pixel offsetStart = null;
-	PixelStorage.Pixel end = null;
-	ArrayList<VectorImage.line> lines = new ArrayList<>();
-	VectorImage image = new VectorImage(16, 16, PixelStorage.fromString("0,0,-16712192;1,0,-16712192;2,0,-16712192;3,0,-16712192;4,0,-16712192;5,0,-16712192;6,0,-16712192;7,0,-16712192;8,0,-16712192;9,0,-16712192;10,0,-16712192;11,0,-16712192;12,0,-16712192;13,0,-16712192;14,0,-16712192;15,0,-16448002;0,1,-16712192;1,1,-16712192;2,1,-16712192;3,1,-16712192;4,1,-16712192;5,1,-16712192;6,1,-16712192;7,1,-16712192;8,1,-16712192;9,1,-16712192;10,1,-16712192;11,1,-16712192;12,1,-16712192;13,1,-16712192;14,1,-16712192;15,1,-16776962;0,2,-16712192;1,2,-16712192;2,2,-16712192;3,2,-16712192;4,2,-16712192;5,2,-16712192;6,2,-16712192;7,2,-16712192;8,2,-16712192;9,2,-16712192;10,2,-16712192;11,2,-16712192;12,2,-16712192;13,2,-16712192;14,2,-16712192;15,2,-16776962;0,3,-16712192;1,3,-16712192;2,3,-16712192;3,3,-16712192;4,3,-16712192;5,3,-16712192;6,3,-16712192;7,3,-16712192;8,3,-16712192;9,3,-16712192;10,3,-16712192;11,3,-16712192;12,3,-16712192;13,3,-16712192;14,3,-16712192;15,3,-16776962;0,4,-16712192;1,4,-16712192;2,4,-16712192;3,4,-16712192;4,4,-16712192;5,4,-16712192;6,4,-16712192;7,4,-16712192;8,4,-16712192;9,4,-16712192;10,4,-16712192;11,4,-16712192;12,4,-16712192;13,4,-16712192;14,4,-16712192;15,4,-16776962;0,5,-16712192;1,5,-16712192;2,5,-16712192;3,5,-16712192;4,5,-16712192;5,5,-16712192;6,5,-16712192;7,5,-16712192;8,5,-16712192;9,5,-16712192;10,5,-16712192;11,5,-16712192;12,5,-16712192;13,5,-16712192;14,5,-16712192;15,5,-16776962;0,6,-16712192;1,6,-16712192;2,6,-16712192;3,6,-16712192;4,6,-16712192;5,6,-16712192;6,6,-16712192;7,6,-16712192;8,6,-16712192;9,6,-16712192;10,6,-16712192;11,6,-16712192;12,6,-16712192;13,6,-16712192;14,6,-16712192;15,6,-16776962;0,7,-16712192;1,7,-16712192;2,7,-16712192;3,7,-16712192;4,7,-16712192;5,7,-16712192;6,7,-16712192;7,7,-16712192;8,7,-16712192;9,7,-16712192;10,7,-16712192;11,7,-16712192;12,7,-16712192;13,7,-16712192;14,7,-16712192;15,7,-16776962;0,8,-16712192;1,8,-16712192;2,8,-16712192;3,8,-16712192;4,8,-16712192;5,8,-16712192;6,8,-16712192;7,8,-16712192;8,8,-16712192;9,8,-16712192;10,8,-16712192;11,8,-16712192;12,8,-16712192;13,8,-16712192;14,8,-16712192;15,8,-16776962;0,9,-16712192;1,9,-16712192;2,9,-16712192;3,9,-16712192;4,9,-16712192;5,9,-16712192;6,9,-16712192;7,9,-16712192;8,9,-16712192;9,9,-16712192;10,9,-16712192;11,9,-16712192;12,9,-16712192;13,9,-16712192;14,9,-16712192;15,9,-16776962;0,10,-16712192;1,10,-16712192;2,10,-16712192;3,10,-16712192;4,10,-16712192;5,10,-16712192;6,10,-16712192;7,10,-16712192;8,10,-16712192;9,10,-16712192;10,10,-16712192;11,10,-16712192;12,10,-16712192;13,10,-16712192;14,10,-16712192;15,10,-16776962;0,11,-16712192;1,11,-16712192;2,11,-16712192;3,11,-16712192;4,11,-16712192;5,11,-16712192;6,11,-16712192;7,11,-16712192;8,11,-16712192;9,11,-16712192;10,11,-16712192;11,11,-16712192;12,11,-16712192;13,11,-16712192;14,11,-16712192;15,11,-16776962;0,12,-16712192;1,12,-16712192;2,12,-16712192;3,12,-16712192;4,12,-16712192;5,12,-16712192;6,12,-16712192;7,12,-16712192;8,12,-16712192;9,12,-16712192;10,12,-16712192;11,12,-16712192;12,12,-16712192;13,12,-16712192;14,12,-16712192;15,12,-16776962;0,13,-16712192;1,13,-16712192;2,13,-16712192;3,13,-16712192;4,13,-16712192;5,13,-16712192;6,13,-16712192;7,13,-16712192;8,13,-16712192;9,13,-16712192;10,13,-16712192;11,13,-16712192;12,13,-16712192;13,13,-16712192;14,13,-16712192;15,13,-16776962;0,14,-16712192;1,14,-16712192;2,14,-16712192;3,14,-16712192;4,14,-16712192;5,14,-16712192;6,14,-16712192;7,14,-16712192;8,14,-16712192;9,14,-16712192;10,14,-16712192;11,14,-16712192;12,14,-16712192;13,14,-16712192;14,14,-16712192;15,14,-16776962;0,15,-16712192;1,15,-16712192;2,15,-16712192;3,15,-16712192;4,15,-16712192;5,15,-16712192;6,15,-16712192;7,15,-16712192;8,15,-16712192;9,15,-16712192;10,15,-16712192;11,15,-16712192;12,15,-16712192;13,15,-16712192;14,15,-16712192;15,15,-16776962;"));
+	MaterialBasedPixelStorage.MaterialPixel offsetStart = null;
+	MaterialBasedPixelStorage.MaterialPixel end = null;
+	ArrayList<MaterialVectorImage.MaterialLine> lines = new ArrayList<>();
+	MaterialVectorImage image = new MaterialVectorImage(16, 16);
 	boolean isLeftDown = false;
 	
 	public ToolForgeScreen(ToolForgeContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
@@ -73,7 +74,7 @@ public class ToolForgeScreen extends ContainerScreen<ToolForgeContainer> {
 		
 		//SETUP IMAGE
 		image.clear();
-		for (VectorImage.line ln : lines) {
+		for (MaterialVectorImage.MaterialLine ln : lines) {
 			image.addLine(ln.px1, ln.px2);
 		}
 		try {
@@ -132,22 +133,20 @@ public class ToolForgeScreen extends ContainerScreen<ToolForgeContainer> {
 						if (offY2 >= 0) {
 							offY2 = 0;
 						}
-						offsetStart = new PixelStorage.Pixel(start.x - Math.round(offX2), start.y - Math.round(offY2), new DrawingUtils.ColorHelper(mat.color));
+						offsetStart = new MaterialBasedPixelStorage.MaterialPixel(start.x - Math.round(offX2), start.y - Math.round(offY2), materialStack);
 						if (offX <= 0) {
 							offX = 0;
 						}
 						if (offY <= 0) {
 							offY = 0;
 						}
-						end = new PixelStorage.Pixel(x + Math.round(offX), y + Math.round(offY), new DrawingUtils.ColorHelper(mat.color));
+						end = new MaterialBasedPixelStorage.MaterialPixel(x + Math.round(offX), y + Math.round(offY), materialStack);
 					}
 					if (!isLeftDown && start != null) {
 						lines.add(
-								new VectorImage.line(
+								new MaterialVectorImage.MaterialLine(
 										offsetStart,
-										end,
-										materialStack.getItem(),
-										materialStack.getItem()
+										end
 								)
 						);
 						start = null;
@@ -182,8 +181,8 @@ public class ToolForgeScreen extends ContainerScreen<ToolForgeContainer> {
 	
 	@Override
 	public void onClose() {
-		this.container.tile.image = image;
 		super.onClose();
+		this.container.tile.image = image.toString();
 	}
 	
 	@Override
@@ -293,7 +292,7 @@ public class ToolForgeScreen extends ContainerScreen<ToolForgeContainer> {
 			isLeftDown = false;
 			try {
 				DynamicWeapons.INSTANCE.sendToServer(new ImagePacket(image.toString()));
-				container.tile.image = image;
+				container.tile.image = image.toString();
 			} catch (Exception ignored) {
 			}
 		}

@@ -1,4 +1,6 @@
-package tfc.dynamic_weaponary.Utils;
+package tfc.dynamic_weaponary.Utils.Tool;
+
+import tfc.dynamic_weaponary.Utils.DrawingUtils;
 
 public class Material {
 	public int durability;

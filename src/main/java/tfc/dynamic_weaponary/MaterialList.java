@@ -2,7 +2,7 @@ package tfc.dynamic_weaponary;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import tfc.dynamic_weaponary.Utils.Material;
+import tfc.dynamic_weaponary.Utils.Tool.Material;
 
 import java.util.HashMap;
 

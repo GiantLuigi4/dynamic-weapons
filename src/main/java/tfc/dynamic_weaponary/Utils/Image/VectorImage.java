@@ -1,9 +1,10 @@
-package tfc.dynamic_weaponary.Utils;
+package tfc.dynamic_weaponary.Utils.Image;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import tfc.dynamic_weaponary.MaterialList;
+import tfc.dynamic_weaponary.Utils.DrawingUtils;
 
 import java.util.ArrayList;
 

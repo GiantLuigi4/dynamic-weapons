@@ -26,7 +26,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.fml.network.NetworkHooks;
 import tfc.dynamic_weaponary.Deffered_Registry.TileEntities;
-import tfc.dynamic_weaponary.Utils.PixelStorage;
+import tfc.dynamic_weaponary.Utils.Image.PixelStorage;
 
 import javax.annotation.Nullable;
 

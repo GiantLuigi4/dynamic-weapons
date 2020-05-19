@@ -1,4 +1,6 @@
-package tfc.dynamic_weaponary.Utils;
+package tfc.dynamic_weaponary.Utils.Image;
+
+import tfc.dynamic_weaponary.Utils.DrawingUtils;
 
 import java.util.ArrayList;
 

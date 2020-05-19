@@ -21,7 +21,7 @@ public class ToolForgeRenderer extends TileEntityRenderer<ToolForge.ForgeTE> {
 	
 	@Override
 	public void render(ToolForge.ForgeTE forgeTE, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn, int combinedOverlayIn) {
-		matrixStackIn.translate(0.495, 0.96, 0.495);
+		matrixStackIn.translate(0.495, 0.96, 0.505);
 		matrixStackIn.rotate(new Quaternion(90, 0, 0, true));
 		matrixStackIn.scale(1 / 16f, 1 / 16f, 1 / 16f);
 		matrixStackIn.scale(6, 6, 6);
@@ -29,7 +29,7 @@ public class ToolForgeRenderer extends TileEntityRenderer<ToolForge.ForgeTE> {
 		ItemStack renderStack = new ItemStack(Items.TOOL.get());
 		try {
 			CompoundNBT nbt = renderStack.getOrCreateTag();
-			nbt.putString("image", forgeTE.image.toString());
+			nbt.putString("image", forgeTE.image);
 		} catch (Exception err) {
 		}
 		

@@ -6,7 +6,7 @@ import net.minecraft.item.ItemStack;
 import org.apache.logging.log4j.Level;
 import tfc.dynamic_weaponary.DynamicWeapons;
 import tfc.dynamic_weaponary.ShaderOrb.ShaderItem;
-import tfc.dynamic_weaponary.Utils.PixelStorage;
+import tfc.dynamic_weaponary.Utils.Image.PixelStorage;
 
 public class ShadingSlot extends Slot {
 	public ShadingSlot(IInventory inventoryIn, int index, int xPosition, int yPosition) {

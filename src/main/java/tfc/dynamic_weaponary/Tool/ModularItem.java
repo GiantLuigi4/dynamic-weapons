@@ -16,16 +16,24 @@ import net.minecraft.item.ToolItem;
 import net.minecraft.item.UseAction;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ToolType;
+import net.minecraftforge.registries.ForgeRegistries;
+import tfc.dynamic_weaponary.MaterialList;
 import tfc.dynamic_weaponary.Utils.DrawingUtils;
-import tfc.dynamic_weaponary.Utils.ToolShape;
+import tfc.dynamic_weaponary.Utils.Image.MaterialBasedPixelStorage;
+import tfc.dynamic_weaponary.Utils.Optimization.ImageList;
+import tfc.dynamic_weaponary.Utils.Tool.Material;
+import tfc.dynamic_weaponary.Utils.Tool.ToolLogicHelper;
+import tfc.dynamic_weaponary.Utils.Tool.ToolShape;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -34,6 +42,52 @@ public class ModularItem extends ToolItem {
 	
 	public ModularItem(float attackDamageIn, float attackSpeedIn, IItemTier tier, Set<Block> effectiveBlocksIn, Properties builder) {
 		super(attackDamageIn, attackSpeedIn, tier, effectiveBlocksIn, builder);
+	}
+	
+	@Override
+	public Multimap<String, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot, ItemStack stack) {
+		Multimap<String, AttributeModifier> modifiers = super.getAttributeModifiers(slot);
+		if (slot.equals(EquipmentSlotType.MAINHAND)) {
+			MaterialBasedPixelStorage img = ImageList.get(stack.getTag().getString("image"));
+			if (img == null) {
+				img = ImageList.addOrReplaceImage(stack.getTag().getString("image"));
+			}
+			ToolLogicHelper logicHelperDamage = new ToolLogicHelper();
+			ToolLogicHelper logicHelperWeight = new ToolLogicHelper();
+			ArrayList<String> items = new ArrayList<>();
+			for (MaterialBasedPixelStorage.MaterialPixel px : img.image) {
+				if (px.stack != ItemStack.EMPTY) {
+					if (!items.contains(px.stack.getItem().getRegistryName().toString())) {
+						items.add(px.stack.getItem().getRegistryName().toString());
+					}
+					Material mat = MaterialList.lookupMaterial(px.stack);
+					logicHelperDamage.add(px.stack.getItem().getRegistryName().toString(), mat.strength);
+					logicHelperWeight.add(px.stack.getItem().getRegistryName().toString(), mat.weight);
+				}
+			}
+			float attack = 0;
+			float weight = 0;
+			for (String str : items) {
+				if (new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(str))) != ItemStack.EMPTY) {
+					float materialPercent = logicHelperDamage.getPercent(str);
+					attack += materialPercent;
+					weight += materialPercent;
+				}
+			}
+			if (modifiers.containsKey(SharedMonsterAttributes.ATTACK_DAMAGE.getName())) {
+				modifiers.removeAll(SharedMonsterAttributes.ATTACK_DAMAGE.getName());
+			}
+			if (modifiers.containsKey(SharedMonsterAttributes.ATTACK_SPEED.getName())) {
+				modifiers.removeAll(SharedMonsterAttributes.ATTACK_SPEED.getName());
+			}
+			double weightCalc = (double) 5 - weight;
+			if (weightCalc <= -3) {
+				weightCalc = -3;
+			}
+			modifiers.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), (new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Tool modifier", (double) attack, AttributeModifier.Operation.ADDITION)));
+			modifiers.put(SharedMonsterAttributes.ATTACK_SPEED.getName(), (new AttributeModifier(ATTACK_SPEED_MODIFIER, "Tool modifier", weightCalc, AttributeModifier.Operation.ADDITION)));
+		}
+		return modifiers;
 	}
 	
 	public static float getEfficiency(ItemStack stack) {
@@ -89,8 +143,8 @@ public class ModularItem extends ToolItem {
 	public Multimap<String, AttributeModifier> getAttributeModifiers(EquipmentSlotType equipmentSlot) {
 		Multimap<String, AttributeModifier> multimap = super.getAttributeModifiers(equipmentSlot);
 		if (equipmentSlot == EquipmentSlotType.MAINHAND) {
-			multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Tool modifier", (double) this.attackDamage, AttributeModifier.Operation.ADDITION));
-			multimap.put(SharedMonsterAttributes.ATTACK_SPEED.getName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Tool modifier", (double) this.attackSpeed, AttributeModifier.Operation.ADDITION));
+			multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Tool modifier", (double) 0, AttributeModifier.Operation.ADDITION));
+			multimap.put(SharedMonsterAttributes.ATTACK_SPEED.getName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Tool modifier", (double) 0, AttributeModifier.Operation.ADDITION));
 		}
 		return multimap;
 	}
@@ -105,9 +159,6 @@ public class ModularItem extends ToolItem {
 	
 	@Override
 	public double getDurabilityForDisplay(ItemStack stack) {
-		if (stack.getDamage() == stack.getMaxDamage()) {
-			return 1;
-		}
 		return (double) stack.getDamage() / (double) stack.getMaxDamage();
 	}
 	
@@ -119,7 +170,29 @@ public class ModularItem extends ToolItem {
 	
 	@Override
 	public int getMaxDamage(ItemStack stack) {
-		return 0;
+		MaterialBasedPixelStorage img = ImageList.get(stack.getTag().getString("image"));
+		if (img == null) {
+			img = ImageList.addOrReplaceImage(stack.getTag().getString("image"));
+		}
+		ToolLogicHelper logicHelper = new ToolLogicHelper();
+		ArrayList<String> items = new ArrayList<>();
+		for (MaterialBasedPixelStorage.MaterialPixel px : img.image) {
+			if (px.stack != ItemStack.EMPTY) {
+				if (!items.contains(px.stack.getItem().getRegistryName().toString())) {
+					items.add(px.stack.getItem().getRegistryName().toString());
+				}
+				Material mat = MaterialList.lookupMaterial(px.stack);
+				logicHelper.add(px.stack.getItem().getRegistryName().toString(), mat.durability);
+			}
+		}
+		float durability = 0;
+		for (String str : items) {
+			if (new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(str))) != ItemStack.EMPTY) {
+				float materialPercent = logicHelper.getPercent(str);
+				durability += materialPercent;
+			}
+		}
+		return (int) (durability);
 	}
 	
 	@Override

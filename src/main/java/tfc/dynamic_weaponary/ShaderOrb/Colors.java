@@ -5,7 +5,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import tfc.dynamic_weaponary.Utils.DrawingUtils;
-import tfc.dynamic_weaponary.Utils.PixelStorage;
+import tfc.dynamic_weaponary.Utils.Image.PixelStorage;
 
 import java.util.HashMap;
 import java.util.Random;
