@@ -1,19 +1,14 @@
 package tfc.dynamic_weaponary;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScreenManager;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.IItemProvider;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -21,23 +16,26 @@ import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.fml.network.NetworkRegistry;
+import net.minecraftforge.fml.network.simple.SimpleChannel;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tfc.dynamic_weaponary.Deffered_Registry.Blocks;
 import tfc.dynamic_weaponary.Deffered_Registry.Items;
 import tfc.dynamic_weaponary.Deffered_Registry.TileEntities;
-import tfc.dynamic_weaponary.ShaderOrb.Colors;
-import tfc.dynamic_weaponary.Tool.CubeColors;
+import tfc.dynamic_weaponary.Packet.ImagePacket;
 import tfc.dynamic_weaponary.Utils.DrawingUtils;
 import tfc.dynamic_weaponary.Utils.Material;
 import tfc.dynamic_weaponary.Utils.PixelStorage;
 import tfc.dynamic_weaponary.block.ShadingTable.STContainer;
 import tfc.dynamic_weaponary.block.ShadingTable.STScreen;
-import tfc.dynamic_weaponary.block.ToolForge.ToolForge;
 import tfc.dynamic_weaponary.block.ToolForge.ToolForgeContainer;
-import tfc.dynamic_weaponary.block.ToolForge.ToolForgeRenderer;
 import tfc.dynamic_weaponary.block.ToolForge.ToolForgeScreen;
+
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod("dynamic_weaponry")
@@ -45,11 +43,31 @@ public class DynamicWeapons {
 	
 	public static String ModID = "dynamic_weaponry";
 	public static Logger LOGGER = LogManager.getLogger();
+	private static final String PROTOCOL_VERSION = "1";
+	public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
+			new ResourceLocation(ModID, "main"),
+			() -> PROTOCOL_VERSION,
+			PROTOCOL_VERSION::equals,
+			PROTOCOL_VERSION::equals
+	);
 	
 	public DynamicWeapons() {
 		PixelStorage.Pixel pixel = new PixelStorage.Pixel(0, 0, new DrawingUtils.ColorHelper(0, 255, 0));
 		LOGGER.log(Level.INFO, "source_test" + pixel.toString());
 		LOGGER.log(Level.INFO, "result_test" + PixelStorage.pixelFromString(pixel.toString()).toString());
+		
+		INSTANCE.registerMessage(
+				0,
+				ImagePacket.class,
+				(imagePacket, buffer) -> imagePacket.writePacketData(buffer),
+				buffer -> new ImagePacket(buffer),
+				new BiConsumer<ImagePacket, Supplier<NetworkEvent.Context>>() {
+					@Override
+					public void accept(ImagePacket imagePacket, Supplier<NetworkEvent.Context> contextSupplier) {
+						((ToolForgeContainer) contextSupplier.get().getSender().openContainer).tile.image = PixelStorage.fromString(imagePacket.info);
+					}
+				}
+		);
 		
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 		// Register the setup method for modloading
@@ -91,20 +109,7 @@ public class DynamicWeapons {
 	}
 	
 	private void doClientStuff(final FMLClientSetupEvent event) {
-		Minecraft.getInstance().getItemColors().register(new Colors(), new IItemProvider() {
-			@Override
-			public Item asItem() {
-				return Items.SHADER_ORB.get();
-			}
-		});
-		Minecraft.getInstance().getItemColors().register(new CubeColors(), new IItemProvider() {
-			@Override
-			public Item asItem() {
-				return Items.CUBE.get();
-			}
-		});
-		RenderTypeLookup.setRenderLayer(Blocks.TOOL_FORGE.get(), RenderType.getCutout());
-		ClientRegistry.bindTileEntityRenderer((TileEntityType<ToolForge.ForgeTE>) TileEntities.TOOL_FORGE.get(), ToolForgeRenderer::new);
+		tfc.dynamic_weaponary.Events.ClientSetup.run(event);
 	}
 	
 	private void enqueueIMC(final InterModEnqueueEvent event) {

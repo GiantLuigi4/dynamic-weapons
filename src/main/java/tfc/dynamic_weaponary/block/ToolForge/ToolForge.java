@@ -60,15 +60,15 @@ public class ToolForge extends Block implements ITileEntityProvider {
 	@Override
 	public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace) {
 		if (!world.isRemote) {
+			TileEntity tile = world.getTileEntity(pos);
 			if (!player.isSneaking()) {
-				TileEntity tile = world.getTileEntity(pos);
 				NetworkHooks.openGui((ServerPlayerEntity) player, (INamedContainerProvider) tile);
 				return ActionResultType.SUCCESS;
 			} else {
 				ItemStack renderStack = new ItemStack(Items.TOOL.get());
 				try {
 					CompoundNBT nbt = renderStack.getOrCreateTag();
-					nbt.putString("image", ToolForgeContainer.tile.image.toString());
+					nbt.putString("image", ((ForgeTE) tile).image.toString());
 				} catch (Exception err) {
 				}
 				player.setHeldItem(hand, renderStack);
@@ -110,7 +110,7 @@ public class ToolForge extends Block implements ITileEntityProvider {
 	}
 	
 	public static class ForgeTE extends TileEntity implements INamedContainerProvider {
-		public PixelStorage image;
+		public PixelStorage image = new PixelStorage(16, 16, false);
 		
 		public ForgeTE() {
 			super(TileEntities.TOOL_FORGE.get());
@@ -145,6 +145,21 @@ public class ToolForge extends Block implements ITileEntityProvider {
 			} catch (Exception err) {
 			}
 			return super.write(compound);
+		}
+		
+		@Override
+		public void deserializeNBT(CompoundNBT nbt) {
+			super.deserializeNBT(nbt);
+		}
+		
+		@Override
+		public CompoundNBT serializeNBT() {
+			return super.serializeNBT();
+		}
+		
+		@Override
+		public void handleUpdateTag(CompoundNBT tag) {
+			read(tag);
 		}
 		
 		@Nullable

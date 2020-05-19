@@ -1,5 +1,6 @@
 {
   "credit": "Made with Blockbench",
+  "parent": "block/block",
   "textures": {
     "0": "dynamic_weaponry:block/tool_bench",
     "particle": "dynamic_weaponry:block/tool_bench"
@@ -591,105 +592,6 @@
       }
     }
   ],
-  "display": {
-    "thirdperson_righthand": {
-      "rotation": [
-        69,
-        45,
-        0
-      ],
-      "translation": [
-        0,
-        -0.75,
-        -1.25
-      ],
-      "scale": [
-        0.25,
-        0.25,
-        0.25
-      ]
-    },
-    "thirdperson_lefthand": {
-      "rotation": [
-        69,
-        45,
-        0
-      ],
-      "translation": [
-        0,
-        -0.75,
-        -1.25
-      ],
-      "scale": [
-        0.25,
-        0.25,
-        0.25
-      ]
-    },
-    "firstperson_righthand": {
-      "rotation": [
-        0,
-        45,
-        0
-      ],
-      "translation": [
-        3.25,
-        0,
-        0
-      ],
-      "scale": [
-        0.25,
-        0.25,
-        0.25
-      ]
-    },
-    "firstperson_lefthand": {
-      "rotation": [
-        0,
-        45,
-        0
-      ],
-      "translation": [
-        3.25,
-        0,
-        0
-      ],
-      "scale": [
-        0.25,
-        0.25,
-        0.25
-      ]
-    },
-    "ground": {
-      "translation": [
-        0,
-        1.5,
-        0
-      ],
-      "scale": [
-        0.5,
-        0.5,
-        0.5
-      ]
-    },
-    "gui": {
-      "rotation": [
-        22.5,
-        45,
-        0
-      ],
-      "translation": [
-        0,
-        0.5,
-        0
-      ],
-      "scale": [
-        0.5,
-        0.5,
-        0.5
-      ]
-    }
-  },
   "groups": [
     0,
     {

@@ -96,7 +96,10 @@ public class PixelStorage {
 		}
 		PixelStorage storage = new PixelStorage(maxX + 1, maxY + 1, false);
 		for (Pixel px : pixels) {
-			storage.setPixel(px.x, px.y, px.color);
+			try {
+				storage.setPixel(px.x, px.y, px.color);
+			} catch (Exception err) {
+			}
 		}
 		return storage;
 	}

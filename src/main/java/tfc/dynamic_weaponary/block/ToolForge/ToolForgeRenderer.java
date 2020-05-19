@@ -9,8 +9,11 @@ import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import tfc.dynamic_weaponary.Deffered_Registry.Items;
 
+@OnlyIn(Dist.CLIENT)
 public class ToolForgeRenderer extends TileEntityRenderer<ToolForge.ForgeTE> {
 	public ToolForgeRenderer(TileEntityRendererDispatcher rendererDispatcherIn) {
 		super(rendererDispatcherIn);
@@ -26,7 +29,7 @@ public class ToolForgeRenderer extends TileEntityRenderer<ToolForge.ForgeTE> {
 		ItemStack renderStack = new ItemStack(Items.TOOL.get());
 		try {
 			CompoundNBT nbt = renderStack.getOrCreateTag();
-			nbt.putString("image", ToolForgeContainer.tile.image.toString());
+			nbt.putString("image", forgeTE.image.toString());
 		} catch (Exception err) {
 		}
 		

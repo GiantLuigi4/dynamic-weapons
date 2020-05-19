@@ -4,17 +4,11 @@ import net.minecraft.network.INetHandler;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 
-import java.io.IOException;
-
 public class ImagePacket implements IPacket {
-	String info;
+	public String info;
 	
-	public ImagePacket(String info, PacketBuffer buffer) {
+	public ImagePacket(String info) {
 		this.info = info;
-		try {
-			writePacketData(buffer);
-		} catch (Exception ignored) {
-		}
 	}
 	
 	public ImagePacket(PacketBuffer buffer) {
@@ -25,12 +19,12 @@ public class ImagePacket implements IPacket {
 	}
 	
 	@Override
-	public void readPacketData(PacketBuffer buf) throws IOException {
+	public void readPacketData(PacketBuffer buf) {
 		info = buf.readString();
 	}
 	
 	@Override
-	public void writePacketData(PacketBuffer buf) throws IOException {
+	public void writePacketData(PacketBuffer buf) {
 		buf.writeString(info);
 	}
 	

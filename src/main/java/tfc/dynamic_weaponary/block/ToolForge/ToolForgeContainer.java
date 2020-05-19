@@ -9,7 +9,7 @@ import net.minecraft.item.ItemStack;
 
 public class ToolForgeContainer extends Container {
 	public static ContainerType<ToolForgeContainer> TYPE;
-	public static ToolForge.ForgeTE tile;
+	public ToolForge.ForgeTE tile;
 	public IInventory player;
 	
 	public ToolForgeContainer(int id, IInventory playerInv) {

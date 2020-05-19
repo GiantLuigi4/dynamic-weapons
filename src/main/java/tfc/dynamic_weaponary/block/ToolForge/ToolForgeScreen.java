@@ -5,11 +5,11 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
-import tfc.dynamic_weaponary.Deffered_Registry.Items;
+import tfc.dynamic_weaponary.DynamicWeapons;
 import tfc.dynamic_weaponary.MaterialList;
+import tfc.dynamic_weaponary.Packet.ImagePacket;
 import tfc.dynamic_weaponary.Utils.DrawingUtils;
 import tfc.dynamic_weaponary.Utils.Material;
 import tfc.dynamic_weaponary.Utils.PixelStorage;
@@ -182,11 +182,7 @@ public class ToolForgeScreen extends ContainerScreen<ToolForgeContainer> {
 	
 	@Override
 	public void onClose() {
-		ItemStack stack = new ItemStack(Items.TOOL.get());
-		CompoundNBT nbt = stack.getOrCreateTag();
-		nbt.putString("image", image.toString());
 		this.container.tile.image = image;
-		this.container.player.setInventorySlotContents(17, stack);
 		super.onClose();
 	}
 	
@@ -296,7 +292,8 @@ public class ToolForgeScreen extends ContainerScreen<ToolForgeContainer> {
 		if (button == 0) {
 			isLeftDown = false;
 			try {
-				ToolForgeContainer.tile.image = image;
+				DynamicWeapons.INSTANCE.sendToServer(new ImagePacket(image.toString()));
+				container.tile.image = image;
 			} catch (Exception ignored) {
 			}
 		}

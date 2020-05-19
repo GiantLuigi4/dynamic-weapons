@@ -6,10 +6,13 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import tfc.dynamic_weaponary.Deffered_Registry.Items;
 import tfc.dynamic_weaponary.Utils.DrawingUtils;
 import tfc.dynamic_weaponary.Utils.PixelStorage;
 
+@OnlyIn(Dist.CLIENT)
 public class ModularItemRenderer extends ItemStackTileEntityRenderer {
 	@Override
 	public void render(ItemStack itemStackIn, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn, int combinedOverlayIn) {
@@ -30,10 +33,11 @@ public class ModularItemRenderer extends ItemStackTileEntityRenderer {
 		try {
 			for (int x = 0; x < 16; x++) {
 				for (int y = 0; y < 16; y++) {
-					CubeColors.color = image.getPixel(x, y).getRGB();
+					DrawingUtils.ColorHelper color = image.getPixel(x, y);
 					matrixStackIn.push();
 					matrixStackIn.translate(x / 16D, 0, y / 16D);
-					if (image.getPixel(x, y).getAlpha() != 0) {
+					if (color.getAlpha() != 0 && (color.getRed() != 0 || color.getGreen() != 0 || color.getBlue() != 0)) {
+						CubeColors.color = color.getRGB();
 						Minecraft.getInstance().getItemRenderer().renderItem(new ItemStack(Items.CUBE.get()), ItemCameraTransforms.TransformType.FIXED, combinedLightIn, combinedOverlayIn, matrixStackIn, bufferIn);
 					}
 					matrixStackIn.pop();

@@ -35,10 +35,7 @@ public class VectorImage extends PixelStorage {
 	}
 	
 	public void prep() {
-		String toString = "";
 		for (line ln : lines) {
-			toString += ln.px1.toString();
-			toString += ln.px2.toString();
 			for (Pixel px : ln.getAllPixels(0.05f / ln.getLength())) {
 				this.setPixel(px.x, px.y, px.color);
 			}

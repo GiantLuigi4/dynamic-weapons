@@ -1,5 +1,6 @@
 {
   "credit": "Made with Blockbench",
+  "parent": "block/block",
   "textures": {
     "0": "dynamic_weaponry:block/shading_bench",
     "particle": "dynamic_weaponry:block/shading_bench"
