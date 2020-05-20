@@ -19,9 +19,11 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.util.TriConsumer;
 import tfc.dynamic_weaponary.Deffered_Registry.Blocks;
 import tfc.dynamic_weaponary.Deffered_Registry.Items;
 import tfc.dynamic_weaponary.Deffered_Registry.TileEntities;
@@ -29,6 +31,10 @@ import tfc.dynamic_weaponary.Packet.ImagePacket;
 import tfc.dynamic_weaponary.Utils.DrawingUtils;
 import tfc.dynamic_weaponary.Utils.Image.PixelStorage;
 import tfc.dynamic_weaponary.Utils.Tool.Material;
+import tfc.dynamic_weaponary.Utils.ToolEventHandler.BlazeQuartzEvents;
+import tfc.dynamic_weaponary.Utils.ToolEventHandler.ElvenQuartzEvents;
+import tfc.dynamic_weaponary.Utils.ToolEventHandler.SmokeyQuartzEvents;
+import tfc.dynamic_weaponary.Utils.ToolEventHandler.SunnyQuartzEvents;
 import tfc.dynamic_weaponary.block.ShadingTable.STContainer;
 import tfc.dynamic_weaponary.block.ShadingTable.STScreen;
 import tfc.dynamic_weaponary.block.ToolForge.ToolForge;
@@ -89,27 +95,10 @@ public class DynamicWeapons {
 		MinecraftForge.EVENT_BUS.register(this);
 	}
 	
-	private void setup(final FMLCommonSetupEvent event) {
-		//GOLD
-		MaterialList.RegisterMaterial(net.minecraft.item.Items.GOLD_INGOT, new Material(32, 4, 5 - 3.6f, new DrawingUtils.ColorHelper(245, 244, 135)));
-		//WOODS
-		MaterialList.RegisterMaterial(net.minecraft.item.Items.OAK_PLANKS, new Material(58, 4, 5 - 1.0f, new DrawingUtils.ColorHelper(125, 101, 65)));
-		MaterialList.RegisterMaterial(net.minecraft.item.Items.SPRUCE_PLANKS, new Material(58, 4, 5 - 1.0f, new DrawingUtils.ColorHelper(118, 88, 53)));
-		MaterialList.RegisterMaterial(net.minecraft.item.Items.BIRCH_PLANKS, new Material(58, 4, 5 - 1.0f, new DrawingUtils.ColorHelper(168, 153, 107)));
-		MaterialList.RegisterMaterial(net.minecraft.item.Items.JUNGLE_PLANKS, new Material(58, 4, 5 - 1.0f, new DrawingUtils.ColorHelper(145, 103, 67)));
-		MaterialList.RegisterMaterial(net.minecraft.item.Items.ACACIA_PLANKS, new Material(58, 4, 5 - 1.0f, new DrawingUtils.ColorHelper(169, 90, 50)));
-		MaterialList.RegisterMaterial(net.minecraft.item.Items.DARK_OAK_PLANKS, new Material(58, 4, 5 - 1.0f, new DrawingUtils.ColorHelper(72, 46, 22)));
-		//STONE
-		MaterialList.RegisterMaterial(net.minecraft.item.Items.COBBLESTONE, new Material(131, 5, 5 - 0.6f, new DrawingUtils.ColorHelper(90, 90, 90)));
-		MaterialList.RegisterMaterial(net.minecraft.item.Items.STONE, new Material(131, 5, 5 - 0.6f, new DrawingUtils.ColorHelper(90, 90, 90)));
-		//IRON
-		MaterialList.RegisterMaterial(net.minecraft.item.Items.IRON_INGOT, new Material(250, 6, 5 - 1.6f, new DrawingUtils.ColorHelper(140, 140, 140)));
-		//EMERALD
-		MaterialList.RegisterMaterial(net.minecraft.item.Items.EMERALD, new Material(687, 6, 5 - 1.8f, new DrawingUtils.ColorHelper(31, 173, 70)));
-		//DIAMOND
-		MaterialList.RegisterMaterial(net.minecraft.item.Items.DIAMOND, new Material(1561, 7, 5 - 2.3f, new DrawingUtils.ColorHelper(88, 222, 227)));
-		//QUARTZ
-		MaterialList.RegisterMaterial(net.minecraft.item.Items.QUARTZ, new Material(15, 10, 5 - 1.6f, new DrawingUtils.ColorHelper(200, 200, 200)));
+	public static void tryRegisterModdedMaterial(ResourceLocation material, Material mat) {
+		if (ForgeRegistries.ITEMS.containsKey(material)) {
+			MaterialList.RegisterMaterial(ForgeRegistries.ITEMS.getValue(material), mat);
+		}
 	}
 	
 	private void doClientStuff(final FMLClientSetupEvent event) {
@@ -155,5 +144,44 @@ public class DynamicWeapons {
 			ScreenManager.registerFactory(STContainer.TYPE, STScreen::new);
 			ScreenManager.registerFactory(ToolForgeContainer.TYPE, ToolForgeScreen::new);
 		}
+	}
+	
+	public static void tryRegisterModdedEvent(ResourceLocation material, String type, TriConsumer event) {
+		if (ForgeRegistries.ITEMS.containsKey(material)) {
+			EventRegistry.registerEvent(material, type, event);
+		}
+	}
+	
+	private void setup(final FMLCommonSetupEvent event) {
+		//GOLD
+		MaterialList.RegisterMaterial(net.minecraft.item.Items.GOLD_INGOT, new Material(32, 4, 5 - 3.6f, new DrawingUtils.ColorHelper(245, 244, 135)));
+		//WOODS
+		MaterialList.RegisterMaterial(net.minecraft.item.Items.OAK_PLANKS, new Material(58, 4, 5 - 1.0f, new DrawingUtils.ColorHelper(125, 101, 65)));
+		MaterialList.RegisterMaterial(net.minecraft.item.Items.SPRUCE_PLANKS, new Material(58, 4, 5 - 1.0f, new DrawingUtils.ColorHelper(118, 88, 53)));
+		MaterialList.RegisterMaterial(net.minecraft.item.Items.BIRCH_PLANKS, new Material(58, 4, 5 - 1.0f, new DrawingUtils.ColorHelper(168, 153, 107)));
+		MaterialList.RegisterMaterial(net.minecraft.item.Items.JUNGLE_PLANKS, new Material(58, 4, 5 - 1.0f, new DrawingUtils.ColorHelper(145, 103, 67)));
+		MaterialList.RegisterMaterial(net.minecraft.item.Items.ACACIA_PLANKS, new Material(58, 4, 5 - 1.0f, new DrawingUtils.ColorHelper(169, 90, 50)));
+		MaterialList.RegisterMaterial(net.minecraft.item.Items.DARK_OAK_PLANKS, new Material(58, 4, 5 - 1.0f, new DrawingUtils.ColorHelper(72, 46, 22)));
+		//STONE
+		MaterialList.RegisterMaterial(net.minecraft.item.Items.COBBLESTONE, new Material(131, 5, 5 - 0.6f, new DrawingUtils.ColorHelper(90, 90, 90)));
+		MaterialList.RegisterMaterial(net.minecraft.item.Items.STONE, new Material(131, 5, 5 - 0.6f, new DrawingUtils.ColorHelper(90, 90, 90)));
+		//IRON
+		MaterialList.RegisterMaterial(net.minecraft.item.Items.IRON_INGOT, new Material(250, 6, 5 - 1.6f, new DrawingUtils.ColorHelper(140, 140, 140)));
+		//EMERALD
+		MaterialList.RegisterMaterial(net.minecraft.item.Items.EMERALD, new Material(687, 6, 5 - 1.8f, new DrawingUtils.ColorHelper(31, 173, 70)));
+		//DIAMOND
+		MaterialList.RegisterMaterial(net.minecraft.item.Items.DIAMOND, new Material(1561, 7, 5 - 2.3f, new DrawingUtils.ColorHelper(88, 222, 227)));
+		//QUARTZ
+		MaterialList.RegisterMaterial(net.minecraft.item.Items.QUARTZ, new Material(15, 10, 5 - 1.6f, new DrawingUtils.ColorHelper(200, 200, 200)));
+		
+		//BOTANIA
+		tryRegisterModdedMaterial(new ResourceLocation("botania:quartz_blaze"), new Material(16, 8, 5 - 1.6f, new DrawingUtils.ColorHelper(248, 145, 74)));
+		tryRegisterModdedEvent(new ResourceLocation("botania:quartz_blaze"), "hit_entity", BlazeQuartzEvents.hitEvent);
+		tryRegisterModdedMaterial(new ResourceLocation("botania:quartz_dark"), new Material(16, 7, 5 - 1.7f, new DrawingUtils.ColorHelper(28, 27, 26)));
+		tryRegisterModdedEvent(new ResourceLocation("botania:quartz_dark"), "hit_entity", SmokeyQuartzEvents.hitEvent);
+		tryRegisterModdedMaterial(new ResourceLocation("botania:quartz_elven"), new Material(16, 6, 5 - 1.5f, new DrawingUtils.ColorHelper(186, 240, 188)));
+		tryRegisterModdedEvent(new ResourceLocation("botania:quartz_elven"), "hit_entity", ElvenQuartzEvents.hitEvent);
+		tryRegisterModdedMaterial(new ResourceLocation("botania:quartz_sunny"), new Material(16, 7, 5 - 1.5f, new DrawingUtils.ColorHelper(223, 229, 125)));
+		tryRegisterModdedEvent(new ResourceLocation("botania:quartz_sunny"), "hit_entity", SunnyQuartzEvents.hitEvent);
 	}
 }

@@ -197,12 +197,13 @@ public class ToolForgeScreen extends ContainerScreen<ToolForgeContainer> {
 		FontRenderer font = stack.getItem().getFontRenderer(stack);
 		net.minecraftforge.fml.client.gui.GuiUtils.preItemToolTip(stack);
 		List<String> tooltip = this.getTooltipFromItem(stack);
-		if (MaterialList.materialHashMap.containsKey(stack.getItem().getRegistryName().toString())) {
-			tooltip.add("Weight:" + MaterialList.materialHashMap.get(stack.getItem().getRegistryName().toString()).weight);
-			tooltip.add("Strength:" + MaterialList.materialHashMap.get(stack.getItem().getRegistryName().toString()).strength);
-			tooltip.add("Durability:" + MaterialList.materialHashMap.get(stack.getItem().getRegistryName().toString()).durability);
-			tooltip.add("Color:" + MaterialList.materialHashMap.get(stack.getItem().getRegistryName().toString()).color);
-//			tooltip.add("Durability:"+MaterialList.materialHashMap.get(stack.getItem().getRegistryName().toString()).durability);
+		Material mat = MaterialList.lookupMaterial(stack);
+		boolean isValidMaterial = !(mat.color == 0 || mat.durability == 0 && mat.strength == 0 && mat.weight == 0);
+		if (isValidMaterial) {
+			tooltip.add("Weight:" + mat.weight);
+			tooltip.add("Strength:" + mat.strength);
+			tooltip.add("Durability:" + mat.durability);
+			tooltip.add("Color:" + mat.color);
 		}
 		this.renderTooltip(tooltip, x, y, (font == null ? this.font : font));
 		net.minecraftforge.fml.client.gui.GuiUtils.postItemToolTip();
@@ -210,7 +211,7 @@ public class ToolForgeScreen extends ContainerScreen<ToolForgeContainer> {
 	
 	public void renderTooltip(List<String> p_renderTooltip_1_, int p_renderTooltip_2_, int p_renderTooltip_3_, FontRenderer font) {
 		DrawingUtils.drawHoveringText(p_renderTooltip_1_, p_renderTooltip_2_, p_renderTooltip_3_, width, height, -1, font);
-//		if (false && !p_renderTooltip_1_.isEmpty()) {
+//		if (true && !p_renderTooltip_1_.isEmpty()) {
 //			RenderSystem.disableRescaleNormal();
 //			RenderSystem.disableDepthTest();
 //			int i = 0;

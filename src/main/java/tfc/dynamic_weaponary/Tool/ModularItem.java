@@ -5,6 +5,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -24,6 +25,8 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.apache.logging.log4j.util.TriConsumer;
+import tfc.dynamic_weaponary.EventRegistry;
 import tfc.dynamic_weaponary.MaterialList;
 import tfc.dynamic_weaponary.Utils.DrawingUtils;
 import tfc.dynamic_weaponary.Utils.Image.MaterialBasedPixelStorage;
@@ -108,10 +111,43 @@ public class ModularItem extends ToolItem {
 	
 	@Override
 	public boolean hitEntity(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+		//Run Hit Entity Events
+		MaterialBasedPixelStorage img = ImageList.get(stack.getTag().getString("image"));
+		if (img == null) {
+			img = ImageList.addOrReplaceImage(stack.getTag().getString("image"));
+		}
+		ToolLogicHelper logicHelperDamage = new ToolLogicHelper();
+		ToolLogicHelper logicHelperWeight = new ToolLogicHelper();
+		ArrayList<String> items = new ArrayList<>();
+		for (MaterialBasedPixelStorage.MaterialPixel px : img.image) {
+			if (px.stack != ItemStack.EMPTY) {
+				if (!items.contains(px.stack.getItem().getRegistryName().toString())) {
+					items.add(px.stack.getItem().getRegistryName().toString());
+				}
+				Material mat = MaterialList.lookupMaterial(px.stack);
+				logicHelperDamage.add(px.stack.getItem().getRegistryName().toString(), mat.strength);
+				logicHelperWeight.add(px.stack.getItem().getRegistryName().toString(), mat.weight);
+			}
+		}
+		for (String str : items) {
+			if (new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(str))) != ItemStack.EMPTY) {
+				float materialPercent = logicHelperDamage.getPercent(str);
+				Object obj = EventRegistry.getEvent(new ResourceLocation(str), "hit_entity");
+				if (obj != null) {
+					((TriConsumer) obj).accept(target, attacker, materialPercent);
+				}
+			}
+		}
+		
 		stack.damageItem(2, attacker, (p_220039_0_) -> {
 			p_220039_0_.sendBreakAnimation(EquipmentSlotType.MAINHAND);
 		});
 		return true;
+	}
+	
+	@Override
+	public void inventoryTick(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
+		super.inventoryTick(stack, worldIn, entityIn, itemSlot, isSelected);
 	}
 	
 	@Override

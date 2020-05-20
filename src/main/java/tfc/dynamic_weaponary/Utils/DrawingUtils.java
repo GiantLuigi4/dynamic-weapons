@@ -8,7 +8,6 @@ import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.RenderTooltipEvent;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.gui.GuiUtils;
 
 import javax.annotation.Nonnull;
@@ -52,9 +51,9 @@ public class DrawingUtils {
 	public static void drawHoveringText(@Nonnull ItemStack stack, List<String> textLines, int mouseX, int mouseY, int screenWidth, int screenHeight, int maxTextWidth, int backgroundColor, int borderColorStart, int borderColorEnd, FontRenderer font) {
 		if (!((List) textLines).isEmpty()) {
 			RenderTooltipEvent.Pre event = new RenderTooltipEvent.Pre(stack, (List) textLines, mouseX, mouseY, screenWidth, screenHeight, maxTextWidth, font);
-			if (MinecraftForge.EVENT_BUS.post(event)) {
-				return;
-			}
+//			if (MinecraftForge.EVENT_BUS.post(event)) {
+//				return;
+//			}
 			
 			mouseX = event.getX();
 			mouseY = event.getY();
@@ -150,11 +149,11 @@ public class DrawingUtils {
 			}
 
 //			int zLevel = true;
-			RenderTooltipEvent.Color colorEvent = new RenderTooltipEvent.Color(stack, (List) textLines, tooltipX, tooltipY, font, backgroundColor, borderColorStart, borderColorEnd);
-			MinecraftForge.EVENT_BUS.post(colorEvent);
-			backgroundColor = colorEvent.getBackground();
-			borderColorStart = colorEvent.getBorderStart();
-			borderColorEnd = colorEvent.getBorderEnd();
+//			RenderTooltipEvent.Color colorEvent = new RenderTooltipEvent.Color(stack, (List) textLines, tooltipX, tooltipY, font, backgroundColor, borderColorStart, borderColorEnd);
+//			MinecraftForge.EVENT_BUS.post(colorEvent);
+//			backgroundColor = colorEvent.getBackground();
+//			borderColorStart = colorEvent.getBorderStart();
+//			borderColorEnd = colorEvent.getBorderEnd();
 			GuiUtils.drawGradientRect(300, tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3, tooltipY - 3, backgroundColor, backgroundColor);
 			GuiUtils.drawGradientRect(300, tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor);
 			GuiUtils.drawGradientRect(300, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor);
@@ -164,7 +163,7 @@ public class DrawingUtils {
 			GuiUtils.drawGradientRect(300, tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd);
 			GuiUtils.drawGradientRect(300, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 3 + 1, borderColorStart, borderColorStart);
 			GuiUtils.drawGradientRect(300, tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd);
-			MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostBackground(stack, (List) textLines, tooltipX, tooltipY, font, tooltipTextWidth, tooltipHeight));
+//			MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostBackground(stack, (List) textLines, tooltipX, tooltipY, font, tooltipTextWidth, tooltipHeight));
 			IRenderTypeBuffer.Impl renderType = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
 			MatrixStack textStack = new MatrixStack();
 			textStack.translate(0.0D, 0.0D, 300.0D);
@@ -192,7 +191,7 @@ public class DrawingUtils {
 			}
 			
 			renderType.finish();
-			MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostText(stack, (List) textLines, tooltipX, tooltipY, font, tooltipTextWidth, tooltipHeight));
+//			MinecraftForge.EVENT_BUS.post(new RenderTooltipEvent.PostText(stack, (List) textLines, tooltipX, tooltipY, font, tooltipTextWidth, tooltipHeight));
 			RenderSystem.enableDepthTest();
 			RenderSystem.enableRescaleNormal();
 		}
