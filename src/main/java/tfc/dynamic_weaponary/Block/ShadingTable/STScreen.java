@@ -1,4 +1,4 @@
-package tfc.dynamic_weaponary.block.ShadingTable;
+package tfc.dynamic_weaponary.Block.ShadingTable;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;

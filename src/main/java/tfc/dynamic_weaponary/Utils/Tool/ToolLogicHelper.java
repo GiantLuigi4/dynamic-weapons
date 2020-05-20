@@ -15,7 +15,7 @@ public class ToolLogicHelper {
 		} catch (Exception err) {
 			values.put(item, amount);
 		}
-		number += 1;
+		number += amount;
 		return values.get(item) + amount;
 	}
 	
@@ -33,6 +33,6 @@ public class ToolLogicHelper {
 	}
 	
 	public float getPercent(String item) {
-		return values.get(item) / (float) number;
+		return values.get(item) / number;
 	}
 }

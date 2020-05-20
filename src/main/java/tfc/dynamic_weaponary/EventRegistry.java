@@ -14,6 +14,11 @@ public class EventRegistry {
 	
 	public static TriConsumer getEvent(ResourceLocation material, String type) {
 		try {
+//			return new TriConsumer() {
+//				@Override
+//				public void accept(Object o, Object o2, Object o3) {
+//				}
+//			};
 			return methods.get(new ResourceLocation(material.toString() + "." + type));
 		} catch (Exception err) {
 			return null;

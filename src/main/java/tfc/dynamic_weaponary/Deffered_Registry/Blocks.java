@@ -7,9 +7,9 @@ import net.minecraft.item.ItemGroup;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import tfc.dynamic_weaponary.Block.ShadingTable.ShadingTable;
+import tfc.dynamic_weaponary.Block.ToolForge.ToolForge;
 import tfc.dynamic_weaponary.DynamicWeapons;
-import tfc.dynamic_weaponary.block.ShadingTable.ShadingTable;
-import tfc.dynamic_weaponary.block.ToolForge.ToolForge;
 
 import java.util.Objects;
 import java.util.function.Function;

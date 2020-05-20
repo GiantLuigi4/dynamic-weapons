@@ -79,7 +79,11 @@ public class MaterialBasedPixelStorage {
 	}
 	
 	public DrawingUtils.ColorHelper getPixel(int x, int y) {
-		return image.get(x + (y * width)).color;
+		MaterialPixel px = image.get(x + (y * width));
+		if (px.x == x || px.y == y) {
+			return px.color;
+		}
+		return new MaterialPixel(0, 0, ItemStack.EMPTY).color;
 	}
 	
 	public void setPixel(int x, int y, ItemStack stack) {

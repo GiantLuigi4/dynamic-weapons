@@ -1,4 +1,4 @@
-package tfc.dynamic_weaponary.block.ToolForge;
+package tfc.dynamic_weaponary.Block.ToolForge;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.FontRenderer;

@@ -10,13 +10,13 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import tfc.dynamic_weaponary.Block.ToolForge.ToolForge;
+import tfc.dynamic_weaponary.Block.ToolForge.ToolForgeRenderer;
 import tfc.dynamic_weaponary.Deffered_Registry.Blocks;
 import tfc.dynamic_weaponary.Deffered_Registry.Items;
 import tfc.dynamic_weaponary.Deffered_Registry.TileEntities;
 import tfc.dynamic_weaponary.ShaderOrb.Colors;
 import tfc.dynamic_weaponary.Tool.CubeColors;
-import tfc.dynamic_weaponary.block.ToolForge.ToolForge;
-import tfc.dynamic_weaponary.block.ToolForge.ToolForgeRenderer;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientSetup {

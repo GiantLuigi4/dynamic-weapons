@@ -1,4 +1,4 @@
-package tfc.dynamic_weaponary.block.ToolForge;
+package tfc.dynamic_weaponary.Block.ToolForge;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;

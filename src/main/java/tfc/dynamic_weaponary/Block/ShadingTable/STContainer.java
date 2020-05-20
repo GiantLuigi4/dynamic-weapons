@@ -1,4 +1,4 @@
-package tfc.dynamic_weaponary.block.ShadingTable;
+package tfc.dynamic_weaponary.Block.ShadingTable;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
