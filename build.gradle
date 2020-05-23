@@ -1,21 +1,25 @@
 buildscript {
     repositories {
         maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url "https://plugins.gradle.org/m2/" }
         jcenter()
         mavenCentral()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath "com.wynprice.cursemaven:CurseMaven:2.1.4"
     }
 }
 
 apply plugin: 'net.minecraftforge.gradle'
+apply plugin: "com.wynprice.cursemaven"
 
 version = modVersion
 group = modGroup
 archivesBaseName = modBaseName
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+
 
 minecraft {
     // The mappings can be changed at any time, and must be in the following format.
@@ -88,5 +92,17 @@ dependencies {
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.15.2-31.2.0'
+
+    // compile against the JEI tfc.dynamic_weaponary.API but do not include it at runtime
+    deobf fg.deobf("curse.maven:botania:2953670")
+    deobf fg.deobf("curse.maven:psi:2961217")
+    // at runtime, use the full JEI jar
+    runtimeOnly fg.deobf("curse.maven:psi:2961217")
+    runtimeOnly fg.deobf("curse.maven:botania:2953670")
+    runtimeOnly fg.deobf("curse.maven:curios:2934458")
+    runtimeOnly fg.deobf("curse.maven:patchouli:2945108")
+    runtimeOnly fg.deobf("curse.maven:jei:2944279")
+    runtimeOnly fg.deobf("curse.maven:the_bumblezone:2959198")
+//    runtimeOnly "curse.maven:ctm:2642375"
 
 }

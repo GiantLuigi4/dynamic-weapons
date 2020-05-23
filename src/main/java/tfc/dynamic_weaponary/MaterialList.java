@@ -20,8 +20,8 @@ public class MaterialList {
 		}
 		try {
 			int d = t.getField("MatDurability").getInt(stack.getItem());
-			int s = t.getField("MatStrength").getInt(stack.getItem());
-			float w = t.getField("MatWeight").getFloat(stack.getItem());
+			double s = t.getField("MatStrength").getDouble(stack.getItem());
+			double w = t.getField("MatWeight").getDouble(stack.getItem());
 			int c = t.getField("MatColor").getInt(stack.getItem());
 			return new Material(d, s, w, c);
 		} catch (Exception err) {

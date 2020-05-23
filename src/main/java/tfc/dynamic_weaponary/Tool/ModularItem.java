@@ -25,12 +25,11 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.registries.ForgeRegistries;
+import tfc.dynamic_weaponary.CalculationRegistry;
 import tfc.dynamic_weaponary.EventRegistryRedo;
-import tfc.dynamic_weaponary.MaterialList;
 import tfc.dynamic_weaponary.Utils.DrawingUtils;
-import tfc.dynamic_weaponary.Utils.Image.MaterialBasedPixelStorage;
-import tfc.dynamic_weaponary.Utils.Optimization.ImageList;
-import tfc.dynamic_weaponary.Utils.Tool.Material;
+import tfc.dynamic_weaponary.Utils.Optimization.StatList;
+import tfc.dynamic_weaponary.Utils.Optimization.ToolStats;
 import tfc.dynamic_weaponary.Utils.Tool.ToolLogicHelper;
 import tfc.dynamic_weaponary.Utils.Tool.ToolShape;
 
@@ -38,6 +37,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 public class ModularItem extends ToolItem {
 	private Set<Block> effectiveBlocks;
@@ -46,52 +46,7 @@ public class ModularItem extends ToolItem {
 		super(attackDamageIn, attackSpeedIn, tier, effectiveBlocksIn, builder);
 	}
 	
-	@Override
-	public Multimap<String, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot, ItemStack stack) {
-		Multimap<String, AttributeModifier> modifiers = super.getAttributeModifiers(slot);
-		if (slot.equals(EquipmentSlotType.MAINHAND)) {
-			MaterialBasedPixelStorage img = ImageList.get(stack.getTag().getString("image"));
-			if (img == null) {
-				img = ImageList.addOrReplaceImage(stack.getTag().getString("image"));
-			}
-			ToolLogicHelper logicHelperDamage = new ToolLogicHelper();
-			ToolLogicHelper logicHelperWeight = new ToolLogicHelper();
-			ArrayList<String> items = new ArrayList<>();
-			for (MaterialBasedPixelStorage.MaterialPixel px : img.image) {
-				if (!px.stack.equals(ItemStack.EMPTY)) {
-					if (!items.contains(px.stack.getItem().getRegistryName().toString())) {
-						items.add(px.stack.getItem().getRegistryName().toString());
-					}
-					logicHelperDamage.add(px.stack.getItem().getRegistryName().toString(), 1);
-					logicHelperWeight.add(px.stack.getItem().getRegistryName().toString(), 1);
-				}
-			}
-			float attack = 0;
-			float weight = 0;
-			for (String str : items) {
-				ItemStack checkStack = new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(str)));
-				if (checkStack != ItemStack.EMPTY) {
-					Material mat = MaterialList.lookupMaterial(checkStack);
-					float materialPercent = logicHelperDamage.getPercent(str);
-					attack += materialPercent * mat.strength;
-					weight += materialPercent * mat.weight;
-				}
-			}
-			if (modifiers.containsKey(SharedMonsterAttributes.ATTACK_DAMAGE.getName())) {
-				modifiers.removeAll(SharedMonsterAttributes.ATTACK_DAMAGE.getName());
-			}
-			if (modifiers.containsKey(SharedMonsterAttributes.ATTACK_SPEED.getName())) {
-				modifiers.removeAll(SharedMonsterAttributes.ATTACK_SPEED.getName());
-			}
-			double weightCalc = (double) 5 - weight;
-			if (weightCalc <= -3) {
-				weightCalc = -3;
-			}
-			modifiers.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), (new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Tool modifier", (double) attack - 1, AttributeModifier.Operation.ADDITION)));
-			modifiers.put(SharedMonsterAttributes.ATTACK_SPEED.getName(), (new AttributeModifier(ATTACK_SPEED_MODIFIER, "Tool modifier", weightCalc - 1, AttributeModifier.Operation.ADDITION)));
-		}
-		return modifiers;
-	}
+	double damage = 1;
 	
 	public static float getEfficiency(ItemStack stack) {
 		return 5;
@@ -110,33 +65,62 @@ public class ModularItem extends ToolItem {
 	}
 	
 	@Override
+	public Multimap<String, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot, ItemStack stack) {
+		Multimap<String, AttributeModifier> modifiers = super.getAttributeModifiers(slot);
+		try {
+			if (slot.equals(EquipmentSlotType.MAINHAND)) {
+				ToolStats stat = StatList.get(stack.getTag().getString("image"));
+				if (modifiers.containsKey(SharedMonsterAttributes.ATTACK_DAMAGE.getName())) {
+					modifiers.removeAll(SharedMonsterAttributes.ATTACK_DAMAGE.getName());
+				}
+				if (modifiers.containsKey(SharedMonsterAttributes.ATTACK_SPEED.getName())) {
+					modifiers.removeAll(SharedMonsterAttributes.ATTACK_SPEED.getName());
+				}
+				float weight = stat.getStat("weight", Float.class);
+				float attack = stat.getStat("attack", Float.class);
+				double weightCalc = (double) 5 - weight;
+				if (weightCalc <= -3) {
+					weightCalc = -3;
+				}
+				
+				if (stack.getTag() != null) {
+//					ToolStats stat=StatList.get(stack.getTag().getString("image"));
+					if (stat == null) {
+						StatList.addOrReplaceImage(stack.getTag().getString("image"));
+					} else {
+						for (String str : (ArrayList<String>) stat.getStat("materialList", ArrayList.class)) {
+							if (new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(str))) != ItemStack.EMPTY) {
+								damage = attack;
+								Function func = CalculationRegistry.getEvent(new ResourceLocation(str), "AttackBoost");
+								if (func != null) {
+									attack += (float) func.apply(stack);
+								}
+							}
+						}
+					}
+				}
+				
+				modifiers.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), (new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Tool modifier", (double) attack - 1, AttributeModifier.Operation.ADDITION)));
+				modifiers.put(SharedMonsterAttributes.ATTACK_SPEED.getName(), (new AttributeModifier(ATTACK_SPEED_MODIFIER, "Tool modifier", weightCalc - 1, AttributeModifier.Operation.ADDITION)));
+			}
+		} catch (Exception err) {
+		}
+		return modifiers;
+	}
+	
+	@Override
 	public boolean hitEntity(ItemStack stack, LivingEntity target, LivingEntity attacker) {
 		//Run Hit Entity Events
-		MaterialBasedPixelStorage img = ImageList.get(stack.getTag().getString("image"));
-		ToolLogicHelper logicHelper = new ToolLogicHelper();
-		if (img == null) {
-			img = ImageList.addOrReplaceImage(stack.getTag().getString("image"));
-		}
-		ArrayList<String> items = new ArrayList<>();
-		for (MaterialBasedPixelStorage.MaterialPixel px : img.image) {
-			if (px.stack != ItemStack.EMPTY) {
-				if (!items.contains(px.stack.getItem().getRegistryName().toString())) {
-					items.add(px.stack.getItem().getRegistryName().toString());
+		try {
+			ToolStats stat = StatList.get(stack.getTag().getString("image"));
+			ToolLogicHelper logicHelper = stat.getStat("logicHelper", ToolLogicHelper.class);
+			for (String str : (ArrayList<String>) stat.getStat("materialList", ArrayList.class)) {
+				if (new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(str))) != ItemStack.EMPTY) {
+					float materialPercent = logicHelper.getPercent(str);
+					EventRegistryRedo.execute(new ResourceLocation(str), "event_hitentity", target, attacker, materialPercent);
 				}
-				logicHelper.add(px.stack.getItem().getRegistryName().toString(), 1);
 			}
-		}
-		for (String str : items) {
-//			DynamicWeapons.LOGGER.log(Level.INFO,new ResourceLocation(str+".event_hitentity"));
-			if (new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(str))) != ItemStack.EMPTY) {
-				float materialPercent = logicHelper.getPercent(str);
-//				Object obj = EventRegistry.getEvent(new ResourceLocation(str), "hit_entity");
-//				if (obj != null) {
-//					DynamicWeapons.LOGGER.log(Level.INFO,new ResourceLocation(str+".event_hitentity"));
-//					((TriConsumer) obj).accept(target, attacker, materialPercent);
-				EventRegistryRedo.execute(new ResourceLocation(str + ".event_hitentity"), target, attacker, materialPercent);
-//				}
-			}
+		} catch (Exception err) {
 		}
 		
 		stack.damageItem(2, attacker, (p_220039_0_) -> {
@@ -147,6 +131,23 @@ public class ModularItem extends ToolItem {
 	
 	@Override
 	public void inventoryTick(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
+		if (stack.getTag() != null) {
+			ToolStats stat = StatList.get(stack.getTag().getString("image"));
+			if (stat == null) {
+				StatList.addOrReplaceImage(stack.getTag().getString("image"));
+			} else {
+				ToolLogicHelper logicHelper = stat.getStat("logicHelper", ToolLogicHelper.class);
+				for (String str : (ArrayList<String>) stat.getStat("materialList", ArrayList.class)) {
+					if (new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(str))) != ItemStack.EMPTY) {
+						float materialPercent = logicHelper.getPercent(str);
+						try {
+							EventRegistryRedo.execute(new ResourceLocation(str), "InvTick", stack, entityIn, materialPercent);
+						} catch (Exception err) {
+						}
+					}
+				}
+			}
+		}
 		super.inventoryTick(stack, worldIn, entityIn, itemSlot, isSelected);
 	}
 	
@@ -179,7 +180,7 @@ public class ModularItem extends ToolItem {
 	public Multimap<String, AttributeModifier> getAttributeModifiers(EquipmentSlotType equipmentSlot) {
 		Multimap<String, AttributeModifier> multimap = super.getAttributeModifiers(equipmentSlot);
 		if (equipmentSlot == EquipmentSlotType.MAINHAND) {
-			multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Tool modifier", (double) 0, AttributeModifier.Operation.ADDITION));
+			multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Tool modifier", (double) damage, AttributeModifier.Operation.ADDITION));
 			multimap.put(SharedMonsterAttributes.ATTACK_SPEED.getName(), new AttributeModifier(ATTACK_SPEED_MODIFIER, "Tool modifier", (double) 0, AttributeModifier.Operation.ADDITION));
 		}
 		return multimap;
@@ -206,30 +207,21 @@ public class ModularItem extends ToolItem {
 	
 	@Override
 	public int getMaxDamage(ItemStack stack) {
-		MaterialBasedPixelStorage img = ImageList.get(stack.getTag().getString("image"));
-		if (img == null) {
-			img = ImageList.addOrReplaceImage(stack.getTag().getString("image"));
-		}
-		ToolLogicHelper logicHelper = new ToolLogicHelper();
-		ArrayList<String> items = new ArrayList<>();
-		for (MaterialBasedPixelStorage.MaterialPixel px : img.image) {
-			if (px.stack != ItemStack.EMPTY) {
-				if (!items.contains(px.stack.getItem().getRegistryName().toString())) {
-					items.add(px.stack.getItem().getRegistryName().toString());
+		try {
+			if (stack.getTag() != null) {
+				ToolStats stat = StatList.get(stack.getTag().getString("image"));
+				if (stat == null) {
+					StatList.addOrReplaceImage(stack.getTag().getString("image"));
+				} else {
+					try {
+						return (int) stat.getStat("durability", Float.class).doubleValue();
+					} catch (Exception err) {
+					}
 				}
-				logicHelper.add(px.stack.getItem().getRegistryName().toString(), 1);
 			}
+		} catch (Exception err) {
 		}
-		float durability = 0;
-		for (String str : items) {
-			ItemStack checkStack = new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(str)));
-			if (checkStack != ItemStack.EMPTY) {
-				Material mat = MaterialList.lookupMaterial(checkStack);
-				float materialPercent = logicHelper.getPercent(str);
-				durability += materialPercent * mat.durability;
-			}
-		}
-		return (int) (durability);
+		return 100;
 	}
 	
 	@Override

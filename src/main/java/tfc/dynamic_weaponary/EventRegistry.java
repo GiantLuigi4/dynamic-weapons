@@ -1,25 +1,29 @@
 package tfc.dynamic_weaponary;
 
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.HashMap;
 
 public class EventRegistry {
-	private static HashMap<ResourceLocation, TriConsumer> methods = new HashMap<>();
+	private static HashMap<String, TriConsumer> methods = new HashMap<>();
 	
 	public static void registerEvent(ResourceLocation material, String type, TriConsumer event) {
-		methods.put(new ResourceLocation(material.toString() + "." + type), event);
+		methods.put(material.toString() + "." + type, event);
 	}
 	
 	public static TriConsumer getEvent(ResourceLocation material, String type) {
 		try {
-//			return new TriConsumer() {
-//				@Override
-//				public void accept(Object o, Object o2, Object o3) {
-//				}
-//			};
-			return methods.get(new ResourceLocation(material.toString() + "." + type));
+			if (methods.containsKey(material.toString() + "." + type)) {
+				return methods.get(material.toString() + "." + type);
+			} else {
+				try {
+					return (TriConsumer) (ForgeRegistries.ITEMS.getValue(material).getClass().getField(type).get(ForgeRegistries.ITEMS.getValue(material)));
+				} catch (Exception err) {
+					return null;
+				}
+			}
 		} catch (Exception err) {
 			return null;
 		}

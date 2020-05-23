@@ -14,7 +14,7 @@ import tfc.dynamic_weaponary.Deffered_Registry.Items;
 import tfc.dynamic_weaponary.MaterialList;
 import tfc.dynamic_weaponary.Utils.DrawingUtils;
 import tfc.dynamic_weaponary.Utils.Image.MaterialBasedPixelStorage;
-import tfc.dynamic_weaponary.Utils.Optimization.ImageList;
+import tfc.dynamic_weaponary.Utils.Optimization.StatList;
 
 import java.util.Random;
 
@@ -33,25 +33,30 @@ public class ModularItemRenderer extends ItemStackTileEntityRenderer {
 			}
 		} else {
 			try {
-				image = ImageList.get(itemStackIn.getTag().getString("image"));
-				if (image == null) {
-					image = ImageList.addOrReplaceImage(itemStackIn.getTag().getString("image"));
+				image = StatList.get(itemStackIn.getTag().getString("image")).image;
+				if (image == null || new Random().nextInt(255) >= 200) {
+					image = StatList.addOrReplaceImage(itemStackIn.getTag().getString("image")).image;
 				}
 			} catch (Exception err) {
 			}
 		}
 		try {
+			int pixelsRendered = 0;
 			for (int x = 0; x < 16; x++) {
 				for (int y = 0; y < 16; y++) {
 					DrawingUtils.ColorHelper color = image.getPixel(x, y);
 					matrixStackIn.push();
 					matrixStackIn.translate(x / 16D, 0, y / 16D);
 					if (color.getAlpha() != 0 && (color.getRed() != 0 || color.getGreen() != 0 || color.getBlue() != 0)) {
+						pixelsRendered++;
 						CubeColors.color = color.getRGB();
 						Minecraft.getInstance().getItemRenderer().renderItem(new ItemStack(Items.CUBE.get()), ItemCameraTransforms.TransformType.FIXED, combinedLightIn, combinedOverlayIn, matrixStackIn, bufferIn);
 					}
 					matrixStackIn.pop();
 				}
+			}
+			if (pixelsRendered == 0) {
+				StatList.addOrReplaceImage(itemStackIn.getTag().getString("image"));
 			}
 		} catch (Exception ignored) {
 		}

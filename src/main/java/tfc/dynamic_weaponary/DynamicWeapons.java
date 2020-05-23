@@ -9,6 +9,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.*;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
@@ -35,6 +36,9 @@ import tfc.dynamic_weaponary.Utils.CFGHelper;
 import tfc.dynamic_weaponary.Utils.DrawingUtils;
 import tfc.dynamic_weaponary.Utils.Image.PixelStorage;
 import tfc.dynamic_weaponary.Utils.Tool.Material;
+import tfc.dynamic_weaponary.Utils.ToolEventHandler.Botania.*;
+import tfc.dynamic_weaponary.Utils.ToolEventHandler.Bumble_Zone.HoneyCrystalEvents;
+import tfc.dynamic_weaponary.Utils.ToolEventHandler.PSI.PSIMetalEvents;
 
 import java.io.File;
 import java.util.function.BiConsumer;
@@ -152,10 +156,21 @@ public class DynamicWeapons {
 		);
 		Config.createAndWrite(path, "dynamic_weaponry", "" +
 				//BOTANIA
-				new CFGHelper.matString("botania:quartz_blaze", 16, 8, 5 - 1.6f, new DrawingUtils.ColorHelper(248, 145, 74).getRGB(), "tfc.dynamic_weaponary.Utils.ToolEventHandler.BlazeQuartzEvents.hitEntity", "no method", "no method").toString() +
-				new CFGHelper.matString("botania:quartz_dark", 16, 7, 5 - 1.7f, new DrawingUtils.ColorHelper(28, 27, 26).getRGB(), "tfc.dynamic_weaponary.Utils.ToolEventHandler.SmokeyQuartzEvents.hitEntity", "no method", "no method").toString() +
-				new CFGHelper.matString("botania:quartz_elven", 16, 6, 5 - 1.5f, new DrawingUtils.ColorHelper(186, 240, 188).getRGB(), "tfc.dynamic_weaponary.Utils.ToolEventHandler.ElvenQuartzEvents.hitEntity", "no method", "no method").toString() +
-				new CFGHelper.matString("botania:quartz_sunny", 16, 7, 5 - 1.5f, new DrawingUtils.ColorHelper(223, 229, 125).getRGB(), "tfc.dynamic_weaponary.Utils.ToolEventHandler.SunnyQuartzEvents.hitEntity", "no method", "no method").toString()
+				new CFGHelper.matString("botania:quartz_blaze", 16, 8, 5 - 1.6f, new DrawingUtils.ColorHelper(248, 145, 74).getRGB()).toString() +
+				new CFGHelper.matString("botania:quartz_dark", 16, 7, 5 - 1.7f, new DrawingUtils.ColorHelper(28, 27, 26).getRGB()).toString() +
+				new CFGHelper.matString("botania:quartz_elven", 16, 6, 5 - 1.5f, new DrawingUtils.ColorHelper(186, 240, 188).getRGB()).toString() +
+				new CFGHelper.matString("botania:quartz_sunny", 16, 7.5, 5 - 1.5f, new DrawingUtils.ColorHelper(223, 229, 125).getRGB()).toString() +
+				new CFGHelper.matString("botania:quartz_mana", 4, 1.5, 5 - 0.3f, new DrawingUtils.ColorHelper(159, 205, 222).getRGB()).toString() +
+				new CFGHelper.matString("botania:manasteel_ingot", 300, 6, 5 - 1.8f, new DrawingUtils.ColorHelper(110, 168, 241).getRGB()).toString() +
+				new CFGHelper.matString("botania:elementium_ingot", 720, 5.5, 5 - 2.6f, new DrawingUtils.ColorHelper(245, 175, 213).getRGB()).toString() +
+				new CFGHelper.matString("botania:terrasteel_ingot", 2300, 7, 5 - 2.5f, new DrawingUtils.ColorHelper(117, 225, 0).getRGB()).toString() +
+				new CFGHelper.matString("the_bumblezone:honey_crystal_shards", 14, 2, 5 - 5.5f, new DrawingUtils.ColorHelper(238, 194, 123).getRGB()).toString() +
+				new CFGHelper.matString("psi:psimetal", 900, 6, 5 - 2.5f, new DrawingUtils.ColorHelper(145, 137, 210).getRGB()).toString()
+		);
+		Config.createAndWrite(path, "example", "" +
+				//BOTANIA
+				new CFGHelper.matString("ex:no_methods", 2300, 7, 5 - 2.5f, new DrawingUtils.ColorHelper(117, 225, 0).getRGB()).toString() +
+				new CFGHelper.matString("ex:methods", 2300, 7, 5 - 2.5f, new DrawingUtils.ColorHelper(117, 225, 0).getRGB(), "a", "b", "c").toString()
 		);
 		Config.readConfig(path, "minecraft");
 		Config.readConfig(path, "dynamic_weaponry");
@@ -189,5 +204,22 @@ public class DynamicWeapons {
 	}
 	
 	private void setup(final FMLCommonSetupEvent event) {
+		//BOTANIA
+		if (ModList.get().isLoaded("botania")) {
+			tryRegisterModdedEvent(new ResourceLocation("botania:quartz_blaze"), "event_hitentity", BlazeQuartzEvents.consumer);
+			tryRegisterModdedEvent(new ResourceLocation("botania:quartz_dark"), "event_hitentity", SmokeyQuartzEvents.consumer);
+			tryRegisterModdedEvent(new ResourceLocation("botania:quartz_elven"), "event_hitentity", ElvenQuartzEvents.consumer);
+			tryRegisterModdedEvent(new ResourceLocation("botania:quartz_sunny"), "event_hitentity", SunnyQuartzEvents.consumer);
+			tryRegisterModdedEvent(new ResourceLocation("botania:quartz_mana"), "event_hitentity", ManaQuartzEvents.consumer);
+			tryRegisterModdedEvent(new ResourceLocation("botania:terrasteel_ingot"), "InvTick", TerrasteelEvents.consumer);
+			tryRegisterModdedEvent(new ResourceLocation("botania:elementium_ingot"), "InvTick", ElementiumEvents.consumer);
+			tryRegisterModdedEvent(new ResourceLocation("botania:manasteel_ingot"), "InvTick", ManasteelEvents.consumer);
+		}
+		if (ModList.get().isLoaded("the_bumblezone")) {
+			tryRegisterModdedEvent(new ResourceLocation("the_bumblezone:honey_crystal_shards"), "event_hitentity", HoneyCrystalEvents.consumer);
+		}
+		if (ModList.get().isLoaded("psi")) {
+			tryRegisterModdedEvent(new ResourceLocation("psi:psimetal"), "InvTick", PSIMetalEvents.consumer);
+		}
 	}
 }

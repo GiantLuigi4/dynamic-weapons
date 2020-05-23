@@ -200,7 +200,7 @@ public class ToolForgeScreen extends ContainerScreen<ToolForgeContainer> {
 		Material mat = MaterialList.lookupMaterial(stack);
 		boolean isValidMaterial = !(mat.color == 0 || mat.durability == 0 && mat.strength == 0 && mat.weight == 0);
 		if (isValidMaterial) {
-			tooltip.add("Weight:" + mat.weight);
+			tooltip.add("Weight:" + (mat.weight + 3));
 			tooltip.add("Strength:" + mat.strength);
 			tooltip.add("Durability:" + mat.durability);
 			tooltip.add("Color:" + mat.color);

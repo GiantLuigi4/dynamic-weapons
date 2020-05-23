@@ -61,7 +61,7 @@ public class CFGHelper {
 				methods += "event_killentit=" + killEntityMethod + "\n";
 			}
 			if (!inInventoryMethod.equals("no method")) {
-				methods += "_event_invtick_=" + inInventoryMethod + "\n";
+				methods += "InvTick=" + inInventoryMethod + "\n";
 			}
 			return "" +
 					"id=" + id + "\n" +
