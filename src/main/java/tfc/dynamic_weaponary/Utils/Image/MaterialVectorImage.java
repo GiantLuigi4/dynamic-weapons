@@ -21,7 +21,9 @@ public class MaterialVectorImage extends MaterialBasedPixelStorage {
 	public void prep() {
 		for (MaterialLine ln : lines) {
 			for (MaterialPixel px : ln.getAllPixels(0.05f / ln.getLength())) {
-				this.setPixel(px.x, px.y, px.stack);
+				if (px.x < width && px.y < height) {
+					this.setPixel(px.x, px.y, px.stack);
+				}
 			}
 		}
 	}

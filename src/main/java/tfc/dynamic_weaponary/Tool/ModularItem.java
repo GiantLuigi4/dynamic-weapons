@@ -117,7 +117,10 @@ public class ModularItem extends ToolItem {
 			for (String str : (ArrayList<String>) stat.getStat("materialList", ArrayList.class)) {
 				if (new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(str))) != ItemStack.EMPTY) {
 					float materialPercent = logicHelper.getPercent(str);
-					EventRegistryRedo.execute(new ResourceLocation(str), "event_hitentity", target, attacker, materialPercent);
+					try {
+						EventRegistryRedo.execute(new ResourceLocation(str), "event_hitentity", target, attacker, materialPercent);
+					} catch (Throwable err) {
+					}
 				}
 			}
 		} catch (Exception err) {

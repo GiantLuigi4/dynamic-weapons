@@ -7,6 +7,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import tfc.dynamic_weaponary.DynamicWeapons;
 import tfc.dynamic_weaponary.MaterialList;
 import tfc.dynamic_weaponary.Packet.ImagePacket;
@@ -25,11 +26,24 @@ public class ToolForgeScreen extends ContainerScreen<ToolForgeContainer> {
 	MaterialBasedPixelStorage.MaterialPixel offsetStart = null;
 	MaterialBasedPixelStorage.MaterialPixel end = null;
 	ArrayList<MaterialVectorImage.MaterialLine> lines = new ArrayList<>();
+	ArrayList<MaterialBasedPixelStorage.MaterialPixel> pixels = new ArrayList<>();
 	MaterialVectorImage image = new MaterialVectorImage(16, 16);
 	boolean isLeftDown = false;
 	
 	public ToolForgeScreen(ToolForgeContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
-		super(screenContainer, inv, titleIn);
+		super(screenContainer, inv, new StringTextComponent("Tool Forge"));
+
+//		System.out.println(titleIn.getString());
+		try {
+			MaterialBasedPixelStorage pixels = MaterialBasedPixelStorage.fromString(titleIn.getString());
+			this.pixels.addAll(pixels.image);
+		} catch (Throwable err) {
+		}
+	}
+	
+	@Override
+	protected void init() {
+		super.init();
 	}
 	
 	@Override
@@ -74,6 +88,9 @@ public class ToolForgeScreen extends ContainerScreen<ToolForgeContainer> {
 		
 		//SETUP IMAGE
 		image.clear();
+		for (MaterialBasedPixelStorage.MaterialPixel px : pixels) {
+			image.setPixel(px.x, px.y, px.stack);
+		}
 		for (MaterialVectorImage.MaterialLine ln : lines) {
 			image.addLine(ln.px1, ln.px2);
 		}
@@ -107,8 +124,8 @@ public class ToolForgeScreen extends ContainerScreen<ToolForgeContainer> {
 				if (mouseX >= this.guiLeft + 25 + (x * pixelSize) &&
 						mouseX <= this.guiLeft + 25 + (x * pixelSize) + pixelSize &&
 						mouseY >= this.guiTop + 14 + (y * pixelSize) &&
-						mouseY <= this.guiTop + 14 + (y * pixelSize) + pixelSize &&
-						!materialStack.equals(ItemStack.EMPTY)
+						mouseY <= this.guiTop + 14 + (y * pixelSize) + pixelSize /*&&
+						!materialStack.equals(ItemStack.EMPTY)*/
 				) {
 					DrawingUtils.drawTexturedRect(this.guiLeft + 25 + (x * pixelSize), this.guiTop + 14 + (y * pixelSize), 0, 0, 1, 1, pixelSize, pixelSize, 0.25, 0.25, 0.25, 1);
 					if (start == null && isLeftDown) {
@@ -154,7 +171,7 @@ public class ToolForgeScreen extends ContainerScreen<ToolForgeContainer> {
 				}
 				try {
 					DrawingUtils.ColorHelper px = image.getPixel(x, y);
-					if (px.getAlpha() != 0) {
+					if (px.getAlpha() != 0 && (px.getRed() != 0 || px.getGreen() != 0 || px.getBlue() != 0)) {
 						DrawingUtils.drawTexturedRect(this.guiLeft + 25 + (x * pixelSize), this.guiTop + 14 + (y * pixelSize), 0, 0, 1, 1, pixelSize, pixelSize, px.getRed() / 255f, px.getGreen() / 255f, px.getBlue() / 255f, 1);
 					}
 				} catch (Exception err) {

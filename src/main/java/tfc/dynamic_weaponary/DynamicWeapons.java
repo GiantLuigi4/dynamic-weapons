@@ -164,11 +164,13 @@ public class DynamicWeapons {
 				new CFGHelper.matString("botania:manasteel_ingot", 300, 6, 5 - 1.8f, new DrawingUtils.ColorHelper(110, 168, 241).getRGB()).toString() +
 				new CFGHelper.matString("botania:elementium_ingot", 720, 5.5, 5 - 2.6f, new DrawingUtils.ColorHelper(245, 175, 213).getRGB()).toString() +
 				new CFGHelper.matString("botania:terrasteel_ingot", 2300, 7, 5 - 2.5f, new DrawingUtils.ColorHelper(117, 225, 0).getRGB()).toString() +
+				//BUMBLE ZONE
 				new CFGHelper.matString("the_bumblezone:honey_crystal_shards", 14, 2, 5 - 5.5f, new DrawingUtils.ColorHelper(238, 194, 123).getRGB()).toString() +
+				//PSI
 				new CFGHelper.matString("psi:psimetal", 900, 6, 5 - 2.5f, new DrawingUtils.ColorHelper(145, 137, 210).getRGB()).toString()
 		);
 		Config.createAndWrite(path, "example", "" +
-				//BOTANIA
+				//EXAMPLES
 				new CFGHelper.matString("ex:no_methods", 2300, 7, 5 - 2.5f, new DrawingUtils.ColorHelper(117, 225, 0).getRGB()).toString() +
 				new CFGHelper.matString("ex:methods", 2300, 7, 5 - 2.5f, new DrawingUtils.ColorHelper(117, 225, 0).getRGB(), "a", "b", "c").toString()
 		);

@@ -50,7 +50,9 @@ public class ModularItemRenderer extends ItemStackTileEntityRenderer {
 					if (color.getAlpha() != 0 && (color.getRed() != 0 || color.getGreen() != 0 || color.getBlue() != 0)) {
 						pixelsRendered++;
 						CubeColors.color = color.getRGB();
-						Minecraft.getInstance().getItemRenderer().renderItem(new ItemStack(Items.CUBE.get()), ItemCameraTransforms.TransformType.FIXED, combinedLightIn, combinedOverlayIn, matrixStackIn, bufferIn);
+						ItemStack renderStack = new ItemStack(Items.CUBE.get());
+						renderStack.setTag(itemStackIn.getOrCreateTag());
+						Minecraft.getInstance().getItemRenderer().renderItem(renderStack, ItemCameraTransforms.TransformType.FIXED, combinedLightIn, combinedOverlayIn, matrixStackIn, bufferIn);
 					}
 					matrixStackIn.pop();
 				}

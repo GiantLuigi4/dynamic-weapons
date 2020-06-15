@@ -117,7 +117,7 @@ public class ToolForge extends Block implements ITileEntityProvider {
 		
 		@Override
 		public ITextComponent getDisplayName() {
-			return new StringTextComponent("none");
+			return new StringTextComponent(image);
 		}
 		
 		@Nullable
