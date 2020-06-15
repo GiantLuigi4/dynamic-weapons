@@ -11,8 +11,9 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.*;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.NetworkRegistry;
@@ -22,6 +23,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.TriConsumer;
+import tfc.dynamic_weaponary.API.Events.SetupConfigsEvent;
 import tfc.dynamic_weaponary.Block.ShadingTable.STContainer;
 import tfc.dynamic_weaponary.Block.ShadingTable.STScreen;
 import tfc.dynamic_weaponary.Block.ToolForge.ToolForge;
@@ -80,14 +82,10 @@ public class DynamicWeapons {
 		);
 		
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-		// Register the setup method for modloading
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-		// Register the enqueueIMC method for modloading
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
-		// Register the processIMC method for modloading
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
-		// Register the doClientStuff method for modloading
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
+		bus.addListener(this::setup);
+		bus.addListener(this::doClientStuff);
+		bus.addListener(this::setupConfigs);
+		bus.addListener(this::serverSetupEvent);
 		
 		Blocks.BLOCKS.register(bus);
 		Items.ITEMS.register(bus);
@@ -101,22 +99,31 @@ public class DynamicWeapons {
 		}
 	}
 	
+	static void readConfigs() {
+		System.out.println(path);
+		StringBuilder s = new StringBuilder("Found configs from the following mods:[");
+		for (File f : path.listFiles()) {
+			String file = f.getName().substring(0, (int) (f.getName().length() - 4));
+			s.append(file).append(",");
+			Config.readConfig(path, file);
+		}
+		s.replace(s.length() - 1, s.length(), "");
+		s.append(']');
+		LOGGER.log(Level.INFO, s.toString());
+	}
+	
 	private void doClientStuff(final FMLClientSetupEvent event) {
 		tfc.dynamic_weaponary.Events.ClientSetup.run(event);
-	}
-	
-	private void enqueueIMC(final InterModEnqueueEvent event) {
-	}
-	
-	private void processIMC(final InterModProcessEvent event) {
+		path = new File(event.getMinecraftSupplier().get().gameDir + "\\config\\dynamic_weaponry");
+		if (!path.exists()) {
+			path.mkdirs();
+		}
+		FMLJavaModLoadingContext.get().getModEventBus().post(new SetupConfigsEvent.MakeFiles(Dist.CLIENT, path));
+		FMLJavaModLoadingContext.get().getModEventBus().post(new SetupConfigsEvent.ChangeFiles(Dist.CLIENT, path));
+		readConfigs();
 	}
 	
 	static File path;
-	
-	// You can use SubscribeEvent and let the Event Bus discover methods to call
-	@SubscribeEvent
-	public void onServerStarting(FMLServerStartingEvent event) {
-	}
 	
 	// You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
 	// Event bus for receiving Registry Events)
@@ -174,15 +181,21 @@ public class DynamicWeapons {
 				new CFGHelper.matString("ex:no_methods", 2300, 7, 5 - 2.5f, new DrawingUtils.ColorHelper(117, 225, 0).getRGB()).toString() +
 				new CFGHelper.matString("ex:methods", 2300, 7, 5 - 2.5f, new DrawingUtils.ColorHelper(117, 225, 0).getRGB(), "a", "b", "c").toString()
 		);
-		Config.readConfig(path, "minecraft");
-		Config.readConfig(path, "dynamic_weaponry");
 	}
 	
-	@SubscribeEvent
-	public void serverSetupEvent(FMLDedicatedServerSetupEvent event) {
+	private void setupConfigs(SetupConfigsEvent.MakeFiles event) {
+		handleConfig();
+	}
+	
+	private void serverSetupEvent(FMLDedicatedServerSetupEvent event) {
 		try {
 			path = new File(event.getServerSupplier().get().getDataDirectory() + "\\config\\dynamic_weaponry");
-			handleConfig();
+			if (!path.exists()) {
+				path.mkdirs();
+			}
+			FMLJavaModLoadingContext.get().getModEventBus().post(new SetupConfigsEvent.MakeFiles(Dist.DEDICATED_SERVER, path));
+			FMLJavaModLoadingContext.get().getModEventBus().post(new SetupConfigsEvent.ChangeFiles(Dist.DEDICATED_SERVER, path));
+			readConfigs();
 		} catch (Exception err) {
 		}
 	}
@@ -192,8 +205,6 @@ public class DynamicWeapons {
 	public static final class ClientSetup {
 		@SubscribeEvent
 		public static void setup(FMLClientSetupEvent event) {
-			path = new File(event.getMinecraftSupplier().get().gameDir + "\\config\\dynamic_weaponry");
-			handleConfig();
 			ScreenManager.registerFactory(STContainer.TYPE, STScreen::new);
 			ScreenManager.registerFactory(ToolForgeContainer.TYPE, ToolForgeScreen::new);
 		}
