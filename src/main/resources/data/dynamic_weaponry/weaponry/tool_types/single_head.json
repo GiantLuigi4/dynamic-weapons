@@ -1,0 +1,13 @@
+{
+  "single_head": {
+    "part count": 2,
+    "part1": [
+      {"name": "dynamic_weaponry:sword_blade", "incompatibilities": [{"part": 2, "name": "dynamic_weaponry:long_stick"}]},
+      {"name": "dynamic_weaponry:shove_head", "incompatibilities": [{"part": 2, "name": "dynamic_weaponry:short_stick"}]}
+    ],
+    "part2": [
+      {"name": "dynamic_weaponry:short_stick"},
+      {"name": "dynamic_weaponry:long_stick"}
+    ]
+  }
+}
