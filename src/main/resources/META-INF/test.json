@@ -1,0 +1,74 @@
+{
+  "parts": {
+    "long_stick": {
+      "name": "long_stick",
+      "points": [
+        {
+          "material": "minecraft:oak_planks",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "material": "minecraft:oak_planks",
+          "x": 1,
+          "y": 1
+        },
+        {
+          "material": "minecraft:oak_planks",
+          "x": 0,
+          "y": 1
+        },
+        {
+          "material": "minecraft:oak_planks",
+          "x": 1,
+          "y": 0
+        },
+        {
+          "material": "minecraft:oak_planks",
+          "x": 2,
+          "y": 2
+        },
+        {
+          "material": "minecraft:oak_planks",
+          "x": 2,
+          "y": 1
+        },
+        {
+          "material": "minecraft:oak_planks",
+          "x": 1,
+          "y": 2
+        },
+        {
+          "material": "minecraft:oak_planks",
+          "x": 3,
+          "y": 3
+        },
+        {
+          "material": "minecraft:oak_planks",
+          "x": 3,
+          "y": 2
+        },
+        {
+          "material": "minecraft:oak_planks",
+          "x": 2,
+          "y": 3
+        },
+        {
+          "material": "minecraft:oak_planks",
+          "x": 4,
+          "y": 4
+        },
+        {
+          "material": "minecraft:oak_planks",
+          "x": 4,
+          "y": 3
+        },
+        {
+          "material": "minecraft:oak_planks",
+          "x": 3,
+          "y": 4
+        }
+      ]
+    }
+  }
+}

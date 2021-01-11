@@ -9,7 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 // The value here should match an entry in the META-INF/mods.toml file
-@Mod("DynamicWeaponry")
+@Mod("dynamic_weaponry")
 public class DynamicWeaponry {
 	
 	// Directly reference a log4j logger.
