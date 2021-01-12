@@ -24,6 +24,8 @@ public class Shading {
 	};
 	
 	public static Color shade(MaterialPoint point, Tool tool, ToolComponent from) {
+		if (true) return new Color(Loader.INSTANCE.getMaterial(point.material).color);
+		
 		ArrayList<ToolComponent> components = new ArrayList<>();
 		for (ToolComponent component : tool.components) {
 			if (
