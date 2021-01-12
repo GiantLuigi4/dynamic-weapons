@@ -205,7 +205,7 @@ public class ToolCreationScreen extends Screen {
 			for (MaterialPoint point : component.points) {
 				Material material = Loader.INSTANCE.getMaterial(point.material);
 				if (material != null) {
-					Color color = new Color(material.color);
+					Color color = Shading.shade(point, tool, component);
 					matrixStack.push();
 					matrixStack.scale(8, 8, 1);
 					matrixStack.translate(point.x, ((gridSize - 1) - point.y), 0);

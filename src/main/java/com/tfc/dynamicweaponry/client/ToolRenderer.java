@@ -56,7 +56,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 				for (MaterialPoint point : component.points) {
 					Material material = Loader.INSTANCE.getMaterial(point.material);
 					if (material != null) {
-						Color color = new Color(material.color);
+						Color color = Shading.shade(point, tool, component);
 						matrixStack.push();
 						matrixStack.translate(point.x / 4f, point.y / 4f, 0);
 						

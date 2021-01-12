@@ -49,14 +49,34 @@ public class ToolComponent implements Comparable<ToolComponent> {
 	
 	public void setPoint(Point pos, ResourceLocation material) {
 		if (material != null) {
+			setPoint(pos, null);
 			points.add(new MaterialPoint(pos.x, pos.y, material));
 		} else {
 			MaterialPoint toRemove = null;
 			for (MaterialPoint point : points)
-				if (point.x == pos.x && point.y == pos.y)
+				if (point.x == pos.x && point.y == pos.y) {
 					toRemove = point;
-			if (toRemove != null) points.remove(toRemove);
+					break;
+				}
+			while (toRemove != null) {
+				for (MaterialPoint point : points)
+					if (point.x == pos.x && point.y == pos.y) {
+						toRemove = point;
+						break;
+					}
+				if (toRemove != null) points.remove(toRemove);
+				toRemove = null;
+			}
 		}
+	}
+	
+	public MaterialPoint getPoint(int x, int y) {
+		for (MaterialPoint point : points) {
+			if (point.x == x && point.y == y) {
+				return point;
+			}
+		}
+		return null;
 	}
 	
 	/**
