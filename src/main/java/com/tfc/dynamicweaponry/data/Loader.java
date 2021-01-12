@@ -56,7 +56,7 @@ public class Loader implements IResourceManagerReloadListener {
 									new ResourceLocation(material.getAsJsonPrimitive("item").getAsString())
 							);
 							
-							materials.put(new ResourceLocation(resource.getLocation().getNamespace(), resource.getLocation().getPath().substring("weaponry/materials/".length())), mat);
+							materials.put(new ResourceLocation(resource.getLocation().getNamespace(), resource.getLocation().getPath().substring("weaponry/materials/".length()).replace(".json", "")), mat);
 						} catch (Throwable err) {
 							err.printStackTrace();
 						}
@@ -74,6 +74,7 @@ public class Loader implements IResourceManagerReloadListener {
 					IResource resource = resourceManager.getResource(resourceLocation);
 					if (resource.getLocation().toString().endsWith(".properties")) {
 						try {
+							ResourceLocation location = new ResourceLocation(resource.getLocation().getNamespace(), resource.getLocation().getPath().substring("weaponry/part_types/".length()).replace(".properties", ""));
 							InputStream stream = resource.getInputStream();
 							byte[] bytes = new byte[stream.available()];
 							stream.read(bytes);
@@ -85,7 +86,12 @@ public class Loader implements IResourceManagerReloadListener {
 							int maxX = Integer.parseInt(properties.getValue("maxX"));
 							int maxY = Integer.parseInt(properties.getValue("maxY"));
 							
-							PartType type = new PartType(new Point(minX, minY), new Point(maxX, maxY));
+							PartType type = new PartType(
+									location,
+									new Point(minX, minY),
+									new Point(maxX, maxY),
+									Integer.parseInt(properties.getValue("order"))
+							);
 							
 							for (int i = 0; i < reqPoints; i++) {
 								int pointX = Integer.parseInt(properties.getValue("requiredPoint" + (i + 1) + "_X"));
@@ -96,7 +102,7 @@ public class Loader implements IResourceManagerReloadListener {
 							
 							type.lock();
 							
-							partTypes.put(new ResourceLocation(resource.getLocation().getNamespace(), resource.getLocation().getPath().substring("weaponry/part_types/".length())), type);
+							partTypes.put(location, type);
 						} catch (Throwable err) {
 							err.printStackTrace();
 						}
@@ -162,8 +168,8 @@ public class Loader implements IResourceManagerReloadListener {
 										
 										toolType.addPart(part);
 									}
-									toolTypes.put(new ResourceLocation(resource.getLocation().getNamespace(), resource.getLocation().getPath().substring("weaponry/tool_types/".length())), toolType);
 								}
+								toolTypes.put(new ResourceLocation(resource.getLocation().getNamespace(), stringJsonElementEntry.getKey()), toolType);
 							}
 						} catch (Throwable err) {
 							err.printStackTrace();

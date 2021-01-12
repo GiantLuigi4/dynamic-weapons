@@ -31,7 +31,6 @@ public class ToolPart {
 				", incompatibilities=" + Arrays.toString(incompatibilities) +
 				", dependencies=" + Arrays.toString(dependencies) +
 				", listIndex=" + listIndex +
-				", toolType=" + toolType +
 				'}';
 	}
 	
@@ -40,12 +39,12 @@ public class ToolPart {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		ToolPart toolPart = (ToolPart) o;
-		return listIndex == toolPart.listIndex &&
-				Objects.equals(toolType, toolPart.toolType);
+		return listIndex == toolPart.listIndex;
+//				&& Objects.equals(toolType, toolPart.toolType);
 	}
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(listIndex, toolType);
+		return Objects.hash(listIndex);
 	}
 }

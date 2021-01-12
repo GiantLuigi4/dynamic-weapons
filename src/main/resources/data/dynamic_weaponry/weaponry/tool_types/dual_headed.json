@@ -1,17 +1,35 @@
 {
-  "dual head": {
+  "dual_head": {
     "part count": 3,
     "part1": [
-      {"name": "dynamic_weaponry:pickaxe_head"},
-      {"name": "dynamic_weaponry:axe_head"}
+      {
+        "name": "dynamic_weaponry:pickaxe_head"
+      },
+      {
+        "name": "dynamic_weaponry:axe_head"
+      }
     ],
     "part2": [
-      {"name": "dynamic_weaponry:pickaxe_head_2"},
-      {"name": "dynamic_weaponry:axe_head_2"},
-      {"name": "dynamic_weaponry:axe_but", "dependencies": [{"part": 1, "name": "dynamic_weaponry:axe_head"}]}
+      {
+        "name": "dynamic_weaponry:pickaxe_head_2"
+      },
+      {
+        "name": "dynamic_weaponry:axe_head_2"
+      },
+      {
+        "name": "dynamic_weaponry:axe_but",
+        "dependencies": [
+          {
+            "part": 1,
+            "name": "dynamic_weaponry:axe_head"
+          }
+        ]
+      }
     ],
     "part3": [
-      "dynamic_weaponry:long_stick"
+      {
+        "name": "dynamic_weaponry:long_stick"
+      }
     ]
   }
 }

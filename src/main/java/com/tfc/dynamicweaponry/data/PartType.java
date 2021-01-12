@@ -1,6 +1,7 @@
 package com.tfc.dynamicweaponry.data;
 
 import com.tfc.dynamicweaponry.utils.Point;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -8,14 +9,17 @@ import java.util.Objects;
 public class PartType {
 	private final ArrayList<Point> requiredPoints = new ArrayList<>();
 	private final ArrayList<Point> stabilityPoints = new ArrayList<>();
-	
-	private final Point min, max;
+	public final Point min, max;
+	public final int renderLayer;
+	public ResourceLocation name;
 	
 	private boolean isLocked = false;
 	
-	public PartType(Point min, Point max) {
+	public PartType(ResourceLocation name, Point min, Point max, int renderLayer) {
+		this.name = name;
 		this.min = min;
 		this.max = max;
+		this.renderLayer = renderLayer;
 	}
 	
 	public void lock() {

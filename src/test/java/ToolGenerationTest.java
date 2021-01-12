@@ -28,9 +28,13 @@ public class ToolGenerationTest {
 		imageToPartMap.put(
 				"test_blade.png", new ResourceLocation("dynamic_weaponry:sword_blade")
 		);
+		imageToPartMap.put(
+				"test_guard.png", new ResourceLocation("dynamic_weaponry:sword_guard")
+		);
 	}
 	
 	public static void main(String[] args) {
+		CompoundNBT tool_info = new CompoundNBT();
 		CompoundNBT tool = new CompoundNBT();
 		
 		CompoundNBT nbt = new CompoundNBT();
@@ -65,7 +69,9 @@ public class ToolGenerationTest {
 		});
 		
 		tool.put("parts", nbt);
+		tool.putString("tool_type", "dynamic_weaponry:single_head");
+		tool_info.put("tool_info", tool);
 		
-		System.out.println("dynamic_weaponry:dynamic_tool" + tool);
+		System.out.println("dynamic_weaponry:dynamic_tool" + tool_info);
 	}
 }
