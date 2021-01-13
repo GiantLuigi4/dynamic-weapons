@@ -216,11 +216,14 @@ public class Loader implements IResourceManagerReloadListener {
 			return materials.get(location);
 		
 		AtomicReference<Material> materialAtomicReference = new AtomicReference<>();
-		materials.forEach((name, mat) -> {
-			if (mat.item.equals(location)) {
-				materialAtomicReference.set(mat);
-			}
-		});
+		try {
+			materials.forEach((name, mat) -> {
+				if (mat.item.equals(location)) {
+					materialAtomicReference.set(mat);
+				}
+			});
+		} catch (Throwable ignored) {
+		}
 		return materialAtomicReference.get();
 	}
 	
