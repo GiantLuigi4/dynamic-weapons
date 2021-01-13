@@ -3,9 +3,12 @@ package tfc.dynamic_weaponary.API;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.apache.logging.log4j.util.TriConsumer;
+import tfc.dynamic_weaponary.CalculationRegistry;
 import tfc.dynamic_weaponary.EventRegistry;
 import tfc.dynamic_weaponary.MaterialList;
 import tfc.dynamic_weaponary.Utils.Tool.Material;
+
+import java.util.function.Function;
 
 public class RegistryHelper {
 	public static void RegisterMaterial(Material mat, ItemStack item) {
@@ -18,6 +21,10 @@ public class RegistryHelper {
 	
 	public static void RegisterEvent(TriConsumer event, eventTypes type, Item item) {
 		EventRegistry.registerEvent(item.getRegistryName(), type.name, event);
+	}
+	
+	public static void RegisterFunction(Function function, eventTypes type, Item item) {
+		CalculationRegistry.registerEvent(item.getRegistryName(), type.name, function);
 	}
 	
 	public static enum eventTypes {
