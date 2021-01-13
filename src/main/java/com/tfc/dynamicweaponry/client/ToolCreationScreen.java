@@ -6,12 +6,14 @@ import com.mojang.brigadier.StringReader;
 import com.tfc.assortedutils.utils.Color;
 import com.tfc.dynamicweaponry.data.*;
 import com.tfc.dynamicweaponry.registry.Items;
+import com.tfc.dynamicweaponry.tool.DynamicTool;
 import com.tfc.dynamicweaponry.tool.MaterialPoint;
 import com.tfc.dynamicweaponry.tool.Tool;
 import com.tfc.dynamicweaponry.tool.ToolComponent;
 import com.tfc.dynamicweaponry.utils.Point;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.command.arguments.ItemParser;
@@ -20,8 +22,11 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ToolCreationScreen extends Screen {
 	private static final ResourceLocation Background = new ResourceLocation("dynamic_weaponry:textures/gui/tool_editor.png");
@@ -46,6 +51,8 @@ public class ToolCreationScreen extends Screen {
 	public String currentPart = "";
 	public Tool tool = new Tool(defaultTool);
 	
+	public final TextFieldWidget output;
+	
 	public boolean lMouseDown = false;
 	public boolean rMouseDown = false;
 	public ItemSlot selectedSlot = null;
@@ -69,8 +76,15 @@ public class ToolCreationScreen extends Screen {
 				slots.add(slot);
 			}
 		}
-		
 		this.minecraft = instance;
+		
+		output =
+				new TextFieldWidget(
+						font == null ? minecraft.fontRenderer : font,
+						this.width / 2 + 277, (this.height / 2) + 48,
+						58, 18,
+						new StringTextComponent(tool.serialize().toString())
+				);
 	}
 	
 	@Override
@@ -89,6 +103,23 @@ public class ToolCreationScreen extends Screen {
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
 		matrixStack.push();
 		matrixStack.translate(0, -40, 0);
+		
+		{
+			int r = 128;
+			int g = 255;
+			int b = 128;
+			drawString(matrixStack, font, "Weight: " + Math.round(tool.getWeight() * 100) / 100f,
+					i + 180, j + 70, new Color(r, g, b).getRGB());
+			drawString(matrixStack, font, "Attack: " + Math.round(tool.getDamage() * 100) / 100f,
+					i + 180, j + 80, new Color(r, g, b).getRGB());
+			drawString(matrixStack, font, "Efficiency: " + Math.round(tool.getEfficiency() * 10) / 10f,
+					i + 180, j + 90, new Color(r, g, b).getRGB());
+			drawString(matrixStack, font, "Cooldown: " + Math.round(tool.getAttackSpeed() * 100) / 100f,
+					i + 180, j + 100, new Color(r, g, b).getRGB());
+			drawString(matrixStack, font, "Durability: " + Math.round(tool.getDurability()),
+					i + 180, j + 110, new Color(r, g, b).getRGB());
+		}
+		
 		this.minecraft.getTextureManager().bindTexture(Background);
 		
 		if (this.buttons.isEmpty()) {
@@ -108,6 +139,7 @@ public class ToolCreationScreen extends Screen {
 							this::cyclePart
 					)
 			);
+			this.buttons.add(output);
 		}
 		
 		int minX = 0;
@@ -116,10 +148,12 @@ public class ToolCreationScreen extends Screen {
 		int maxY = -1;
 		if (!currentPart.equals("")) {
 			PartType type = Loader.INSTANCE.partTypes.get(new ResourceLocation(currentPart));
-			minX = type.min.x;
-			minY = type.min.y;
-			maxX = type.max.x;
-			maxY = type.max.y;
+			if (type != null) {
+				minX = type.min.x;
+				minY = type.min.y;
+				maxX = type.max.x;
+				maxY = type.max.y;
+			}
 		}
 		
 		boolean alternator = false;
@@ -258,6 +292,11 @@ public class ToolCreationScreen extends Screen {
 		matrixStack.push();
 		for (ItemSlot slot : slots) slot.render(matrixStack, mouseX, mouseY, i, j, this);
 		matrixStack.pop();
+		
+		String text = "give @p dynamic_weaponry:dynamic_tool" + tool.serialize().toString();
+		output.setMaxStringLength(text.length());
+		if (!output.getText().equals(text))
+			output.setText(text);
 	}
 	
 	private void cyclePart(Button button) {
@@ -357,6 +396,10 @@ public class ToolCreationScreen extends Screen {
 						}
 						selectedSlot = slot;
 						slot.color = new Color(128, 255, 128);
+					} else {
+						if (slot.get().getItem() instanceof DynamicTool) {
+							tool = new Tool(slot.get());
+						}
 					}
 					return true;
 				}
@@ -371,22 +414,84 @@ public class ToolCreationScreen extends Screen {
 		if (button == 0) lMouseDown = false;
 		else if (button == 1) rMouseDown = false;
 		
+		for (Widget button1 : buttons) {
+			if (button1.isFocused()) {
+				boolean clicked = button1.mouseReleased(mouseX, mouseY, button);
+				if (clicked) return true;
+			}
+		}
+		
 		return super.mouseReleased(mouseX, mouseY, button);
 	}
 	
 	@Override
 	public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+		for (Widget button1 : buttons) {
+			if (button1.isFocused()) {
+				boolean clicked = button1.keyReleased(keyCode, scanCode, modifiers);
+				if (clicked) return true;
+			}
+		}
+		
 		return super.keyReleased(keyCode, scanCode, modifiers);
 	}
 	
 	@Override
 	public boolean charTyped(char codePoint, int modifiers) {
+		for (Widget button1 : buttons) {
+			if (button1.isFocused()) {
+				boolean clicked = button1.charTyped(codePoint, modifiers);
+				if (clicked) return true;
+			}
+		}
+		
 		return super.charTyped(codePoint, modifiers);
+	}
+	
+	@Override
+	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		for (Widget button1 : buttons) {
+			if (button1.isFocused()) {
+				boolean clicked = button1.keyPressed(keyCode, scanCode, modifiers);
+				if (clicked) return true;
+			}
+		}
+		
+		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 	
 	@Override
 	public boolean changeFocus(boolean focus) {
 		System.out.println(focus);
 		return super.changeFocus(false);
+	}
+	
+	@Override
+	public List<ITextComponent> getTooltipFromItem(ItemStack itemStack) {
+		ArrayList<ITextComponent> list = new ArrayList(super.getTooltipFromItem(itemStack));
+		Material material = Loader.INSTANCE.getMaterial(itemStack.getItem().getRegistryName());
+		if (material != null) {
+			list.add(new StringTextComponent(
+					"Weight: ").mergeStyle(TextFormatting.GREEN).append(new StringTextComponent(
+					String.valueOf(material.weight)).mergeStyle(TextFormatting.RED))
+			);
+			list.add(new StringTextComponent(
+					"Efficiency: ").mergeStyle(TextFormatting.GREEN).append(new StringTextComponent(
+					String.valueOf(material.efficiency)).mergeStyle(TextFormatting.RED))
+			);
+			list.add(new StringTextComponent(
+					"Attack Power: ").mergeStyle(TextFormatting.GREEN).append(new StringTextComponent(
+					String.valueOf(material.attack)).mergeStyle(TextFormatting.RED))
+			);
+			list.add(new StringTextComponent(
+					"Durability: ").mergeStyle(TextFormatting.GREEN).append(new StringTextComponent(
+					String.valueOf(material.durability)).mergeStyle(TextFormatting.RED))
+			);
+			list.add(new StringTextComponent(
+					"Color: ").mergeStyle(TextFormatting.GREEN).append(new StringTextComponent(
+					String.valueOf(material.color)).mergeStyle(Style.EMPTY.setColor(net.minecraft.util.text.Color.fromInt(material.color))))
+			);
+		}
+		return list;
 	}
 }

@@ -35,15 +35,18 @@ public class ToolComponent implements Comparable<ToolComponent> {
 		}
 	}
 	
-	public ListNBT serialize() {
-		ListNBT thisNBT = new ListNBT();
+	public CompoundNBT serialize() {
+		CompoundNBT thisNBT = new CompoundNBT();
+		ListNBT pointList = new ListNBT();
+		thisNBT.putString("name", name);
 		for (MaterialPoint point : points) {
 			CompoundNBT nbt = new CompoundNBT();
 			nbt.putString("material", point.material.toString());
 			nbt.putInt("x", point.x);
 			nbt.putInt("y", point.y);
-			thisNBT.add(nbt);
+			pointList.add(nbt);
 		}
+		thisNBT.put("points", pointList);
 		return thisNBT;
 	}
 	

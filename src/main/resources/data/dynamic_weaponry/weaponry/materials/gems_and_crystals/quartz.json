@@ -1,8 +1,8 @@
 {
   "color": 15130581,
   "durability": 10,
-  "weight": 1,
-  "efficiency": 0.2,
+  "weight": 0.9,
+  "efficiency": 1,
   "attack": 10,
   "item": "minecraft:quartz"
 }

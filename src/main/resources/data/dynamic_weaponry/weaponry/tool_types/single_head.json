@@ -1,6 +1,6 @@
 {
   "dynamic_weaponry:single_head": {
-    "part count": 2,
+    "part count": 3,
     "part1": [
       {
         "name": "dynamic_weaponry:sword_blade",
@@ -27,6 +27,11 @@
       },
       {
         "name": "dynamic_weaponry:long_stick"
+      }
+    ],
+    "part3": [
+      {
+        "name": "dynamic_weaponry:sword_guard"
       }
     ]
   }

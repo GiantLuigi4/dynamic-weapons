@@ -65,7 +65,10 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 						float b = color.getBlue() / 255f;
 						
 						matrixStack.translate(0, 0, 0.125f / 2);
-						
+
+//						if (component.type != null) {
+//							matrixStack.scale(1,1,1+component.type.renderLayer/10f);
+//						}
 						renderCube(r, g, b, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, p_239207_2_ != ItemCameraTransforms.TransformType.GUI);
 						
 						matrixStack.pop();
