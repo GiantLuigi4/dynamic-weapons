@@ -11,6 +11,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class ToolComponent implements Comparable<ToolComponent> {
 	public ArrayList<MaterialPoint> points;
@@ -125,5 +126,20 @@ public class ToolComponent implements Comparable<ToolComponent> {
 		if (this.type == null) return 1;
 		if (o.type == null) return -1;
 		return Integer.compare(type.renderLayer, o.type.renderLayer);
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		ToolComponent component = (ToolComponent) o;
+		return Objects.equals(points, component.points) &&
+				Objects.equals(name, component.name) &&
+				Objects.equals(type, component.type);
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(points, name, type);
 	}
 }

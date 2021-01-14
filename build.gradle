@@ -89,6 +89,7 @@ minecraft {
 
 repositories {
     maven { url 'https://jitpack.io' }
+    maven {url "https://www.cursemaven.com"}
 }
 
 dependencies {
@@ -97,7 +98,8 @@ dependencies {
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.16.4-35.1.36'
 
-    implementation fg.deobf('com.github.GiantLuigi4:AssortedUtils:5ed6746f27')
+    implementation fg.deobf('com.github.GiantLuigi4:AssortedUtils:41f01d1406')
+    implementation fg.deobf('curse.maven:reauth-237701:3105779')
 
     // You may put jars on which you depend on in ./libs or you may define them like so..
     // compile "some.group:artifact:version:classifier"

@@ -188,7 +188,6 @@ public class Loader implements IResourceManagerReloadListener {
 		
 		type.lock();
 
-//		ResourceLocation rlocation = new ResourceLocation(location.getNamespace(), location.getPath().substring("weaponry/part_types/".length()).replace(".properties", ""));
 		INSTANCE.partTypes.put(location, type);
 		INSTANCE.partTypesRaw.put(location, data);
 	}
@@ -241,7 +240,7 @@ public class Loader implements IResourceManagerReloadListener {
 				Collection<ResourceLocation> resourceList = resourceManager.getAllResourceLocations("weaponry/materials", (file) -> file.endsWith(".json"));
 				for (ResourceLocation resourceLocation : resourceList) {
 					IResource resource = resourceManager.getResource(resourceLocation);
-					if (resource.getLocation().toString().endsWith(".json")) {
+					if (resourceLocation.toString().endsWith(".json")) {
 						try {
 							InputStream stream = resource.getInputStream();
 							byte[] bytes = new byte[stream.available()];
@@ -263,9 +262,9 @@ public class Loader implements IResourceManagerReloadListener {
 				Collection<ResourceLocation> resourceList = resourceManager.getAllResourceLocations("weaponry/part_types", (file) -> file.endsWith(".properties"));
 				for (ResourceLocation resourceLocation : resourceList) {
 					IResource resource = resourceManager.getResource(resourceLocation);
-					if (resource.getLocation().toString().endsWith(".properties")) {
+					if (resourceLocation.toString().endsWith(".properties")) {
 						try {
-							ResourceLocation location = new ResourceLocation(resource.getLocation().getNamespace(), resource.getLocation().getPath().substring("weaponry/part_types/".length()).replace(".properties", ""));
+							ResourceLocation location = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().substring("weaponry/part_types/".length()).replace(".properties", ""));
 							InputStream stream = resource.getInputStream();
 							byte[] bytes = new byte[stream.available()];
 							stream.read(bytes);
@@ -285,13 +284,13 @@ public class Loader implements IResourceManagerReloadListener {
 				Collection<ResourceLocation> resourceList = resourceManager.getAllResourceLocations("weaponry/tool_types", (file) -> file.endsWith(".json"));
 				for (ResourceLocation resourceLocation : resourceList) {
 					IResource resource = resourceManager.getResource(resourceLocation);
-					if (resource.getLocation().toString().endsWith(".json")) {
+					if (resourceLocation.toString().endsWith(".json")) {
 						try {
 							InputStream stream = resource.getInputStream();
 							byte[] bytes = new byte[stream.available()];
 							stream.read(bytes);
 							stream.close();
-							parseToolTypes(resource.getLocation(), new String(bytes));
+							parseToolTypes(resourceLocation, new String(bytes));
 						} catch (Throwable err) {
 							err.printStackTrace();
 						}

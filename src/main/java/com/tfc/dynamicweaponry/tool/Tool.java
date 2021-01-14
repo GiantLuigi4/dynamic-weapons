@@ -2,12 +2,14 @@ package com.tfc.dynamicweaponry.tool;
 
 import com.tfc.dynamicweaponry.data.Loader;
 import com.tfc.dynamicweaponry.data.Material;
+import com.tfc.dynamicweaponry.registry.Registry;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class Tool {
 	public final ArrayList<ToolComponent> components = new ArrayList<>();
@@ -148,5 +150,28 @@ public class Tool {
 		for (ToolComponent component : components) parts.put(component.name, component.serialize());
 		thisNBT.put("parts", parts);
 		return thisNBT;
+	}
+	
+	public Tool copy() {
+		CompoundNBT nbt = this.serialize();
+		ItemStack stack = new ItemStack(Registry.DYNAMIC_TOOL.get());
+		CompoundNBT nbt1 = stack.getOrCreateTag();
+		nbt1.put("tool_info", nbt);
+		Tool tool = new Tool(stack);
+		return tool;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Tool tool = (Tool) o;
+		return Objects.equals(components, tool.components) &&
+				Objects.equals(name, tool.name);
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(components, name);
 	}
 }
