@@ -65,10 +65,6 @@ public class ToolForgeTileEntity extends TileEntity {
 		read(state, tag);
 	}
 	
-	/**
-	 * Get an NBT compound to sync to the client with SPacketChunkData, used for initial loading of the chunk or when
-	 * many blocks change at once. This compound comes back to you clientside in {@link handleUpdateTag}
-	 */
 	@Override
 	public CompoundNBT getUpdateTag() {
 		return serializeNBT();
