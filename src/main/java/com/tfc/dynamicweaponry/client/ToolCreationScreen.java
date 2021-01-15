@@ -29,8 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer> {
-	private static final ResourceLocation Background = new ResourceLocation("dynamic_weaponry:textures/gui/tool_editor.png");
-	
 	public static final ItemStack defaultTool = ToolForgeTileEntity.defaultTool;
 	
 	private final ArrayList<ItemSlot> slots = new ArrayList<>();
@@ -110,11 +108,18 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		matrixStack.push();
 		super.renderBackground(matrixStack);
 		matrixStack.translate(0, -40, 0);
-		this.minecraft.getTextureManager().bindTexture(Background);
 		int i = (this.width - 248) / 2;
 		int j = (this.height - 166) / 2;
-		this.blit(matrixStack, i, j, 0, 0, (248 - 90), 166);
-		this.blit(matrixStack, i + 90, j, 79, 0, (248 - 79), 166);
+		drawBackground(matrixStack,
+				i, j,
+				(248 - 72), 166
+		);
+		drawBackground(matrixStack,
+				i + (248 - 73), j,
+				79, 166
+		);
+//		this.blit(matrixStack, i, j, 0, 0, (248 - 90), 166);
+//		this.blit(matrixStack, i + 90, j, 79, 0, (248 - 79), 166);
 		this.minecraft.getTextureManager().bindTexture(new ResourceLocation("textures/gui/container/inventory.png"));
 		this.blit(matrixStack, i, j + 160, 0, 80, 248, (166 - 80));
 		matrixStack.pop();
@@ -141,8 +146,6 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				System.out.println(tool);
 			}
 		}
-		
-		this.minecraft.getTextureManager().bindTexture(Background);
 		
 		if (this.buttons.isEmpty()) {
 			this.buttons.add(
