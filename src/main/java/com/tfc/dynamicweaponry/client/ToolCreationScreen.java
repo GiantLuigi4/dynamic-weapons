@@ -2,11 +2,11 @@ package com.tfc.dynamicweaponry.client;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.brigadier.StringReader;
 import com.tfc.assortedutils.API.gui.screen.SimpleContainerScreen;
 import com.tfc.assortedutils.utils.Color;
 import com.tfc.dynamicweaponry.DynamicWeaponry;
 import com.tfc.dynamicweaponry.block.ToolForgeContainer;
+import com.tfc.dynamicweaponry.block.ToolForgeTileEntity;
 import com.tfc.dynamicweaponry.data.*;
 import com.tfc.dynamicweaponry.network.ToolPacket;
 import com.tfc.dynamicweaponry.registry.Registry;
@@ -19,15 +19,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.command.arguments.ItemParser;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,20 +31,7 @@ import java.util.List;
 public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer> {
 	private static final ResourceLocation Background = new ResourceLocation("dynamic_weaponry:textures/gui/tool_editor.png");
 	
-	private static final ItemStack defaultTool = new ItemStack(Registry.DYNAMIC_TOOL.get());
-	
-	static {
-		try {
-			ItemParser parser = new ItemParser(new StringReader(
-					"dynamic_weaponry:dynamic_tool{tool_info:{tool_type:\"dynamic_weaponry:single_head\",parts:{\"dynamic_weaponry:short_stick\":{name:\"dynamic_weaponry:short_stick\",points:[{material:\"minecraft:diamond\",x:0,y:2},{material:\"minecraft:diamond\",x:0,y:1},{material:\"minecraft:diamond\",x:0,y:0},{material:\"minecraft:diamond\",x:1,y:2},{material:\"minecraft:diamond\",x:1,y:1},{material:\"minecraft:diamond\",x:1,y:0},{material:\"minecraft:oak_planks\",x:2,y:3},{material:\"minecraft:oak_planks\",x:2,y:2},{material:\"minecraft:diamond\",x:2,y:1},{material:\"minecraft:diamond\",x:2,y:0},{material:\"minecraft:oak_planks\",x:3,y:4},{material:\"minecraft:oak_planks\",x:3,y:3},{material:\"minecraft:oak_planks\",x:3,y:2},{material:\"minecraft:oak_planks\",x:4,y:4},{material:\"minecraft:oak_planks\",x:4,y:3}]},\"dynamic_weaponry:sword_blade\":{name:\"dynamic_weaponry:sword_blade\",points:[{material:\"minecraft:diamond\",x:6,y:8},{material:\"minecraft:diamond\",x:6,y:7},{material:\"minecraft:diamond\",x:6,y:6},{material:\"minecraft:diamond\",x:7,y:9},{material:\"minecraft:diamond\",x:7,y:8},{material:\"minecraft:diamond\",x:7,y:7},{material:\"minecraft:diamond\",x:7,y:6},{material:\"minecraft:diamond\",x:8,y:10},{material:\"minecraft:diamond\",x:8,y:9},{material:\"minecraft:diamond\",x:8,y:8},{material:\"minecraft:diamond\",x:8,y:7},{material:\"minecraft:diamond\",x:8,y:6},{material:\"minecraft:diamond\",x:9,y:11},{material:\"minecraft:diamond\",x:9,y:10},{material:\"minecraft:diamond\",x:9,y:9},{material:\"minecraft:diamond\",x:9,y:8},{material:\"minecraft:diamond\",x:9,y:7},{material:\"minecraft:diamond\",x:10,y:12},{material:\"minecraft:diamond\",x:10,y:11},{material:\"minecraft:diamond\",x:10,y:10},{material:\"minecraft:diamond\",x:10,y:9},{material:\"minecraft:diamond\",x:10,y:8},{material:\"minecraft:diamond\",x:11,y:13},{material:\"minecraft:diamond\",x:11,y:12},{material:\"minecraft:diamond\",x:11,y:11},{material:\"minecraft:diamond\",x:11,y:10},{material:\"minecraft:diamond\",x:11,y:9},{material:\"minecraft:diamond\",x:12,y:14},{material:\"minecraft:diamond\",x:12,y:13},{material:\"minecraft:diamond\",x:12,y:12},{material:\"minecraft:diamond\",x:12,y:11},{material:\"minecraft:diamond\",x:12,y:10},{material:\"minecraft:diamond\",x:13,y:15},{material:\"minecraft:diamond\",x:13,y:14},{material:\"minecraft:diamond\",x:13,y:13},{material:\"minecraft:diamond\",x:13,y:12},{material:\"minecraft:diamond\",x:13,y:11},{material:\"minecraft:diamond\",x:14,y:15},{material:\"minecraft:diamond\",x:14,y:14},{material:\"minecraft:diamond\",x:14,y:13},{material:\"minecraft:diamond\",x:14,y:12},{material:\"minecraft:diamond\",x:15,y:15},{material:\"minecraft:diamond\",x:15,y:14},{material:\"minecraft:diamond\",x:15,y:13}]},\"dynamic_weaponry:sword_guard\":{name:\"dynamic_weaponry:sword_guard\",points:[{material:\"minecraft:gold_ingot\",x:2,y:9},{material:\"minecraft:gold_ingot\",x:2,y:8},{material:\"minecraft:gold_ingot\",x:3,y:9},{material:\"minecraft:gold_ingot\",x:3,y:8},{material:\"minecraft:gold_ingot\",x:3,y:7},{material:\"minecraft:gold_ingot\",x:3,y:6},{material:\"minecraft:gold_ingot\",x:4,y:8},{material:\"minecraft:gold_ingot\",x:4,y:7},{material:\"minecraft:gold_ingot\",x:4,y:6},{material:\"minecraft:gold_ingot\",x:4,y:5},{material:\"minecraft:gold_ingot\",x:5,y:7},{material:\"minecraft:gold_ingot\",x:5,y:6},{material:\"minecraft:gold_ingot\",x:5,y:5},{material:\"minecraft:gold_ingot\",x:5,y:4},{material:\"minecraft:gold_ingot\",x:6,y:5},{material:\"minecraft:gold_ingot\",x:6,y:4},{material:\"minecraft:gold_ingot\",x:6,y:3},{material:\"minecraft:gold_ingot\",x:7,y:5},{material:\"minecraft:gold_ingot\",x:7,y:4},{material:\"minecraft:gold_ingot\",x:7,y:3},{material:\"minecraft:gold_ingot\",x:8,y:4},{material:\"minecraft:gold_ingot\",x:8,y:3},{material:\"minecraft:gold_ingot\",x:8,y:2},{material:\"minecraft:gold_ingot\",x:9,y:3},{material:\"minecraft:gold_ingot\",x:9,y:2}]}}}}"
-			), true);
-			parser.readItem();
-			parser.readNBT();
-			defaultTool.getOrCreateTag().merge(parser.getNbt());
-		} catch (Throwable err) {
-			err.printStackTrace();
-		}
-	}
+	public static final ItemStack defaultTool = ToolForgeTileEntity.defaultTool;
 	
 	private final ArrayList<ItemSlot> slots = new ArrayList<>();
 	public String currentTool = "";
@@ -91,7 +74,6 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		
 		super.deseralize(nbt);
 		
-		
 		if (minecraft != null && minecraft.player != null) {
 			for (int i = 0; i < 9; i++) {
 				ItemSlot slot = new ItemSlot(minecraft.player.inventory, i, i * 18 + 8, 182);
@@ -108,6 +90,11 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				slots.add(slot);
 			}
 		}
+		
+		ItemStack stack = new ItemStack(Registry.DYNAMIC_TOOL.get());
+		CompoundNBT nbt1 = stack.getOrCreateTag();
+		nbt1.put("tool_info", nbt.getCompound("tool"));
+		tool = new Tool(stack);
 	}
 	
 	@Override
@@ -117,6 +104,9 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 	
 	@Override
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+		if (selectedSlot != null)
+			slots.get(selectedSlot.index).color = selectedSlot.color;
+		
 		matrixStack.push();
 		super.renderBackground(matrixStack);
 		matrixStack.translate(0, -40, 0);
@@ -159,18 +149,18 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 					new Button(
 							this.width / 2 + 63, j - 30,
 							60, 20,
-							new StringTextComponent(tool.name),
+							(new TranslationTextComponent("tool_type." + new ResourceLocation(tool.name).getNamespace() + "." + new ResourceLocation(tool.name).getPath().replace("/", "."))),
 							this::cycleTool
 					)
 			);
-			this.buttons.add(
-					new Button(
-							this.width / 2 + 63, j - 10,
-							60, 20,
-							new StringTextComponent(currentPart),
-							this::cyclePart
-					)
+			Button button = new Button(
+					this.width / 2 + 63, j - 10,
+					60, 20,
+					new StringTextComponent(currentPart),
+					this::cyclePart
 			);
+			cyclePart(button);
+			this.buttons.add(button);
 			this.buttons.add(output);
 		}
 		
@@ -319,14 +309,18 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				}
 			}
 		}
+		
 		matrixStack.pop();
 		
 		matrixStack.push();
 		for (ItemSlot slot : slots) slot.render(matrixStack, mouseX, mouseY, i, j, this);
 		matrixStack.pop();
 		
+		tool.sort();
+		
 		String text = "give @p dynamic_weaponry:dynamic_tool" + tool.serialize().toString();
 		output.setMaxStringLength(text.length());
+		
 		if (!output.getText().equals(text)) {
 			DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new ToolPacket(tool));
 			output.setText(text);
@@ -338,15 +332,18 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 			int index = 0;
 			ResourceLocation[] typeNames = Loader.INSTANCE.toolTypes.keySet().toArray(new ResourceLocation[0]);
 			ToolType[] types = Loader.INSTANCE.toolTypes.values().toArray(new ToolType[0]);
+			
 			for (ResourceLocation location : typeNames) {
 				if (location.toString().equals(tool.name)) {
 					break;
 				}
 				index++;
 			}
+			
 			ToolType type = types[index];
 			ToolPart[] parts = type.getParts();
 			index = 0;
+			
 			for (ToolPart part : parts) {
 				if (part.type != null) {
 					if (part.type.name.toString().equals(currentPart)) {
@@ -355,28 +352,34 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				}
 				index++;
 			}
+			
 			if (index + 1 >= parts.length) index = -1;
 			ToolPart part = parts[index + 1];
+			
 			if (part.type == null) {
 				index++;
 				if (index + 1 >= parts.length) index = -1;
 				part = parts[index + 1];
 			}
+			
 			ResourceLocation name = part.type.name;
 			currentPart = name.toString();
 			boolean containsComponent = false;
+			
 			for (ToolComponent component : tool.components) {
 				if (component.name.equals(name.toString())) {
 					containsComponent = true;
 					break;
 				}
 			}
+			
 			if (!containsComponent) {
 				CompoundNBT nbt = new CompoundNBT();
 				nbt.putString("name", currentPart);
 				tool.components.add(new ToolComponent(nbt));
 			}
-			button.setMessage(new StringTextComponent(name.toString()));
+			
+			button.setMessage(new TranslationTextComponent("part_type." + name.getNamespace() + "." + name.getPath().replace("/", ".")));
 		} catch (Throwable err) {
 			err.printStackTrace();
 		}
@@ -394,7 +397,9 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		if (index + 1 >= types.length) index = -1;
 		currentTool = types[index + 1].toString();
 		tool.name = currentTool;
-		button.setMessage(new StringTextComponent(tool.name));
+		
+		ResourceLocation name = new ResourceLocation(tool.name);
+		button.setMessage(new TranslationTextComponent("tool_type." + name.getNamespace() + "." + name.getPath().replace("/", ".")));
 		
 		ItemStack newStack = new ItemStack(Registry.DYNAMIC_TOOL.get());
 		CompoundNBT nbt = newStack.getOrCreateTag();

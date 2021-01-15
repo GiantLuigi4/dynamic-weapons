@@ -24,6 +24,8 @@ import net.minecraft.util.math.vector.Vector4f;
 public class ToolRenderer extends ItemStackTileEntityRenderer {
 	private static final ModelRenderer cube = new ModelRenderer(16, 16, 0, 0);
 	
+	public static final ToolRenderer render = new ToolRenderer();
+	
 	static {
 		//Generated with block bench
 		cube.setRotationPoint(0.0F, 0.0F, 0.0F);
@@ -186,5 +188,9 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 		Vector4f vector4f = new Vector4f(x, y, z, 1.0F);
 		vector4f.transform(stack.getLast().getMatrix());
 		return new Vector3f(vector4f.getX(), vector4f.getY(), vector4f.getZ());
+	}
+	
+	public static ToolRenderer getInstance() {
+		return render;
 	}
 }

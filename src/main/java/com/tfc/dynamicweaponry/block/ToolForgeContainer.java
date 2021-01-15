@@ -5,6 +5,7 @@ import com.tfc.dynamicweaponry.registry.Registry;
 import com.tfc.dynamicweaponry.tool.Tool;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -13,7 +14,7 @@ import javax.annotation.Nullable;
 public class ToolForgeContainer extends SimpleContainer {
 	public BlockPos pos;
 	public World world;
-	public Tool tool;
+	public Tool tool = new Tool(ToolForgeTileEntity.defaultTool);
 	
 	public ToolForgeContainer(int id, IInventory playerInv) {
 		super(Registry.TOOL_FORGE_CONTAINER.get(), id);
@@ -23,5 +24,12 @@ public class ToolForgeContainer extends SimpleContainer {
 		super(type, id);
 		this.pos = pos;
 		this.world = world;
+	}
+	
+	@Override
+	public CompoundNBT serialize() {
+		CompoundNBT nbt = super.serialize();
+		nbt.put("tool", tool.serialize());
+		return nbt;
 	}
 }

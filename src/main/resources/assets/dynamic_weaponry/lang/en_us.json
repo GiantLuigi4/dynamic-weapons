@@ -1,0 +1,21 @@
+{
+  "item.dynamic_weaponry.dynamic_tool": "missingno tool",
+  "tool_type.dynamic_weaponry.single_head": "Single Headed Tool",
+  "tool_type.dynamic_weaponry.dual_head": "Dual Headed Tool",
+  "part_type.dynamic_weaponry.sword_blade": "Sword Blade",
+  "part_type.dynamic_weaponry.short_stick": "Short Tool Rod",
+  "part_type.dynamic_weaponry.sword_guard": "Sword Guard Rod",
+  "part_type.dynamic_weaponry.long_stick": "Long Tool Rod",
+  "part_type.dynamic_weaponry.pickaxe_head": "Front Pickaxe Head",
+  "part_type.dynamic_weaponry.axe_head": "Front Axe Head",
+  "part_type.dynamic_weaponry.pickaxe_head_2": "Back Pickaxe Head",
+  "part_type.dynamic_weaponry.axe_head_2": "Back Axe Head",
+  "tooltip.dynamic_weaponry.weight": "Weight: %val%",
+  "tooltip.dynamic_weaponry.efficiency": "Efficiency: %val%",
+  "tooltip.dynamic_weaponry.durability": "Durability: %val%",
+  "tooltip.dynamic_weaponry.cooldown": "Cooldown: %val%",
+  "tooltip.dynamic_weaponry.attack": "Attack: %val%",
+  "problem.dynamic_weaponry.part_incompatibility": "%type1% is incompatible with %type2%.",
+  "problem.dynamic_weaponry.part_dependency": "%type1% requires %type2%, but only %type1% is present.",
+  "": ""
+}

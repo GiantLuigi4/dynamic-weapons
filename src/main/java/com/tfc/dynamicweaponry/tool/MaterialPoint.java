@@ -26,7 +26,7 @@ public class MaterialPoint extends Point {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		MaterialPoint that = (MaterialPoint) o;
-		return Objects.equals(material, that.material);
+		return Objects.equals(material, that.material) && x == that.x && y == that.y;
 	}
 	
 	@Override

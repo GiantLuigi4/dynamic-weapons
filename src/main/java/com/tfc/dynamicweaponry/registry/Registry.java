@@ -23,6 +23,6 @@ public class Registry {
 	public static final RegistryObject<Item> DYNAMIC_TOOL = ITEMS.register("dynamic_tool", DynamicTool::new);
 	
 	public static final RegistryObject<Block> TOOL_FORGE = BLOCKS.register("tool_forge", () -> new ToolForge(AbstractBlock.Properties.from(Blocks.IRON_BLOCK)));
-	public static final RegistryObject<TileEntityType<?>> TOOL_FORGE_TE = TILE_ENTITIES.register("tool_forge", () -> TileEntityType.Builder.create(ToolForgeTileEntity::new, TOOL_FORGE.get()).build(null));
+	public static final RegistryObject<TileEntityType<ToolForgeTileEntity>> TOOL_FORGE_TE = TILE_ENTITIES.register("tool_forge", () -> TileEntityType.Builder.create(ToolForgeTileEntity::new, TOOL_FORGE.get()).build(null));
 	public static final RegistryObject<ContainerType<?>> TOOL_FORGE_CONTAINER = CONTAINERS.register("tool_forge", () -> new ContainerType<>(ToolForgeContainer::new));
 }

@@ -1,14 +1,14 @@
 package com.tfc.dynamicweaponry.network;
 
+import com.tfc.assortedutils.API.networking.SimplePacket;
 import com.tfc.dynamicweaponry.data.Loader;
 import net.minecraft.network.INetHandler;
-import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.util.ArrayList;
 
-public class DataPacket implements IPacket {
+public class DataPacket extends SimplePacket {
 	public String[] materials;
 	public String[] parts;
 	public String tools;

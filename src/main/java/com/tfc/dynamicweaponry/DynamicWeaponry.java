@@ -1,47 +1,45 @@
 package com.tfc.dynamicweaponry;
 
+import com.tfc.assortedutils.API.networking.AutomatedSimpleChannel;
 import com.tfc.dynamicweaponry.block.ToolForgeContainer;
 import com.tfc.dynamicweaponry.block.ToolForgeTileEntity;
 import com.tfc.dynamicweaponry.client.Setup;
 import com.tfc.dynamicweaponry.data.Loader;
 import com.tfc.dynamicweaponry.network.DataPacket;
+import com.tfc.dynamicweaponry.network.ToolForgeDataPacket;
 import com.tfc.dynamicweaponry.network.ToolPacket;
 import com.tfc.dynamicweaponry.registry.Registry;
 import com.tfc.dynamicweaponry.registry.RegistryClient;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.fml.network.PacketDistributor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod("dynamic_weaponry")
 public class DynamicWeaponry {
 	
-	public static final SimpleChannel NETWORK_INSTANCE = NetworkRegistry.newSimpleChannel(
+	public static final AutomatedSimpleChannel NETWORK_INSTANCE = AutomatedSimpleChannel.create(
 			new ResourceLocation("dynamic_weaponry", "main"),
 			() -> "1",
 			"1"::equals,
 			"1"::equals
 	);
 	
+	private static final ArrayList<ToolForgeDataPacket> packets = new ArrayList<>();
+	
 	// Directly reference a log4j logger.
 	private static final Logger LOGGER = LogManager.getLogger();
-
-//	private static final KeyBinding key = new KeyBinding("test", GLFW.GLFW_KEY_X, "dynamic_weaponry") {
-//		@Override
-//		public void setPressed(boolean valueIn) {
-//			super.setPressed(valueIn);
-//			ToolCreationScreen screen = new ToolCreationScreen(StringTextComponent.EMPTY, Minecraft.getInstance());
-//			if (valueIn) Minecraft.getInstance().displayGuiScreen(screen);
-//		}
-//	};
 	
 	public DynamicWeaponry() {
 		Registry.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
@@ -53,25 +51,58 @@ public class DynamicWeaponry {
 		MinecraftForge.EVENT_BUS.addListener(Loader::onPlayerJoin);
 		MinecraftForge.EVENT_BUS.addListener(Loader::tick);
 		
-		NETWORK_INSTANCE.registerMessage(0, DataPacket.class, DataPacket::writePacketData, DataPacket::new, (packet, context) -> {
-			context.get().setPacketHandled(true);
-		});
-		NETWORK_INSTANCE.registerMessage(1, ToolPacket.class, ToolPacket::writePacketData, ToolPacket::new, (packet, context) -> {
+		NETWORK_INSTANCE.registerPacket(DataPacket.class, DataPacket::new);
+		NETWORK_INSTANCE.registerPacket(ToolPacket.class, ToolPacket::new, (packet, context) -> {
 			Container container = context.get().getSender().openContainer;
 			if (container instanceof ToolForgeContainer) {
 				TileEntity te = ((ToolForgeContainer) container).world.getTileEntity(((ToolForgeContainer) container).pos);
 				if (te instanceof ToolForgeTileEntity) {
 					ToolForgeTileEntity tileEntity = (ToolForgeTileEntity) te;
+					tileEntity.container.tool = packet.tool;
 					tileEntity.tool = packet.tool;
+					
+					tileEntity.container.resync();
+					
+					tileEntity.markDirty();
+					
+					packets.add(new ToolForgeDataPacket(tileEntity.tool, tileEntity.getPos(), (Chunk) tileEntity.getWorld().getChunk(tileEntity.getPos())));
+
+//					tileEntity.getWorld().notifyBlockUpdate(te.getPos(), te.getBlockState(), te.getBlockState(), 3);
+//
+//					for (PlayerEntity playerE : ((ToolForgeContainer) container).world.getPlayers()) {
+//						ServerPlayerEntity player = (ServerPlayerEntity)playerE;
+//						if (player.getPosition().distanceSq(((ToolForgeContainer) container).pos) <= 2048) {
+//							IPacket updatePacket = tileEntity.getUpdatePacket();
+//							player.connection.sendPacket(updatePacket);
+//						}
+//					}
 				}
 				context.get().setPacketHandled(true);
 			}
 		});
+		NETWORK_INSTANCE.registerPacket(ToolForgeDataPacket.class, ToolForgeDataPacket::new);
 		
 		if (FMLEnvironment.dist.isClient()) {
-//			ClientRegistry.registerKeyBinding(key);
-			MinecraftForge.EVENT_BUS.addListener(Setup::setup);
+			FMLJavaModLoadingContext.get().getModEventBus().addListener(Setup::setup);
 			RegistryClient.CONTAINERS_SCREENS.register(FMLJavaModLoadingContext.get().getModEventBus());
+		}
+		MinecraftForge.EVENT_BUS.addListener(DynamicWeaponry::tick);
+	}
+	
+	public static void sendPackets() {
+		for (ToolForgeDataPacket packet : packets) {
+			NETWORK_INSTANCE.send(
+					PacketDistributor.TRACKING_CHUNK.with(() -> packet.chunk),
+					packet
+			);
+		}
+	}
+	
+	public static void tick(TickEvent.WorldTickEvent event) {
+		if (event.world.isRemote) return;
+		if (!packets.isEmpty()) {
+			sendPackets();
+			packets.clear();
 		}
 	}
 }

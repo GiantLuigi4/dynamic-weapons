@@ -5,7 +5,9 @@ import com.tfc.dynamicweaponry.data.Material;
 import com.tfc.dynamicweaponry.registry.Registry;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,12 +25,17 @@ public class Tool {
 		if (nbt.contains("tool_type")) name = nbt.getString("tool_type");
 		else name = "dynamic_weaponry:single_head";
 		
+		ListNBT palletNBT;
+		if (nbt.contains("pallet")) palletNBT = nbt.getList("pallet", Constants.NBT.TAG_COMPOUND);
+		else palletNBT = new ListNBT();
+		ResourcePallet pallet = new ResourcePallet(palletNBT);
+		
 		if (nbt.contains("parts")) {
 			CompoundNBT parts = nbt.getCompound("parts");
 			for (String s : parts.keySet()) {
 				CompoundNBT part = parts.getCompound(s);
 				try {
-					components.add(new ToolComponent(part));
+					components.add(new ToolComponent(part, pallet));
 				} catch (Throwable ignored) {
 				}
 			}
@@ -147,17 +154,30 @@ public class Tool {
 		CompoundNBT thisNBT = new CompoundNBT();
 		thisNBT.putString("tool_type", name);
 		CompoundNBT parts = new CompoundNBT();
-		for (ToolComponent component : components) parts.put(component.name, component.serialize());
+		ResourcePallet pallet = new ResourcePallet();
+		for (ToolComponent component : components) {
+			for (MaterialPoint point : component.points) {
+				if (!pallet.contains(point.material)) {
+					pallet.add(pallet.size(), point.material);
+				}
+			}
+		}
+		for (ToolComponent component : components) {
+			parts.put(component.name, component.serialize(pallet));
+		}
 		thisNBT.put("parts", parts);
+		thisNBT.put("pallet", pallet.serialize());
 		return thisNBT;
 	}
 	
 	public Tool copy() {
+		sort();
 		CompoundNBT nbt = this.serialize();
 		ItemStack stack = new ItemStack(Registry.DYNAMIC_TOOL.get());
 		CompoundNBT nbt1 = stack.getOrCreateTag();
 		nbt1.put("tool_info", nbt);
 		Tool tool = new Tool(stack);
+		tool.sort();
 		return tool;
 	}
 	

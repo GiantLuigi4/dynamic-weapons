@@ -19,6 +19,14 @@ public class ToolComponent implements Comparable<ToolComponent> {
 	public PartType type;
 	
 	public ToolComponent(CompoundNBT nbt) {
+		deserialize(nbt, new ResourcePallet());
+	}
+	
+	public ToolComponent(CompoundNBT nbt, ResourcePallet pallet) {
+		deserialize(nbt, pallet);
+	}
+	
+	public void deserialize(CompoundNBT nbt, ResourcePallet pallet) {
 		name = nbt.getString("name");
 		type = Loader.INSTANCE.partTypes.get(new ResourceLocation(name));
 		
@@ -28,7 +36,10 @@ public class ToolComponent implements Comparable<ToolComponent> {
 			
 			for (INBT inbt : pointsList) {
 				ExtendedCompoundNBT compound = new ExtendedCompoundNBT((CompoundNBT) inbt, true);
-				ResourceLocation mat = new ResourceLocation(compound.getString("material"));
+				ResourceLocation mat;
+				if (pallet.size() > 0)
+					mat = pallet.getFromInt(compound.getInt("material"));
+				else mat = new ResourceLocation(compound.getString("material"));
 				int x = compound.getInt("x");
 				int y = compound.getInt("y");
 				points.add(new MaterialPoint(x, y, mat));
@@ -36,13 +47,13 @@ public class ToolComponent implements Comparable<ToolComponent> {
 		}
 	}
 	
-	public CompoundNBT serialize() {
+	public CompoundNBT serialize(ResourcePallet pallet) {
 		CompoundNBT thisNBT = new CompoundNBT();
 		ListNBT pointList = new ListNBT();
 		thisNBT.putString("name", name);
 		for (MaterialPoint point : points) {
 			CompoundNBT nbt = new CompoundNBT();
-			nbt.putString("material", point.material.toString());
+			nbt.putInt("material", pallet.getFromLocation(new ResourceLocation(point.material.toString())));
 			nbt.putInt("x", point.x);
 			nbt.putInt("y", point.y);
 			pointList.add(nbt);

@@ -29,7 +29,7 @@ public class DynamicTool extends Item {
 		Properties properties = new Properties().maxStackSize(1);
 		
 		if (FMLEnvironment.dist.isClient()) {
-			properties.setISTER(() -> ToolRenderer::new);
+			properties.setISTER(() -> ToolRenderer::getInstance);
 		}
 		
 		return properties;
