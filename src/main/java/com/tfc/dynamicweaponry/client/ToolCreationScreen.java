@@ -3,7 +3,6 @@ package com.tfc.dynamicweaponry.client;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.tfc.assortedutils.API.gui.screen.SimpleContainerScreen;
-import com.tfc.assortedutils.AssortedUtils;
 import com.tfc.assortedutils.utils.Color;
 import com.tfc.dynamicweaponry.DynamicWeaponry;
 import com.tfc.dynamicweaponry.block.ToolForgeContainer;
@@ -129,7 +128,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		this.minecraft.getTextureManager().bindTexture(new ResourceLocation("textures/gui/container/inventory.png"));
 		this.blit(matrixStack, i, j + 160, 0, 80, 248, (166 - 80));
 		matrixStack.pop();
-//		super.render(matrixStack, mouseX, mouseY, partialTicks);
+		super.render(matrixStack, mouseX, mouseY, partialTicks);
 		matrixStack.push();
 		matrixStack.translate(0, -40, 0);
 		
@@ -435,7 +434,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		nbt.put("tool_info", tool_info);
 		this.tool = new Tool(newStack);
 		
-		AssortedUtils.NETWORK_INSTANCE.sendToServer(new ToolPacket(tool));
+		DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new ToolPacket(tool));
 	}
 	
 	@Override
