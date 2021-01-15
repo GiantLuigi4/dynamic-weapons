@@ -13,17 +13,12 @@ import com.tfc.dynamicweaponry.registry.RegistryClient;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.network.PacketDistributor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.ArrayList;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod("dynamic_weaponry")
@@ -36,7 +31,7 @@ public class DynamicWeaponry {
 			"1"::equals
 	);
 	
-	private static final ArrayList<ToolForgeDataPacket> packets = new ArrayList<>();
+//	private static final ArrayList<ToolForgeDataPacket> packets = new ArrayList<>();
 	
 	// Directly reference a log4j logger.
 	private static final Logger LOGGER = LogManager.getLogger();
@@ -64,10 +59,10 @@ public class DynamicWeaponry {
 					tileEntity.container.resync();
 					
 					tileEntity.markDirty();
-					
-					packets.add(new ToolForgeDataPacket(tileEntity.tool, tileEntity.getPos(), (Chunk) tileEntity.getWorld().getChunk(tileEntity.getPos())));
 
-//					tileEntity.getWorld().notifyBlockUpdate(te.getPos(), te.getBlockState(), te.getBlockState(), 3);
+//					packets.add(new ToolForgeDataPacket(tileEntity.tool, tileEntity.getPos(), (Chunk) tileEntity.getWorld().getChunk(tileEntity.getPos())));
+					
+					tileEntity.getWorld().notifyBlockUpdate(te.getPos(), te.getBlockState(), te.getBlockState(), 3);
 //
 //					for (PlayerEntity playerE : ((ToolForgeContainer) container).world.getPlayers()) {
 //						ServerPlayerEntity player = (ServerPlayerEntity)playerE;
@@ -86,23 +81,23 @@ public class DynamicWeaponry {
 			FMLJavaModLoadingContext.get().getModEventBus().addListener(Setup::setup);
 			RegistryClient.CONTAINERS_SCREENS.register(FMLJavaModLoadingContext.get().getModEventBus());
 		}
-		MinecraftForge.EVENT_BUS.addListener(DynamicWeaponry::tick);
+//		MinecraftForge.EVENT_BUS.addListener(DynamicWeaponry::tick);
 	}
-	
-	public static void sendPackets() {
-		for (ToolForgeDataPacket packet : packets) {
-			NETWORK_INSTANCE.send(
-					PacketDistributor.TRACKING_CHUNK.with(() -> packet.chunk),
-					packet
-			);
-		}
-	}
-	
-	public static void tick(TickEvent.WorldTickEvent event) {
-		if (event.world.isRemote) return;
-		if (!packets.isEmpty()) {
-			sendPackets();
-			packets.clear();
-		}
-	}
+
+//	public static void sendPackets() {
+//		for (ToolForgeDataPacket packet : packets) {
+//			NETWORK_INSTANCE.send(
+//					PacketDistributor.TRACKING_CHUNK.with(() -> packet.chunk),
+//					packet
+//			);
+//		}
+//	}
+//
+//	public static void tick(TickEvent.WorldTickEvent event) {
+//		if (event.world.isRemote) return;
+//		if (!packets.isEmpty()) {
+//			sendPackets();
+//			packets.clear();
+//		}
+//	}
 }

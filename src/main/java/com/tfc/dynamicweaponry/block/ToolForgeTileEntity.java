@@ -10,6 +10,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.AxisAlignedBB;
 
 import javax.annotation.Nullable;
 
@@ -37,10 +38,6 @@ public class ToolForgeTileEntity extends TileEntity {
 		tool = new Tool(defaultTool);
 	}
 	
-	/**
-	 * Retrieves packet to send to the client whenever this Tile Entity is resynced via World.notifyBlockUpdate. For
-	 * modded TE's, this packet comes back to you clientside in {@link #onDataPacket}
-	 */
 	@Nullable
 	@Override
 	public SUpdateTileEntityPacket getUpdatePacket() {
@@ -50,34 +47,31 @@ public class ToolForgeTileEntity extends TileEntity {
 //				PacketDistributor.TRACKING_CHUNK.with(() -> packet.chunk),
 //				packet
 //		);
-		return new SUpdateTileEntityPacket(pos, 0, write(new CompoundNBT()));
+		return new SUpdateTileEntityPacket(pos, 0, serializeNBT());
 	}
 	
-	/**
-	 * Called when you receive a TileEntityData packet for the location this
-	 * TileEntity is currently in. On the client, the NetworkManager will always
-	 * be the remote server. On the server, it will be whomever is responsible for
-	 * sending the packet.
-	 *
-	 * @param net The NetworkManager the packet originated from
-	 * @param pkt The data packet
-	 */
 	@Override
 	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
 		read(this.getBlockState(), pkt.getNbtCompound());
 	}
 	
-	/**
-	 * Called when the chunk's TE update tag, gotten from {@link #getUpdateTag()}, is received on the client.
-	 * <p>
-	 * Used to handle this tag in a special way. By default this simply calls {@link #readFromNBT(NBTTagCompound)}.
-	 *
-	 * @param state
-	 * @param tag   The {@link NBTTagCompound} sent from {@link #getUpdateTag()}
-	 */
+	@Override
+	public AxisAlignedBB getRenderBoundingBox() {
+		return getBlockState().getRenderShape(getWorld(), getPos()).getBoundingBox().offset(this.getPos());
+	}
+	
 	@Override
 	public void handleUpdateTag(BlockState state, CompoundNBT tag) {
 		read(state, tag);
+	}
+	
+	/**
+	 * Get an NBT compound to sync to the client with SPacketChunkData, used for initial loading of the chunk or when
+	 * many blocks change at once. This compound comes back to you clientside in {@link handleUpdateTag}
+	 */
+	@Override
+	public CompoundNBT getUpdateTag() {
+		return serializeNBT();
 	}
 	
 	@Override
