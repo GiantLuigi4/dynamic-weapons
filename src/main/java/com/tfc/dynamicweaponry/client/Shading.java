@@ -27,6 +27,7 @@ public class Shading {
 		if (true) return new Color(Loader.INSTANCE.getMaterial(point.material).color);
 		
 		ArrayList<ToolComponent> components = new ArrayList<>();
+		
 		for (ToolComponent component : tool.components) {
 			if (
 					from.type != null &&
@@ -35,9 +36,12 @@ public class Shading {
 			)
 				components.add(component);
 		}
+		
 		float dist = 0;
+		
 		for (int i = 0; i < 16; i++) {
 			boolean finishedTrace = false;
+			
 			for (ToolComponent component : components) {
 				MaterialPoint lerped = point.lerp(
 						i / 15f,
@@ -47,6 +51,7 @@ public class Shading {
 								null
 						)
 				);
+				
 				MaterialPoint lerped1 = point.lerp(
 						i / 15f,
 						new MaterialPoint(
@@ -55,6 +60,7 @@ public class Shading {
 								null
 						)
 				);
+				
 				MaterialPoint lerped2 = point.lerp(
 						i / 15f,
 						new MaterialPoint(
@@ -63,6 +69,7 @@ public class Shading {
 								null
 						)
 				);
+				
 				MaterialPoint lerped3 = point.lerp(
 						i / 15f,
 						new MaterialPoint(
@@ -71,7 +78,9 @@ public class Shading {
 								null
 						)
 				);
+				
 				dist = i;
+				
 				if (
 						component.getPoint(lerped.x, lerped.y) == null ||
 								lerped.x < 0 ||
@@ -101,8 +110,10 @@ public class Shading {
 					break;
 				}
 			}
+			
 			if (finishedTrace) break;
 		}
+		
 		dist /= 15f;
 		dist *= shades.length - 1;
 		Material material = Loader.INSTANCE.getMaterial(point.material);

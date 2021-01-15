@@ -32,6 +32,7 @@ public class ResourcePallet {
 				return index;
 			}
 		}
+		
 		return -1;
 	}
 	
@@ -53,6 +54,7 @@ public class ResourcePallet {
 	
 	public ListNBT serialize() {
 		ListNBT thisNBT = new ListNBT();
+		
 		for (int i = 0; i < size(); i++) {
 			ResourceLocation location = locationHashMap.get(i);
 			CompoundNBT nbt = new CompoundNBT();

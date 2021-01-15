@@ -18,10 +18,8 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nullable;
-import java.util.Random;
 
 public class ToolForge extends Block implements ITileEntityProvider {
 	public ToolForge(Properties properties) {
@@ -106,36 +104,36 @@ public class ToolForge extends Block implements ITileEntityProvider {
 		
 		return ActionResultType.SUCCESS;
 	}
-	
-	@Override
-	public void tick(BlockState state, ServerWorld worldIn, BlockPos pos, Random rand) {
-		super.tick(state, worldIn, pos, rand);
-		if (worldIn.isRemote) return;
-		
-		TileEntity te = worldIn.getTileEntity(pos);
-		
-		if (te instanceof ToolForgeTileEntity) {
-			ToolForgeTileEntity tileEntity = (ToolForgeTileEntity) te;
-			tileEntity.container.world = worldIn;
-			tileEntity.container.pos = pos;
-			
-			if (!tileEntity.tool.equals(tileEntity.container.tool)) {
-				tileEntity.container.resync();
-//				tileEntity.tool = tileEntity.container.tool.copy();
-//				tileEntity.markDirty();
-//				tileEntity.getWorld().notifyBlockUpdate(te.getPos(), te.getBlockState(), te.getBlockState(), 3);
 
-//				for (ServerPlayerEntity player : worldIn.getPlayers()) {
-//					if (player.getPosition().distanceSq(pos) <= 2048) {
-//						IPacket updatePacket = tileEntity.getUpdatePacket();
-//						player.connection.sendPacket(updatePacket);
-//					}
-//				}
-			}
-		}
-		
-		worldIn.getPendingBlockTicks().scheduleTick(pos, state.getBlock(), 10);
-	}
+//	@Override
+//	public void tick(BlockState state, ServerWorld worldIn, BlockPos pos, Random rand) {
+//		super.tick(state, worldIn, pos, rand);
+//		if (worldIn.isRemote) return;
+//
+//		TileEntity te = worldIn.getTileEntity(pos);
+//
+//		if (te instanceof ToolForgeTileEntity) {
+//			ToolForgeTileEntity tileEntity = (ToolForgeTileEntity) te;
+//			tileEntity.container.world = worldIn;
+//			tileEntity.container.pos = pos;
+//
+//			if (!tileEntity.tool.equals(tileEntity.container.tool)) {
+//				tileEntity.container.resync();
+////				tileEntity.tool = tileEntity.container.tool.copy();
+////				tileEntity.markDirty();
+////				tileEntity.getWorld().notifyBlockUpdate(te.getPos(), te.getBlockState(), te.getBlockState(), 3);
+//
+////				for (ServerPlayerEntity player : worldIn.getPlayers()) {
+////					if (player.getPosition().distanceSq(pos) <= 2048) {
+////						IPacket updatePacket = tileEntity.getUpdatePacket();
+////						player.connection.sendPacket(updatePacket);
+////					}
+////				}
+//			}
+//		}
+//
+//		worldIn.getPendingBlockTicks().scheduleTick(pos, state.getBlock(), 10);
+//	}
 	
 	@Override
 	public void onBlockAdded(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving) {

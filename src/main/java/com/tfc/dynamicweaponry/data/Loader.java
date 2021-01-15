@@ -55,6 +55,7 @@ public class Loader implements IResourceManagerReloadListener {
 					resyncData((ServerPlayerEntity) player);
 			}
 		else return;
+		
 		needsGlobalRefresh = false;
 	}
 	
@@ -113,12 +114,15 @@ public class Loader implements IResourceManagerReloadListener {
 	
 	private static void parseToolTypes(ResourceLocation resourceLocation, String data) {
 		JsonObject object = gson.fromJson(data, JsonObject.class);
+		
 		for (Map.Entry<String, JsonElement> stringJsonElementEntry : object.entrySet()) {
 			JsonObject object1 = stringJsonElementEntry.getValue().getAsJsonObject();
 			int count = object1.getAsJsonPrimitive("part count").getAsInt();
 			ToolType toolType = new ToolType();
+			
 			for (int i = 0; i < count; i++) {
 				JsonArray array = object1.getAsJsonArray("part" + (i + 1));
+				
 				for (JsonElement element : array) {
 					JsonObject object2 = element.getAsJsonObject();
 					String name = object2.getAsJsonPrimitive("name").getAsString();
@@ -128,6 +132,7 @@ public class Loader implements IResourceManagerReloadListener {
 					if (object2.has("dependencies ")) {
 						JsonArray dependencies = object2.getAsJsonArray("dependencies");
 						ArrayList<ToolPart> deps = new ArrayList<>();
+						
 						for (JsonElement dependency : dependencies) {
 							JsonObject dep = dependency.getAsJsonObject();
 							int partNum = dep.getAsJsonPrimitive("part").getAsInt();
@@ -135,6 +140,7 @@ public class Loader implements IResourceManagerReloadListener {
 							ResourceLocation partLocation = new ResourceLocation(partName);
 							deps.add(new ToolPart(INSTANCE.partTypes.get(partLocation), partNum, null));
 						}
+						
 						part.dependencies = deps.toArray(new ToolPart[0]);
 					} else {
 						part.dependencies = new ToolPart[0];
@@ -143,6 +149,7 @@ public class Loader implements IResourceManagerReloadListener {
 					if (object2.has("incompatibilities")) {
 						JsonArray incompatibilities = object2.getAsJsonArray("incompatibilities");
 						ArrayList<ToolPart> incompats = new ArrayList<>();
+						
 						for (JsonElement incompat : incompatibilities) {
 							JsonObject incompatibility = incompat.getAsJsonObject();
 							int partNum = incompatibility.getAsJsonPrimitive("part").getAsInt();
@@ -150,6 +157,7 @@ public class Loader implements IResourceManagerReloadListener {
 							ResourceLocation partLocation = new ResourceLocation(partName);
 							incompats.add(new ToolPart(INSTANCE.partTypes.get(partLocation), partNum, null));
 						}
+						
 						part.incompatibilities = incompats.toArray(new ToolPart[0]);
 					} else {
 						part.incompatibilities = new ToolPart[0];
@@ -158,9 +166,11 @@ public class Loader implements IResourceManagerReloadListener {
 					toolType.addPart(part);
 				}
 			}
+			
 			ResourceLocation location = new ResourceLocation(stringJsonElementEntry.getKey());
 			INSTANCE.toolTypes.put(location, toolType);
 		}
+		
 		INSTANCE.toolTypesRaw.put(resourceLocation, data);
 	}
 	
@@ -199,12 +209,14 @@ public class Loader implements IResourceManagerReloadListener {
 			String dataS = strings[1];
 			parseMaterial(new ResourceLocation(regName), dataS);
 		}
+		
 		for (String data : packet.parts) {
 			String[] strings = data.replace("\r", "").split("\n", 2);
 			String regName = strings[0];
 			String dataS = strings[1];
 			parsePartType(new ResourceLocation(regName), dataS);
 		}
+		
 		{
 			parseToolTypes(new ResourceLocation("server:tools"), packet.tools);
 		}
@@ -215,6 +227,7 @@ public class Loader implements IResourceManagerReloadListener {
 			return materials.get(location);
 		
 		AtomicReference<Material> materialAtomicReference = new AtomicReference<>();
+		
 		try {
 			materials.forEach((name, mat) -> {
 				if (mat.item.equals(location)) {
@@ -223,6 +236,7 @@ public class Loader implements IResourceManagerReloadListener {
 			});
 		} catch (Throwable ignored) {
 		}
+		
 		return materialAtomicReference.get();
 	}
 	
@@ -238,8 +252,10 @@ public class Loader implements IResourceManagerReloadListener {
 		try {
 			{
 				Collection<ResourceLocation> resourceList = resourceManager.getAllResourceLocations("weaponry/materials", (file) -> file.endsWith(".json"));
+				
 				for (ResourceLocation resourceLocation : resourceList) {
 					IResource resource = resourceManager.getResource(resourceLocation);
+					
 					if (resourceLocation.toString().endsWith(".json")) {
 						try {
 							InputStream stream = resource.getInputStream();
@@ -260,8 +276,10 @@ public class Loader implements IResourceManagerReloadListener {
 		try {
 			{
 				Collection<ResourceLocation> resourceList = resourceManager.getAllResourceLocations("weaponry/part_types", (file) -> file.endsWith(".properties"));
+				
 				for (ResourceLocation resourceLocation : resourceList) {
 					IResource resource = resourceManager.getResource(resourceLocation);
+					
 					if (resourceLocation.toString().endsWith(".properties")) {
 						try {
 							ResourceLocation location = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().substring("weaponry/part_types/".length()).replace(".properties", ""));
@@ -282,8 +300,10 @@ public class Loader implements IResourceManagerReloadListener {
 		try {
 			{
 				Collection<ResourceLocation> resourceList = resourceManager.getAllResourceLocations("weaponry/tool_types", (file) -> file.endsWith(".json"));
+				
 				for (ResourceLocation resourceLocation : resourceList) {
 					IResource resource = resourceManager.getResource(resourceLocation);
+					
 					if (resourceLocation.toString().endsWith(".json")) {
 						try {
 							InputStream stream = resource.getInputStream();

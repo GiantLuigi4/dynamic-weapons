@@ -3,11 +3,13 @@ package com.tfc.dynamicweaponry.client;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.tfc.assortedutils.API.gui.screen.SimpleContainerScreen;
+import com.tfc.assortedutils.AssortedUtils;
 import com.tfc.assortedutils.utils.Color;
 import com.tfc.dynamicweaponry.DynamicWeaponry;
 import com.tfc.dynamicweaponry.block.ToolForgeContainer;
 import com.tfc.dynamicweaponry.block.ToolForgeTileEntity;
 import com.tfc.dynamicweaponry.data.*;
+import com.tfc.dynamicweaponry.network.PaintPixelPacket;
 import com.tfc.dynamicweaponry.network.ToolPacket;
 import com.tfc.dynamicweaponry.registry.Registry;
 import com.tfc.dynamicweaponry.tool.DynamicTool;
@@ -27,6 +29,8 @@ import net.minecraft.util.text.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
+//import com.tfc.dynamicweaponry.network.ToolPacket;
 
 public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer> {
 	public static final ItemStack defaultTool = ToolForgeTileEntity.defaultTool;
@@ -68,8 +72,6 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 	
 	@Override
 	public void deseralize(CompoundNBT nbt) {
-		slots.clear();
-		
 		super.deseralize(nbt);
 		
 		if (minecraft != null && minecraft.player != null) {
@@ -80,6 +82,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				else slot.color = new Color(255, 255, 255);
 				slots.add(slot);
 			}
+			
 			for (int i = 9; i < 36; i++) {
 				ItemSlot slot = new ItemSlot(minecraft.player.inventory, i, (i % 9) * 18 + 8, 106 + (i / 9) * 18);
 				Material material = Loader.INSTANCE.getMaterial(slot.get().getItem().getRegistryName());
@@ -118,6 +121,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				i + (248 - 73), j,
 				79, 166
 		);
+
 //		this.blit(matrixStack, i, j, 0, 0, (248 - 90), 166);
 //		this.blit(matrixStack, i + 90, j, 79, 0, (248 - 79), 166);
 		this.minecraft.getTextureManager().bindTexture(new ResourceLocation("textures/gui/container/inventory.png"));
@@ -156,12 +160,14 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 							this::cycleTool
 					)
 			);
+			
 			Button button = new Button(
 					this.width / 2 + 63, j - 10,
 					60, 20,
 					new StringTextComponent(currentPart),
 					this::cyclePart
 			);
+			
 			cyclePart(button);
 			this.buttons.add(button);
 			this.buttons.add(output);
@@ -171,8 +177,10 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		int minY = 0;
 		int maxX = -1;
 		int maxY = -1;
+		
 		if (!currentPart.equals("")) {
 			PartType type = Loader.INSTANCE.partTypes.get(new ResourceLocation(currentPart));
+			
 			if (type != null) {
 				minX = type.min.x;
 				minY = type.min.y;
@@ -191,6 +199,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		
 		for (ToolComponent component : tool.components) {
 			boolean selected = component.name.equals(currentPart);
+			
 			if (selected) {
 				selectedComponent = component;
 				break;
@@ -237,6 +246,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 								inBounds
 				) {
 					selectedComponent.setPoint(new Point(x, y), selectedSlot.get().getItem().getRegistryName());
+					DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new PaintPixelPacket(x, y, selectedSlot.get().getItem().getRegistryName().toString(), currentPart));
 				} else if (
 						hovered &&
 								selectedComponent != null &&
@@ -245,6 +255,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 								inBounds
 				) {
 					selectedComponent.setPoint(new Point(x, y), null);
+					DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new PaintPixelPacket(x, y, null, currentPart));
 				}
 				
 				RenderSystem.color3f(
@@ -256,13 +267,16 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				matrixStack.pop();
 				alternator = !alternator;
 			}
+			
 			alternator = !alternator;
 		}
 		
 		for (ToolComponent component : tool.components) {
 			boolean selected = component.name.equals(currentPart);
+			
 			for (MaterialPoint point : component.points) {
 				Material material = Loader.INSTANCE.getMaterial(point.material);
+				
 				if (material != null) {
 					Color color = Shading.shade(point, tool, component);
 					matrixStack.push();
@@ -270,6 +284,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 					matrixStack.translate(point.x, ((gridSize - 1) - point.y), 0);
 					RenderSystem.disableTexture();
 					float alpha = 1;
+					
 					if (!currentPart.equals(component.name))
 						alpha = 0.75f;
 					
@@ -281,6 +296,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 									(15 - y) >= minY && (15 - y) <= maxY;
 					
 					boolean isSelected = false;
+					
 					if (
 							inBounds &&
 									mouseX >= i + 18 + x * 8 &&
@@ -325,7 +341,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		output.setMaxStringLength(text.length());
 		
 		if (!output.getText().equals(text)) {
-			DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new ToolPacket(tool));
+//			DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new ToolPacket(tool));
 			output.setText(text);
 		}
 	}
@@ -340,6 +356,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				if (location.toString().equals(tool.name)) {
 					break;
 				}
+				
 				index++;
 			}
 			
@@ -353,6 +370,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 						break;
 					}
 				}
+				
 				index++;
 			}
 			
@@ -391,12 +409,15 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 	public void cycleTool(Button button) {
 		int index = 0;
 		ResourceLocation[] types = Loader.INSTANCE.toolTypes.keySet().toArray(new ResourceLocation[0]);
+		
 		for (ResourceLocation location : types) {
 			if (location.toString().equals(tool.name)) {
 				break;
 			}
+			
 			index++;
 		}
+		
 		if (index + 1 >= types.length) index = -1;
 		currentTool = types[index + 1].toString();
 		tool.name = currentTool;
@@ -411,6 +432,8 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		tool_info.putString("tool_type", currentTool);
 		nbt.put("tool_info", tool_info);
 		this.tool = new Tool(newStack);
+		
+		AssortedUtils.NETWORK_INSTANCE.sendToServer(new ToolPacket(tool));
 	}
 	
 	@Override
@@ -426,16 +449,20 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		if (button == 0) {
 			int i = (this.width - 248) / 2;
 			int j = (this.height - 166) / 2;
+			
 			for (ItemSlot slot : slots) {
 				boolean clicked = slot.click((int) mouseX, (int) mouseY, i, j, this);
+				
 				if (clicked) {
 					Material material = Loader.INSTANCE.getMaterial(slot.get().getItem().getRegistryName());
+					
 					if (material != null) {
 						for (ItemSlot slot1 : slots) {
 							material = Loader.INSTANCE.getMaterial(slot1.get().getItem().getRegistryName());
 							if (material != null) slot1.color = new Color(material.color);
 							else slot1.color = new Color(255, 255, 255);
 						}
+						
 						selectedSlot = slot;
 						slot.color = new Color(128, 255, 128);
 					} else {
@@ -443,6 +470,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 							tool = new Tool(slot.get());
 						}
 					}
+					
 					return true;
 				}
 			}
@@ -512,6 +540,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 	public List<ITextComponent> getTooltipFromItem(ItemStack itemStack) {
 		ArrayList<ITextComponent> list = new ArrayList(super.getTooltipFromItem(itemStack));
 		Material material = Loader.INSTANCE.getMaterial(itemStack.getItem().getRegistryName());
+		
 		if (material != null) {
 			list.add(new StringTextComponent(
 					"Weight: ").mergeStyle(TextFormatting.GREEN).append(new StringTextComponent(
@@ -534,6 +563,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 					String.valueOf(material.color)).mergeStyle(Style.EMPTY.setColor(net.minecraft.util.text.Color.fromInt(material.color))))
 			);
 		}
+		
 		return list;
 	}
 }

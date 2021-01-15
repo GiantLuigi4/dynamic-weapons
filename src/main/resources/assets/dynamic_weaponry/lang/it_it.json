@@ -16,5 +16,6 @@
   "tooltip.dynamic_weaponry.cooldown": "Ricarica: %val%",
   "tooltip.dynamic_weaponry.attack": "Attacco: %val%",
   "problem.dynamic_weaponry.part_incompatibility": "%type1% non è compatibile con %type2%.",
-  "problem.dynamic_weaponry.part_dependency": "%type1% richiede %type2%, ma solo %type1% è presente."
+  "problem.dynamic_weaponry.part_dependency": "%type1% richiede %type2%, ma solo %type1% è presente.",
+  "": ""
 }

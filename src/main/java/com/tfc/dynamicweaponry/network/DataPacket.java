@@ -28,14 +28,16 @@ public class DataPacket extends SimplePacket {
 	public void readPacketData(PacketBuffer buf) {
 		materials = readArray(buf);
 		parts = readArray(buf);
-		tools = buf.readString();
+		tools = buf.readString(32767);
 	}
 	
 	private String[] readArray(PacketBuffer buf) {
 		int len = buf.readInt();
 		ArrayList<String> array = new ArrayList<>();
+		
 		for (int i = 0; i < len; i++)
 			array.add(buf.readString());
+		
 		return array.toArray(new String[0]);
 	}
 	

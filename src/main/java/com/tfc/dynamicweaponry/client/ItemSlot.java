@@ -46,6 +46,7 @@ public class ItemSlot {
 		Minecraft.getInstance().getItemRenderer().renderItemIntoGUI(
 				stack, guiLeft + x, guiTop + y
 		);
+		
 		Minecraft.getInstance().getItemRenderer().renderItemOverlayIntoGUI(Minecraft.getInstance().fontRenderer, stack,
 				guiLeft + x, guiTop + y, null
 		);

@@ -16,11 +16,13 @@ public class Properties {
 	
 	public Properties(String toParse) {
 		String[] properties = toParse.split("\n");
+		
 		for (String s : properties) {
 			if (s.contains(":")) {
 				String[] split = s.split(":", 2);
 				this.properties.put(split[0].trim(), split[1].trim());
 			}
+			
 			if (s.contains("=")) {
 				String[] split = s.split("=", 2);
 				this.properties.put(split[0].trim(), split[1].trim());
@@ -31,12 +33,14 @@ public class Properties {
 	public static Properties parse(Object object) {
 		Properties properties = new Properties("");
 		Field[] fields = object.getClass().getFields();
+		
 		for (Field f : fields) {
 			try {
 				properties.addValue(f.getName(), f.get(object).toString());
 			} catch (Throwable ignored) {
 			}
 		}
+		
 		return properties;
 	}
 	
@@ -44,6 +48,7 @@ public class Properties {
 		try {
 			Properties properties = new Properties(new File(file));
 			Field[] fields = object.getClass().getFields();
+			
 			for (Field f : fields) {
 				try {
 					properties.addValue(f.getName(), f.get(object).toString());
@@ -58,6 +63,7 @@ public class Properties {
 				} catch (Throwable ignored) {
 				}
 			}
+			
 			return properties;
 		} catch (Throwable ignored) {
 			return parse(object);

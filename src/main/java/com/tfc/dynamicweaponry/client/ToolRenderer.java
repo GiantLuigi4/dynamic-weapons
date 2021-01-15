@@ -43,20 +43,24 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 		matrixStack.push();
 		matrixStack.translate(0, 0, 0.45);
 		matrixStack.scale(1f / 4, 1f / 4, 1f / 4);
+		
 		if (p_239207_2_.equals(ItemCameraTransforms.TransformType.GUI)) {
 			matrixStack.scale(0.86f, 0.86f, 1);
 			matrixStack.translate(0.35f, 0.35f, 0);
 			combinedLight = LightTexture.packLight(15, 0);
 		}
+		
 		Tool tool = new Tool(stack);
 		tool.sort();
 		boolean hasRenderedAnything = false;
 		
 		IVertexBuilder builder = buffer.getBuffer(RenderType.getEntitySolid(new ResourceLocation("dynamic_weaponry:textures/item/white_square.png")));
+		
 		for (ToolComponent component : tool.components) {
 			try {
 				for (MaterialPoint point : component.points) {
 					Material material = Loader.INSTANCE.getMaterial(point.material);
+					
 					if (material != null) {
 						Color color = Shading.shade(point, tool, component);
 						matrixStack.push();
@@ -91,6 +95,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 			} catch (Throwable ignored) {
 			}
 		}
+		
 		if (!hasRenderedAnything) {
 			for (int x = 0; x < 16; x++) {
 				for (int y = 0; y < 16; y++) {
@@ -108,6 +113,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 				}
 			}
 		}
+		
 		matrixStack.pop();
 	}
 	
@@ -145,6 +151,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 					(normalU.getZ() * normalV.getX()) - (normalU.getX() * normalV.getZ()),
 					(normalU.getX() * normalV.getY()) - (normalU.getY() * normalV.getX())
 			);
+			
 			normal.normalize();
 			normal.mul(0.5f);
 			

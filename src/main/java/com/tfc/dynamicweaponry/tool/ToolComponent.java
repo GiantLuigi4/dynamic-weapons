@@ -37,9 +37,11 @@ public class ToolComponent implements Comparable<ToolComponent> {
 			for (INBT inbt : pointsList) {
 				ExtendedCompoundNBT compound = new ExtendedCompoundNBT((CompoundNBT) inbt, true);
 				ResourceLocation mat;
+				
 				if (pallet.size() > 0)
 					mat = pallet.getFromInt(compound.getInt("material"));
 				else mat = new ResourceLocation(compound.getString("material"));
+				
 				int x = compound.getInt("x");
 				int y = compound.getInt("y");
 				points.add(new MaterialPoint(x, y, mat));
@@ -51,6 +53,7 @@ public class ToolComponent implements Comparable<ToolComponent> {
 		CompoundNBT thisNBT = new CompoundNBT();
 		ListNBT pointList = new ListNBT();
 		thisNBT.putString("name", name);
+		
 		for (MaterialPoint point : points) {
 			CompoundNBT nbt = new CompoundNBT();
 			nbt.putInt("material", pallet.getFromLocation(new ResourceLocation(point.material.toString())));
@@ -58,6 +61,7 @@ public class ToolComponent implements Comparable<ToolComponent> {
 			nbt.putInt("y", point.y);
 			pointList.add(nbt);
 		}
+		
 		thisNBT.put("points", pointList);
 		return thisNBT;
 	}
@@ -68,17 +72,20 @@ public class ToolComponent implements Comparable<ToolComponent> {
 			points.add(new MaterialPoint(pos.x, pos.y, material));
 		} else {
 			MaterialPoint toRemove = null;
+			
 			for (MaterialPoint point : points)
 				if (point.x == pos.x && point.y == pos.y) {
 					toRemove = point;
 					break;
 				}
+			
 			while (toRemove != null) {
 				for (MaterialPoint point : points)
 					if (point.x == pos.x && point.y == pos.y) {
 						toRemove = point;
 						break;
 					}
+				
 				if (toRemove != null) points.remove(toRemove);
 				toRemove = null;
 			}
@@ -91,6 +98,7 @@ public class ToolComponent implements Comparable<ToolComponent> {
 				return point;
 			}
 		}
+		
 		return null;
 	}
 	

@@ -6,6 +6,7 @@ import com.tfc.dynamicweaponry.registry.Registry;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.util.Constants;
 
@@ -193,5 +194,18 @@ public class Tool {
 	@Override
 	public int hashCode() {
 		return Objects.hash(components, name);
+	}
+	
+	public ToolComponent getComponent(ResourceLocation location) {
+		for (ToolComponent component : components) {
+			if (component.name.equals(location.toString()))
+				return component;
+		}
+		
+		CompoundNBT nbt = new CompoundNBT();
+		nbt.putString("name", location.toString());
+		ToolComponent component = new ToolComponent(nbt);
+		components.add(component);
+		return component;
 	}
 }
