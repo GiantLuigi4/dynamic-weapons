@@ -1,0 +1,20 @@
+{
+  "item.dynamic_weaponry.dynamic_tool": "attrezzo missigno",
+  "tool_type.dynamic_weaponry.single_head": "Attrezzo a testa singola",
+  "tool_type.dynamic_weaponry.dual_head": "Attrezzo a testa doppia",
+  "part_type.dynamic_weaponry.sword_blade": "Lama di spada",
+  "part_type.dynamic_weaponry.short_stick": "Bastone per attrezzo corto",
+  "part_type.dynamic_weaponry.sword_guard": "Bastone per spada da guardia",
+  "part_type.dynamic_weaponry.long_stick": "Bastone per attrezzo lungo",
+  "part_type.dynamic_weaponry.pickaxe_head": "Parte frontale di piccone",
+  "part_type.dynamic_weaponry.axe_head": "Parte frontale d'ascia",
+  "part_type.dynamic_weaponry.pickaxe_head_2": "Parte finale di piccone",
+  "part_type.dynamic_weaponry.axe_head_2": "Parte finale d'ascia",
+  "tooltip.dynamic_weaponry.weight": "Peso: %val%",
+  "tooltip.dynamic_weaponry.efficiency": "Efficienza: %val%",
+  "tooltip.dynamic_weaponry.durability": "Durabilità: %val%",
+  "tooltip.dynamic_weaponry.cooldown": "Ricarica: %val%",
+  "tooltip.dynamic_weaponry.attack": "Attacco: %val%",
+  "problem.dynamic_weaponry.part_incompatibility": "%type1% non è compatibile con %type2%.",
+  "problem.dynamic_weaponry.part_dependency": "%type1% richiede %type2%, ma solo %type1% è presente."
+}
