@@ -72,6 +72,8 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 	
 	@Override
 	public void deseralize(CompoundNBT nbt) {
+		this.slots.clear();
+		
 		super.deseralize(nbt);
 		
 		if (minecraft != null && minecraft.player != null) {
@@ -127,7 +129,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		this.minecraft.getTextureManager().bindTexture(new ResourceLocation("textures/gui/container/inventory.png"));
 		this.blit(matrixStack, i, j + 160, 0, 80, 248, (166 - 80));
 		matrixStack.pop();
-		super.render(matrixStack, mouseX, mouseY, partialTicks);
+//		super.render(matrixStack, mouseX, mouseY, partialTicks);
 		matrixStack.push();
 		matrixStack.translate(0, -40, 0);
 		
