@@ -1,8 +1,8 @@
 package com.tfc.dynamicweaponry.block;
 
 import com.mojang.brigadier.StringReader;
+import com.tfc.dynamicweaponry.item.tool.Tool;
 import com.tfc.dynamicweaponry.registry.Registry;
-import com.tfc.dynamicweaponry.tool.Tool;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.arguments.ItemParser;
 import net.minecraft.item.ItemStack;

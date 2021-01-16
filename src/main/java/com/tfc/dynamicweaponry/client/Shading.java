@@ -3,9 +3,9 @@ package com.tfc.dynamicweaponry.client;
 import com.tfc.assortedutils.utils.Color;
 import com.tfc.dynamicweaponry.data.Loader;
 import com.tfc.dynamicweaponry.data.Material;
-import com.tfc.dynamicweaponry.tool.MaterialPoint;
-import com.tfc.dynamicweaponry.tool.Tool;
-import com.tfc.dynamicweaponry.tool.ToolComponent;
+import com.tfc.dynamicweaponry.item.tool.MaterialPoint;
+import com.tfc.dynamicweaponry.item.tool.Tool;
+import com.tfc.dynamicweaponry.item.tool.ToolComponent;
 
 import java.util.ArrayList;
 

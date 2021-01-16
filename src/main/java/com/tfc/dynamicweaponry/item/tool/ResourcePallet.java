@@ -1,4 +1,4 @@
-package com.tfc.dynamicweaponry.tool;
+package com.tfc.dynamicweaponry.item.tool;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;

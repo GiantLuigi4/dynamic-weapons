@@ -1,4 +1,4 @@
-package com.tfc.dynamicweaponry.tool;
+package com.tfc.dynamicweaponry.item.tool;
 
 import com.tfc.dynamicweaponry.data.Loader;
 import com.tfc.dynamicweaponry.data.Material;
@@ -50,10 +50,14 @@ public class Tool {
 		
 		sort();
 		
+		int divisor = 0;
+		
 		for (int i = this.components.size() - 1; i >= 0; i--) {
 			ToolComponent component = components.get(i);
 			
 			if (component.points.isEmpty()) continue;
+			
+			divisor++;
 			
 			int count = 0;
 			HashMap<Material, Integer> counts = new HashMap<>();
@@ -70,10 +74,12 @@ public class Tool {
 				Integer matAmt = counts.get(mat);
 				float matPercent = ((float) matAmt) / count;
 				if (mat != null) amt += matPercent * mat.attack;
-				amt /= 1.3f;
+//				amt /= 1.3f;
 			}
 		}
-
+		
+		if (divisor != 0)
+			amt /= (divisor);
 
 //		amt -= Math.max(0,20-count);
 		
@@ -97,9 +103,13 @@ public class Tool {
 		
 		sort();
 		
+		int divisor = 0;
+		
 		for (ToolComponent component : this.components) {
 			if (component.points.isEmpty())
 				continue;
+			
+			divisor++;
 			
 			int count = 0;
 			HashMap<Material, Integer> counts = new HashMap<>();
@@ -116,9 +126,12 @@ public class Tool {
 				Integer matAmt = counts.get(mat);
 				float matPercent = ((float) matAmt) / count;
 				if (mat != null) amt += matPercent * mat.efficiency;
-				amt /= 1.3;
+//				amt /= 1.3;
 			}
 		}
+		
+		if (divisor != 0)
+			amt /= (divisor);
 		
 		return amt;
 	}

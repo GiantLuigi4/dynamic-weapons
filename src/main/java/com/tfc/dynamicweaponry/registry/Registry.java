@@ -3,7 +3,8 @@ package com.tfc.dynamicweaponry.registry;
 import com.tfc.dynamicweaponry.block.ToolForge;
 import com.tfc.dynamicweaponry.block.ToolForgeContainer;
 import com.tfc.dynamicweaponry.block.ToolForgeTileEntity;
-import com.tfc.dynamicweaponry.tool.DynamicTool;
+import com.tfc.dynamicweaponry.item.forge.ToolForgeItem;
+import com.tfc.dynamicweaponry.item.tool.DynamicTool;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -23,6 +24,7 @@ public class Registry {
 	public static final RegistryObject<Item> DYNAMIC_TOOL = ITEMS.register("dynamic_tool", DynamicTool::new);
 	
 	public static final RegistryObject<Block> TOOL_FORGE = BLOCKS.register("tool_forge", () -> new ToolForge(AbstractBlock.Properties.from(Blocks.IRON_BLOCK)));
+	public static final RegistryObject<Item> TOOL_FORGE_ITEM = ITEMS.register("tool_forge", ToolForgeItem::new);
 	public static final RegistryObject<TileEntityType<ToolForgeTileEntity>> TOOL_FORGE_TE = TILE_ENTITIES.register("tool_forge", () -> TileEntityType.Builder.create(ToolForgeTileEntity::new, TOOL_FORGE.get()).build(null));
 	public static final RegistryObject<ContainerType<?>> TOOL_FORGE_CONTAINER = CONTAINERS.register("tool_forge", () -> new ContainerType<>(ToolForgeContainer::new));
 }

@@ -12,6 +12,7 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
@@ -104,8 +105,23 @@ public class ToolForge extends Block implements ITileEntityProvider {
 		
 		return ActionResultType.SUCCESS;
 	}
-
-//	@Override
+	
+	/**
+	 * Called when A user uses the creative pick block button on this block
+	 *
+	 * @param state
+	 * @param target The full target the player is looking at
+	 * @param world
+	 * @param pos
+	 * @param player
+	 * @return A ItemStack to add to the player's inventory, empty itemstack if nothing should be added.
+	 */
+	@Override
+	public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
+		return new ItemStack(Registry.TOOL_FORGE_ITEM.get());
+	}
+	
+	//	@Override
 //	public void tick(BlockState state, ServerWorld worldIn, BlockPos pos, Random rand) {
 //		super.tick(state, worldIn, pos, rand);
 //		if (worldIn.isRemote) return;

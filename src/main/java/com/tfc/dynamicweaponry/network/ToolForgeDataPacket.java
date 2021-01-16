@@ -3,7 +3,7 @@
 //import com.tfc.assortedutils.API.networking.SimplePacket;
 //import com.tfc.dynamicweaponry.client.ToolForgeDataPacketHandler;
 //import com.tfc.dynamicweaponry.registry.Registry;
-//import com.tfc.dynamicweaponry.tool.Tool;
+//import com.tfc.dynamicweaponry.item.tool.Tool;
 //import net.minecraft.item.ItemStack;
 //import net.minecraft.nbt.CompoundNBT;
 //import net.minecraft.network.INetHandler;

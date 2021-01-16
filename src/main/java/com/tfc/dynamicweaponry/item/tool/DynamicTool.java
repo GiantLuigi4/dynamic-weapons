@@ -1,4 +1,4 @@
-package com.tfc.dynamicweaponry.tool;
+package com.tfc.dynamicweaponry.item.tool;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;

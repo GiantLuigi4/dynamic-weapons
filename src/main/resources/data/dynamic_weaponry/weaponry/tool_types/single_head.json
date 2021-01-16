@@ -10,8 +10,7 @@
             "name": "dynamic_weaponry:long_stick"
           }
         ]
-      },
-      {
+      }, {
         "name": "dynamic_weaponry:shovel_head",
         "incompatibilities": [
           {
@@ -24,8 +23,7 @@
     "part2": [
       {
         "name": "dynamic_weaponry:short_stick"
-      },
-      {
+      }, {
         "name": "dynamic_weaponry:long_stick"
       }
     ],

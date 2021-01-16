@@ -1,4 +1,4 @@
-package com.tfc.dynamicweaponry.tool;
+package com.tfc.dynamicweaponry.item.tool;
 
 import com.tfc.dynamicweaponry.utils.Point;
 import net.minecraft.util.ResourceLocation;

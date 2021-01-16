@@ -8,13 +8,13 @@ import com.tfc.dynamicweaponry.DynamicWeaponry;
 import com.tfc.dynamicweaponry.block.ToolForgeContainer;
 import com.tfc.dynamicweaponry.block.ToolForgeTileEntity;
 import com.tfc.dynamicweaponry.data.*;
+import com.tfc.dynamicweaponry.item.tool.DynamicTool;
+import com.tfc.dynamicweaponry.item.tool.MaterialPoint;
+import com.tfc.dynamicweaponry.item.tool.Tool;
+import com.tfc.dynamicweaponry.item.tool.ToolComponent;
 import com.tfc.dynamicweaponry.network.PaintPixelPacket;
 import com.tfc.dynamicweaponry.network.ToolPacket;
 import com.tfc.dynamicweaponry.registry.Registry;
-import com.tfc.dynamicweaponry.tool.DynamicTool;
-import com.tfc.dynamicweaponry.tool.MaterialPoint;
-import com.tfc.dynamicweaponry.tool.Tool;
-import com.tfc.dynamicweaponry.tool.ToolComponent;
 import com.tfc.dynamicweaponry.utils.Point;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -171,7 +171,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 					new Button(
 							this.width / 2 + 63, j - 30,
 							60, 20,
-							(new TranslationTextComponent("button.dynamic_weaponry.open_tool_switcher")),
+							(new TranslationTextComponent("button.dynamic_weaponry.toggle_tool_switcher")),
 							(button) -> {
 								isSwitcherOpen = !isSwitcherOpen;
 								isToolSwitcher = true;
@@ -188,7 +188,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 			Button button = new Button(
 					this.width / 2 + 63, j - 10,
 					60, 20,
-					new StringTextComponent(currentPart),
+					(new TranslationTextComponent("button.dynamic_weaponry.toggle_part_switcher")),
 //					this::cyclePart
 					(button1) -> {
 						ToolType type = Loader.INSTANCE.toolTypes.get(new ResourceLocation(tool.name));
@@ -260,6 +260,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				mouseX, mouseY,
 				selectedComponent,
 				!isSwitcherOpen && tool.isPartCompatible(new ResourceLocation(currentPart))
+//				!isSwitcherOpen
 		);
 		
 		matrixStack.pop();
@@ -727,8 +728,8 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				nbt.putString("name", currentPart);
 				tool.components.add(new ToolComponent(nbt));
 			}
-			
-			button.setMessage(new TranslationTextComponent("part_type." + name.getNamespace() + "." + name.getPath().replace("/", ".")));
+
+//			button.setMessage(new TranslationTextComponent("part_type." + name.getNamespace() + "." + name.getPath().replace("/", ".")));
 		} catch (Throwable err) {
 			err.printStackTrace();
 		}

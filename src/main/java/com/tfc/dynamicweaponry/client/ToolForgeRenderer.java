@@ -19,10 +19,8 @@ public class ToolForgeRenderer extends TileEntityRenderer<ToolForgeTileEntity> {
 	@Override
 	public void render(ToolForgeTileEntity tileEntityIn, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn, int combinedOverlayIn) {
 		ToolRenderer renderer = ToolRenderer.getInstance();
-//		CompoundNBT nbt = tileEntityIn.serializeNBT();
 		ItemStack stack = new ItemStack(Registry.DYNAMIC_TOOL.get());
 		CompoundNBT nbt1 = stack.getOrCreateTag();
-//		nbt1.put("tool_info", nbt.getCompound("tool"));
 		nbt1.put("tool_info", tileEntityIn.container.tool.serialize());
 		matrixStackIn.push();
 		matrixStackIn.translate(0, 1.465625, 0);
