@@ -27,9 +27,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
-//import com.tfc.dynamicweaponry.network.ToolPacket;
 
 public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer> {
 	public static final ItemStack defaultTool = ToolForgeTileEntity.defaultTool;
@@ -99,10 +98,15 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		tool = new Tool(stack);
 	}
 	
+	public boolean isSwitcherOpen = false;
+	public boolean isToolSwitcher = false;
+	
 	@Override
 	public boolean isPauseScreen() {
 		return false;
 	}
+	
+	public int switcherIndex = 0;
 	
 	@Override
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
@@ -114,6 +118,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		matrixStack.translate(0, -40, 0);
 		int i = (this.width - 248) / 2;
 		int j = (this.height - 166) / 2;
+		
 		drawBackground(matrixStack,
 				i, j,
 				(248 - 72), 166
@@ -122,9 +127,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				i + (248 - 73), j,
 				79, 166
 		);
-
-//		this.blit(matrixStack, i, j, 0, 0, (248 - 90), 166);
-//		this.blit(matrixStack, i + 90, j, 79, 0, (248 - 79), 166);
+		
 		this.minecraft.getTextureManager().bindTexture(new ResourceLocation("textures/gui/container/inventory.png"));
 		this.blit(matrixStack, i, j + 160, 0, 80, 248, (166 - 80));
 		matrixStack.pop();
@@ -145,20 +148,40 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 						i + 180, j + 90, new Color(r, g, b).getRGB());
 				drawString(matrixStack, font, "Cooldown: " + Math.round(tool.getAttackSpeed() * 100) / 100f,
 						i + 180, j + 100, new Color(r, g, b).getRGB());
-				drawString(matrixStack, font, "Durability: " + Math.round(tool.getDurability()),
+				drawString(matrixStack, font, "Speed: " + Math.round(Math.abs(4 - tool.getAttackSpeed()) * 100) / 100f,
 						i + 180, j + 110, new Color(r, g, b).getRGB());
+				drawString(matrixStack, font, "Durability: " + Math.round(tool.getDurability()),
+						i + 180, j + 120, new Color(r, g, b).getRGB());
 			} catch (Throwable ignored) {
 				System.out.println(tool);
 			}
 		}
 		
 		if (this.buttons.isEmpty()) {
+//			this.buttons.add(
+//					new Button(
+//							this.width / 2 + 63, j - 30,
+//							60, 20,
+//							(new TranslationTextComponent("tool_type." + new ResourceLocation(tool.name).getNamespace() + "." + new ResourceLocation(tool.name).getPath().replace("/", "."))),
+//							this::cycleTool
+//					)
+//			);
+			
 			this.buttons.add(
 					new Button(
 							this.width / 2 + 63, j - 30,
 							60, 20,
-							(new TranslationTextComponent("tool_type." + new ResourceLocation(tool.name).getNamespace() + "." + new ResourceLocation(tool.name).getPath().replace("/", "."))),
-							this::cycleTool
+							(new TranslationTextComponent("button.dynamic_weaponry.open_tool_switcher")),
+							(button) -> {
+								isSwitcherOpen = !isSwitcherOpen;
+								isToolSwitcher = true;
+								ResourceLocation[] locations = Loader.INSTANCE.toolTypes.keySet().toArray(new ResourceLocation[0]);
+								for (int i1 = 0; i1 < locations.length; i1++) {
+									if (locations[i1].toString().equals(tool.name)) {
+										switcherIndex = i1;
+									}
+								}
+							}
 					)
 			);
 			
@@ -166,7 +189,29 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 					this.width / 2 + 63, j - 10,
 					60, 20,
 					new StringTextComponent(currentPart),
-					this::cyclePart
+//					this::cyclePart
+					(button1) -> {
+						ToolType type = Loader.INSTANCE.toolTypes.get(new ResourceLocation(tool.name));
+						ToolPart[] parts = type.getParts();
+						
+						ArrayList<ResourceLocation> locations1 = new ArrayList<>();
+						
+						for (ToolPart part : parts) {
+							if (part.type != null) {
+								locations1.add(part.type.name);
+							}
+						}
+						
+						isSwitcherOpen = !isSwitcherOpen;
+						isToolSwitcher = false;
+						switcherIndex = locations1.indexOf(new ResourceLocation(currentPart));
+//						ResourceLocation[] locations = Loader.INSTANCE.toolTypes.keySet().toArray(new ResourceLocation[0]);
+//						for (int i1 = 0; i1 < locations.length; i1++) {
+//							if (locations[i1].toString().equals(tool.name)) {
+//								switcherIndex = i1;
+//							}
+//						}
+					}
 			);
 			
 			cyclePart(button);
@@ -190,7 +235,6 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 			}
 		}
 		
-		boolean alternator = false;
 		int gridSize = 16;
 		matrixStack.translate(i + 18, j + 18, 0);
 		matrixStack.scale(1f / gridSize, 1f / gridSize, 1);
@@ -209,6 +253,297 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		
 		tool.sort();
 		
+		renderTool(
+				matrixStack,
+				i, j, gridSize,
+				minX, minY, maxX, maxY,
+				mouseX, mouseY,
+				selectedComponent,
+				!isSwitcherOpen && tool.isPartCompatible(new ResourceLocation(currentPart))
+		);
+		
+		matrixStack.pop();
+		
+		matrixStack.push();
+		
+		for (ItemSlot slot : slots) {
+			slot.renderToolTip = !isSwitcherOpen;
+			slot.render(matrixStack, mouseX, mouseY, i, j, this);
+		}
+		
+		matrixStack.pop();
+		
+		if (isSwitcherOpen) {
+			matrixStack.push();
+			matrixStack.translate(0, 0, 200);
+			List<ResourceLocation> locations = Collections.emptyList();
+			
+			if (!isToolSwitcher) {
+//				int index = 0;
+//				ResourceLocation[] typeNames = Loader.INSTANCE.toolTypes.keySet().toArray(new ResourceLocation[0]);
+//				ToolType[] types = Loader.INSTANCE.toolTypes.values().toArray(new ToolType[0]);
+//
+//				for (ResourceLocation location : typeNames) {
+//					if (location.toString().equals(tool.name)) {
+//						break;
+//					}
+//
+//					index++;
+//				}
+//
+//				ToolType type = types[index];
+				ToolType type = Loader.INSTANCE.toolTypes.get(new ResourceLocation(tool.name));
+				ToolPart[] parts = type.getParts();
+				
+				ArrayList<ResourceLocation> locations1 = new ArrayList<>();
+				
+				for (ToolPart part : parts) {
+					if (part.type != null) {
+						locations1.add(part.type.name);
+					}
+				}
+				
+				locations = locations1;
+				
+				currentPart = handleSwitcher(
+						matrixStack,
+						isToolSwitcher, locations,
+						currentTool, mouseX, mouseY,
+						tool
+				);
+				
+				tool.getComponent(new ResourceLocation(currentPart));
+			} else {
+				locations = new ArrayList<>(Loader.INSTANCE.toolTypes.keySet());
+				String lastTool = currentTool;
+				currentTool = handleSwitcher(
+						matrixStack,
+						isToolSwitcher, locations,
+						currentTool, mouseX, mouseY,
+						tool
+				);
+				if (!currentTool.equals(lastTool)) {
+					ItemStack newStack = new ItemStack(Registry.DYNAMIC_TOOL.get());
+					CompoundNBT nbt = newStack.getOrCreateTag();
+					CompoundNBT tool_info = new CompoundNBT();
+//					cyclePart((Button) (buttons.get(1)));
+					tool_info.putString("tool_type", currentTool);
+					nbt.put("tool_info", tool_info);
+					this.tool = new Tool(newStack);
+					DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new ToolPacket(tool));
+				}
+			}
+			matrixStack.pop();
+		}
+		
+		tool.sort();
+		
+		String text = "give @p dynamic_weaponry:dynamic_tool" + tool.serialize().toString();
+		output.setMaxStringLength(text.length());
+		
+		if (!output.getText().equals(text)) {
+//			DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new ToolPacket(tool));
+			output.setText(text);
+		}
+	}
+	
+	public String handleSwitcher(MatrixStack matrixStackIn, boolean isTools, List<ResourceLocation> locations, String prev, int mouseX, int mouseY, Tool tool) {
+		ArrayList<ResourceLocation> textures = new ArrayList<>();
+		
+		int switcherIndexNew = this.switcherIndex;
+		
+		if (isTools) {
+			for (ResourceLocation location : locations)
+				textures.add(new ResourceLocation(
+						location.getNamespace(),
+						"textures/gui/tool_types/" + location.getPath() + ".png"
+				));
+		} else {
+			for (ResourceLocation location : locations)
+				textures.add(new ResourceLocation(
+						location.getNamespace(),
+						"textures/gui/part_types/" + location.getPath() + ".png"
+				));
+		}
+		
+		matrixStackIn.push();
+		
+		int i = (this.width) / 2;
+		int j = (this.height) / 2;
+		matrixStackIn.translate(i, j, 0);
+		
+		matrixStackIn.scale(2, 2, 1);
+		for (int index = 0; index < textures.size(); index++) {
+			ResourceLocation texture = textures.get(index);
+			
+			matrixStackIn.push();
+			
+			matrixStackIn.translate(((index - switcherIndex) * 68), 0, 0);
+			
+			int indexRelative = Math.abs(index - switcherIndex);
+			
+			ResourceLocation toolOrPart = locations.get(index);
+			
+			if (indexRelative <= 3) {
+				if (
+						mouseX >= (((((index - switcherIndex)) * 68) - 32) * 2) + i &&
+								mouseX <= (((((index - switcherIndex)) * 68) + 32) * 2) + i
+				) {
+					if (mouseY >= j - 64 && mouseY <= j + 64) {
+						RenderSystem.color3f(0.5f, 0.5f, 0.5f);
+						if (lMouseDown) {
+							switcherIndexNew = index;
+							lMouseDown = false;
+						}
+					}
+				}
+				
+				if (!isTools && !tool.isPartCompatible(toolOrPart))
+					RenderSystem.color3f(1, 0, 0);
+				
+				drawBackground(
+						matrixStackIn,
+						-32, -32, 64, 64
+				);
+				RenderSystem.color3f(1, 1, 1);
+			}
+			
+			int textureSize = 40;
+			
+			this.minecraft.getTextureManager().bindTexture(texture);
+			matrixStackIn.push();
+			matrixStackIn.translate(-(textureSize / 2f), ((-textureSize / 2f)) - (textureSize / 6f), 0);
+			matrixStackIn.scale(1f / 256, 1f / 256, 1);
+			matrixStackIn.scale(textureSize, textureSize, 1);
+			
+			if (indexRelative <= 3) {
+				blit(matrixStackIn, 0, 0, 0, 0, 256, 256);
+			}
+			
+			matrixStackIn.scale(3, 3, 0);
+			matrixStackIn.translate(-18, 110, 0);
+			String prefix = (isTools ? "tool_type" : "part_type") + ".";
+			String name = prefix + toolOrPart.getNamespace() + "." + toolOrPart.getPath().replace("/", ".");
+			
+			if (indexRelative <= 3) {
+				drawString(
+						matrixStackIn, font == null ? minecraft.fontRenderer : font,
+						new TranslationTextComponent(name), 0, 0, new Color(255, 255, 255).getRGB()
+				);
+			}
+			
+			matrixStackIn.pop();
+			
+			if (index == textures.size() - 1 && indexRelative <= 3 || (textures.size() + index - switcherIndex) >= 2) {
+				matrixStackIn.push();
+				matrixStackIn.translate((((textures.size()) * -68)), 0, 0);
+
+//				if (indexRelative <= 3) {
+				int pos = (((((index - switcherIndex)) * 68) - (32 + (textures.size() * 68))) * 2) + i;
+				
+				if (
+						mouseX >= pos &&
+								mouseX <= pos + 128
+				) {
+					if (mouseY >= j - 64 && mouseY <= j + 64) {
+						RenderSystem.color3f(0.5f, 0.5f, 0.5f);
+						if (lMouseDown) {
+							switcherIndexNew = index;
+							lMouseDown = false;
+						}
+					}
+				}
+				
+				if (!isTools && !tool.isPartCompatible(toolOrPart))
+					RenderSystem.color3f(1, 0, 0);
+				
+				drawBackground(
+						matrixStackIn,
+						-32, -32, 64, 64
+				);
+				RenderSystem.color3f(1, 1, 1);
+//				}
+				
+				this.minecraft.getTextureManager().bindTexture(texture);
+				matrixStackIn.push();
+				matrixStackIn.translate((-textureSize / 2f), ((-textureSize / 2f)) - (textureSize / 6f), 0);
+				matrixStackIn.scale(1f / 256, 1f / 256, 1);
+				matrixStackIn.scale(textureSize, textureSize, 1);
+				blit(matrixStackIn, 0, 0, 0, 0, 256, 256);
+				
+				matrixStackIn.scale(3, 3, 0);
+				matrixStackIn.translate(-18, 110, 0);
+				drawString(
+						matrixStackIn, font == null ? minecraft.fontRenderer : font,
+						new TranslationTextComponent(name), 0, 0, new Color(255, 255, 255).getRGB()
+				);
+				
+				matrixStackIn.pop();
+				matrixStackIn.pop();
+			}
+//			if (Math.abs(((textures.size() - (index + switcherIndex)))) <= 3) {
+			if (index - switcherIndex <= textures.size() - 4 || (indexRelative - 1 == 0 && ((index - 1) - switcherIndex <= textures.size() - 4))) {
+				matrixStackIn.push();
+				matrixStackIn.translate((((textures.size()) * 68)), 0, 0);
+				
+				int pos = (((((index - switcherIndex)) * 68) - (32 + (textures.size() * -68))) * 2) + i;
+				
+				if (
+						mouseX >= pos &&
+								mouseX <= pos + 128
+				) {
+					if (mouseY >= j - 64 && mouseY <= j + 64) {
+						RenderSystem.color3f(0.5f, 0.5f, 0.5f);
+						
+						if (lMouseDown) {
+							switcherIndexNew = index;
+							lMouseDown = false;
+						}
+					}
+				}
+				
+				if (!isTools && !tool.isPartCompatible(toolOrPart))
+					RenderSystem.color3f(1, 0, 0);
+				
+				drawBackground(
+						matrixStackIn,
+						-32, -32, 64, 64
+				);
+				
+				this.minecraft.getTextureManager().bindTexture(texture);
+				matrixStackIn.push();
+				matrixStackIn.translate((-textureSize / 2f), ((-textureSize / 2f)) - (textureSize / 6f), 0);
+				matrixStackIn.scale(1f / 256, 1f / 256, 1);
+				matrixStackIn.scale(textureSize, textureSize, 1);
+				blit(matrixStackIn, 0, 0, 0, 0, 256, 256);
+				
+				matrixStackIn.scale(3, 3, 0);
+				matrixStackIn.translate(-18, 110, 0);
+				drawString(
+						matrixStackIn, font == null ? minecraft.fontRenderer : font,
+						new TranslationTextComponent(name), 0, 0, new Color(255, 255, 255).getRGB()
+				);
+				
+				matrixStackIn.pop();
+				matrixStackIn.pop();
+			}
+			
+			matrixStackIn.pop();
+		}
+		matrixStackIn.pop();
+		
+		switcherIndex = switcherIndexNew;
+		
+		if (switcherIndex == -1) {
+			switcherIndex = 0;
+		}
+		
+		return locations.get(switcherIndex).toString();
+	}
+	
+	public void renderTool(MatrixStack matrixStack, int i, int j, int gridSize, int minX, int minY, int maxX, int maxY, int mouseX, int mouseY, ToolComponent selectedComponent, boolean allowEdits) {
+		boolean alternator = false;
+		
 		for (int x = 0; x < gridSize; x++) {
 			for (int y = 0; y < gridSize; y++) {
 				Color color = new Color(
@@ -216,6 +551,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 						alternator ? (128 + 64) : 128,
 						alternator ? (128 + 64) : 128
 				);
+				
 				matrixStack.push();
 				matrixStack.scale(8, 8, 1);
 				matrixStack.translate(x, ((gridSize - 1) - y), 0);
@@ -233,7 +569,8 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 						mouseX >= i + 18 + x * 8 &&
 								mouseX < i + 18 + x * 8 + 8 &&
 								mouseY >= j + 18 - 40 + ((gridSize - 1) - y) * 8 &&
-								mouseY < j + 18 - 40 + ((gridSize - 1) - y) * 8 + 8
+								mouseY < j + 18 - 40 + ((gridSize - 1) - y) * 8 + 8 &&
+								allowEdits
 				) {
 					rgb = rgb * 2;
 					hovered = true;
@@ -264,6 +601,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 						(rgb) / (inBounds ? 2 : 4),
 						(rgb) / (inBounds ? 2 : 4)
 				);
+				
 				blit(matrixStack, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0);
 				matrixStack.pop();
 				alternator = !alternator;
@@ -303,7 +641,8 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 									mouseX >= i + 18 + x * 8 &&
 									mouseX < i + 18 + x * 8 + 8 &&
 									mouseY >= j + 18 - 40 + ((gridSize - 1) - y) * 8 &&
-									mouseY < j + 18 - 40 + ((gridSize - 1) - y) * 8 + 8
+									mouseY < j + 18 - 40 + ((gridSize - 1) - y) * 8 + 8 &&
+									allowEdits
 					) {
 						isSelected = true;
 					}
@@ -323,6 +662,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 							1, 1, 1,
 							isSelected ? 1 : 0
 					);
+					
 					blit(matrixStack, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0);
 					
 					matrixStack.pop();
@@ -330,21 +670,8 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 			}
 		}
 		
-		matrixStack.pop();
-		
-		matrixStack.push();
-		for (ItemSlot slot : slots) slot.render(matrixStack, mouseX, mouseY, i, j, this);
-		matrixStack.pop();
-		
-		tool.sort();
-		
-		String text = "give @p dynamic_weaponry:dynamic_tool" + tool.serialize().toString();
-		output.setMaxStringLength(text.length());
-		
-		if (!output.getText().equals(text)) {
-//			DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new ToolPacket(tool));
-			output.setText(text);
-		}
+		RenderSystem.color3f(1, 1, 1);
+		RenderSystem.enableTexture();
 	}
 	
 	private void cyclePart(Button button) {
@@ -447,6 +774,8 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 			if (clicked) return true;
 		}
 		
+		if (isSwitcherOpen) return false;
+		
 		if (button == 0) {
 			int i = (this.width - 248) / 2;
 			int j = (this.height - 166) / 2;
@@ -469,6 +798,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 					} else {
 						if (slot.get().getItem() instanceof DynamicTool) {
 							tool = new Tool(slot.get());
+							DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new ToolPacket(tool));
 						}
 					}
 					
@@ -491,6 +821,8 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				if (clicked) return true;
 			}
 		}
+		
+		if (isSwitcherOpen) return false;
 		
 		return super.mouseReleased(mouseX, mouseY, button);
 	}

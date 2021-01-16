@@ -16,6 +16,7 @@ public class ItemSlot {
 	public int x, y;
 	public Color color = new Color(255, 255, 255);
 	public boolean renderSlot = false;
+	public boolean renderToolTip = true;
 	
 	public ItemSlot(IInventory inventory, int index, int x, int y) {
 		this.inventory = inventory;
@@ -73,7 +74,7 @@ public class ItemSlot {
 						guiTop + y,
 						0, 0, 16, 16
 				);
-				if (!stack.isEmpty()) {
+				if (!stack.isEmpty() && renderToolTip) {
 					renderTooltip(
 							matrixStack, stack, mouseX, mouseY, screen
 					);

@@ -12,7 +12,7 @@
         ]
       },
       {
-        "name": "dynamic_weaponry:shove_head",
+        "name": "dynamic_weaponry:shovel_head",
         "incompatibilities": [
           {
             "part": 2,

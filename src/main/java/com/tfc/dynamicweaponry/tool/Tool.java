@@ -2,6 +2,8 @@ package com.tfc.dynamicweaponry.tool;
 
 import com.tfc.dynamicweaponry.data.Loader;
 import com.tfc.dynamicweaponry.data.Material;
+import com.tfc.dynamicweaponry.data.ToolPart;
+import com.tfc.dynamicweaponry.data.ToolType;
 import com.tfc.dynamicweaponry.registry.Registry;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -46,14 +48,19 @@ public class Tool {
 	public double getDamage() {
 		double amt = 0;
 		
-		for (ToolComponent component : this.components) {
-			int count = 0;
-			HashMap<Material, Integer> counts = new HashMap<>();
+		sort();
+		
+		for (int i = this.components.size() - 1; i >= 0; i--) {
+			ToolComponent component = components.get(i);
 			
 			if (component.points.isEmpty()) continue;
 			
+			int count = 0;
+			HashMap<Material, Integer> counts = new HashMap<>();
+			
 			for (MaterialPoint point : component.points) {
 				Material mat = Loader.INSTANCE.getMaterial(point.material);
+				if (mat == null || mat.item == null || mat.item.toString().equals("minecraft:air")) continue;
 				count++;
 				if (!counts.containsKey(mat)) counts.put(mat, 1);
 				else counts.replace(mat, counts.get(mat) + 1);
@@ -88,14 +95,19 @@ public class Tool {
 	public double getEfficiency() {
 		double amt = 0;
 		
+		sort();
 		
 		for (ToolComponent component : this.components) {
+			if (component.points.isEmpty())
+				continue;
+			
 			int count = 0;
 			HashMap<Material, Integer> counts = new HashMap<>();
 			
 			for (MaterialPoint point : component.points) {
 				Material mat = Loader.INSTANCE.getMaterial(point.material);
 				count++;
+				if (point.material == null) continue;
 				if (!counts.containsKey(mat)) counts.put(mat, 1);
 				else counts.replace(mat, counts.get(mat) + 1);
 			}
@@ -112,7 +124,7 @@ public class Tool {
 	}
 	
 	public double getAttackSpeed() {
-		return MathHelper.lerp(0.25, ((getWeight()) * (0.1 / getEfficiency())), 1.6) / 2;
+		return Math.min(MathHelper.lerp(0.25, ((getWeight()) * (0.1 / getEfficiency())), 1.6) / 2, 3.99);
 	}
 	
 	public double getDurability() {
@@ -207,5 +219,46 @@ public class Tool {
 		ToolComponent component = new ToolComponent(nbt);
 		components.add(component);
 		return component;
+	}
+	
+	public boolean isPartCompatible(ResourceLocation type) {
+		ToolType toolType = Loader.INSTANCE.toolTypes.get(new ResourceLocation(name));
+		
+		if (toolType == null) return true;
+		
+		ToolPart toolPart = toolType.getPart(type);
+		
+		if (toolPart == null) return true;
+		
+		if (hasIncompatibility(toolPart)) return false;
+		for (ToolPart dependency : toolPart.getDependencies()) if (hasIncompatibility(dependency)) return false;
+		
+		return true;
+	}
+	
+	public boolean hasIncompatibility(ToolPart toolPart) {
+		for (ToolComponent component : components) {
+			ToolPart componentPart = toolPart.toolType.getPart(component.type.name);
+			if (
+					toolPart.type != null &&
+							component.type != null &&
+							componentPart != null &&
+							toolPart.listIndex ==
+									componentPart.listIndex &&
+							!component.points.isEmpty() &&
+							!toolPart.type.name.equals(component.type.name)
+			) {
+				return true;
+			}
+		}
+		for (ToolPart incompatibility : toolPart.getIncompatibilities()) {
+			for (ToolComponent component : components) {
+				if (component.type != null &&
+						component.name.equals(incompatibility.type.name.toString()) &&
+						!component.points.isEmpty()
+				) return true;
+			}
+		}
+		return false;
 	}
 }

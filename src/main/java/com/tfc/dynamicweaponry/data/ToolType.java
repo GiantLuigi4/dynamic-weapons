@@ -1,5 +1,7 @@
 package com.tfc.dynamicweaponry.data;
 
+import net.minecraft.util.ResourceLocation;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -44,5 +46,14 @@ public class ToolType {
 	@Override
 	public int hashCode() {
 		return Objects.hash(parts, isLocked);
+	}
+	
+	public ToolPart getPart(ResourceLocation type) {
+		for (ToolPart part : parts) {
+			if (part.type != null && part.type.name.equals(type)) {
+				return part;
+			}
+		}
+		return null;
 	}
 }

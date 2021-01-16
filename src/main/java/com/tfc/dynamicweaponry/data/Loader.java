@@ -127,7 +127,8 @@ public class Loader implements IResourceManagerReloadListener {
 					JsonObject object2 = element.getAsJsonObject();
 					String name = object2.getAsJsonPrimitive("name").getAsString();
 					ResourceLocation location = new ResourceLocation(name);
-					ToolPart part = new ToolPart(INSTANCE.partTypes.get(location), i, toolType);
+					ToolPart part = toolType.getPart(location);
+					if (part == null) part = new ToolPart(INSTANCE.partTypes.get(location), i, toolType);
 					
 					if (object2.has("dependencies ")) {
 						JsonArray dependencies = object2.getAsJsonArray("dependencies");
@@ -138,7 +139,13 @@ public class Loader implements IResourceManagerReloadListener {
 							int partNum = dep.getAsJsonPrimitive("part").getAsInt();
 							String partName = dep.getAsJsonPrimitive("name").getAsString();
 							ResourceLocation partLocation = new ResourceLocation(partName);
-							deps.add(new ToolPart(INSTANCE.partTypes.get(partLocation), partNum, null));
+							
+							ToolPart part1 = toolType.getPart(partLocation);
+							if (part1 == null)
+								part1 = new ToolPart(INSTANCE.partTypes.get(partLocation), partNum, toolType);
+
+//							deps.add(new ToolPart(INSTANCE.partTypes.get(partLocation), partNum, toolType));
+							deps.add(part1);
 						}
 						
 						part.dependencies = deps.toArray(new ToolPart[0]);
@@ -155,7 +162,13 @@ public class Loader implements IResourceManagerReloadListener {
 							int partNum = incompatibility.getAsJsonPrimitive("part").getAsInt();
 							String partName = incompatibility.getAsJsonPrimitive("name").getAsString();
 							ResourceLocation partLocation = new ResourceLocation(partName);
-							incompats.add(new ToolPart(INSTANCE.partTypes.get(partLocation), partNum, null));
+							
+							ToolPart part1 = toolType.getPart(partLocation);
+							if (part1 == null)
+								part1 = new ToolPart(INSTANCE.partTypes.get(partLocation), partNum, toolType);
+							
+							incompats.add(part1);
+//							incompats.add(new ToolPart(INSTANCE.partTypes.get(partLocation), partNum, toolType));
 						}
 						
 						part.incompatibilities = incompats.toArray(new ToolPart[0]);

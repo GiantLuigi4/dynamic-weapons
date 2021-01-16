@@ -38,6 +38,8 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 	
 	@Override
 	public void func_239207_a_(ItemStack stack, ItemCameraTransforms.TransformType p_239207_2_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
+		if (!stack.getOrCreateTag().contains("HideFlags")) stack.getOrCreateTag().putInt("HideFlags", 2);
+
 //		super.func_239207_a_(stack, p_239207_2_, matrixStack, buffer, combinedLight, combinedOverlay);
 //		RenderHelper.drawBox(matrixStack, new AxisAlignedBB(0, 0, 0.45, 1, 1, 0.55f), 1, 1, 1, 1);
 		matrixStack.push();

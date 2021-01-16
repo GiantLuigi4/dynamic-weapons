@@ -86,9 +86,12 @@ public class DynamicTool extends Item {
 				"Durability: ").mergeStyle(TextFormatting.GREEN).append(new StringTextComponent(
 				String.valueOf(Math.round(tool.getDurability() * 100) / 100f)).mergeStyle(TextFormatting.RED))
 		);
-//		list.add(new StringTextComponent(
-//				"Attack Power: ").mergeStyle(TextFormatting.GREEN).append(new StringTextComponent(
-//				String.valueOf(tool.getDamage())).mergeStyle(TextFormatting.RED))
-//		);
+		
+		list.add(new StringTextComponent(""));
+		list.add(new StringTextComponent("When in Main Hand:").mergeStyle(TextFormatting.GRAY));
+		list.add(new StringTextComponent(" " + Math.abs(Math.round((tool.getDamage()) * 100) / 100f) + " Attack Damage").mergeStyle(TextFormatting.DARK_GREEN));
+		list.add(new StringTextComponent(" " + Math.abs(Math.round((4 - tool.getAttackSpeed()) * 100) / 100f) + " Attack Speed").mergeStyle(TextFormatting.DARK_GREEN));
+		
+		if (!stack.getOrCreateTag().contains("HideFlags")) stack.getOrCreateTag().putInt("HideFlags", 2);
 	}
 }

@@ -4,7 +4,7 @@
   "tool_type.dynamic_weaponry.dual_head": "Dual Headed Tool",
   "part_type.dynamic_weaponry.sword_blade": "Sword Blade",
   "part_type.dynamic_weaponry.short_stick": "Short Tool Rod",
-  "part_type.dynamic_weaponry.sword_guard": "Sword Guard Rod",
+  "part_type.dynamic_weaponry.sword_guard": "Sword Guard",
   "part_type.dynamic_weaponry.long_stick": "Long Tool Rod",
   "part_type.dynamic_weaponry.pickaxe_head": "Front Pickaxe Head",
   "part_type.dynamic_weaponry.axe_head": "Front Axe Head",
@@ -17,5 +17,6 @@
   "tooltip.dynamic_weaponry.attack": "Attack: %val%",
   "problem.dynamic_weaponry.part_incompatibility": "%type1% is incompatible with %type2%.",
   "problem.dynamic_weaponry.part_dependency": "%type1% requires %type2%, but only %type1% is present.",
+  "button.dynamic_weaponry.open_tool_switcher": "Toggle Tool Switcher",
   "": ""
 }
