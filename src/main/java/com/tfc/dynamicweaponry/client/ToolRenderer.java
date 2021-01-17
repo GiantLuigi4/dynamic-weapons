@@ -10,11 +10,11 @@ import com.tfc.dynamicweaponry.data.Material;
 import com.tfc.dynamicweaponry.item.tool.MaterialPoint;
 import com.tfc.dynamicweaponry.item.tool.Tool;
 import com.tfc.dynamicweaponry.item.tool.ToolComponent;
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -23,23 +23,14 @@ import net.minecraft.util.math.vector.Matrix3f;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector4f;
-import org.codehaus.plexus.util.FastMap;
-
+//import org.codehaus.plexus.util.FastMap;
 //import net.minecraft.client.renderer.texture.OverlayTexture;
 
 public class ToolRenderer extends ItemStackTileEntityRenderer {
-	private static final ModelRenderer cube = new ModelRenderer(16, 16, 0, 0);
-	
 	public static final ToolRenderer render = new ToolRenderer();
 	
-	private static final FastMap<CompoundNBT, CustomBuffer> bufferCache = new FastMap<>();
-	private static final FastMap<CompoundNBT, Tool> toolCache = new FastMap<>();
-	
-	static {
-		//Generated with block bench
-//		cube.setRotationPoint(0.0F, 0.0F, 0.0F);
-//		cube.setTextureOffset(0, 0).addBox(0.0F, 0.0F, 0.0F, 4.0F, 4.0F, 4.0F, 0.0F, false);
-	}
+	private static final Object2ObjectLinkedOpenHashMap<CompoundNBT, CustomBuffer> bufferCache = new Object2ObjectLinkedOpenHashMap<>();
+	private static final Object2ObjectLinkedOpenHashMap<CompoundNBT, Tool> toolCache = new Object2ObjectLinkedOpenHashMap<>();
 	
 	private static final Quaternion quat90X = new Quaternion(90, 0, 0, true);
 	private static final Quaternion quat180X = new Quaternion(180, 0, 0, true);
