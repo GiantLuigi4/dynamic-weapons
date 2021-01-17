@@ -28,9 +28,6 @@ public class ToolForgeItemRenderer extends ItemStackTileEntityRenderer {
 		super.func_239207_a_(stack, p_239207_2_, matrixStack, buffer, combinedLight, combinedOverlay);
 		
 		matrixStack.push();
-		if (p_239207_2_.equals(ItemCameraTransforms.TransformType.GUI)) {
-		
-		}
 		
 		{
 			IBakedModel model = Minecraft.getInstance().getBlockRendererDispatcher().getModelForState(Registry.TOOL_FORGE.get().getDefaultState());

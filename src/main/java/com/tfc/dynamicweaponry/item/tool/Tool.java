@@ -274,4 +274,14 @@ public class Tool {
 		}
 		return false;
 	}
+	
+	public MaterialPoint getPoint(int x, int y) {
+		for (ToolComponent component : components) {
+			if (!component.points.isEmpty()) {
+				MaterialPoint point = component.getPoint(x, y);
+				if (point != null) return point;
+			}
+		}
+		return null;
+	}
 }

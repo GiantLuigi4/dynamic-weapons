@@ -1,5 +1,8 @@
 package com.tfc.dynamicweaponry.block;
 
+import com.tfc.dynamicweaponry.item.tool.MaterialPoint;
+import com.tfc.dynamicweaponry.item.tool.Tool;
+import com.tfc.dynamicweaponry.item.tool.ToolComponent;
 import com.tfc.dynamicweaponry.registry.Registry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -90,6 +93,22 @@ public class ToolForge extends Block implements ITileEntityProvider {
 					ItemStack stack1 = new ItemStack(Registry.DYNAMIC_TOOL.get());
 					CompoundNBT nbt1 = stack1.getOrCreateTag();
 					nbt1.put("tool_info", nbt.getCompound("tool"));
+					
+					Tool tool = new Tool(stack1);
+					for (ToolComponent component : tool.components) {
+						for (MaterialPoint point : component.points.toArray(new MaterialPoint[0])) {
+							if (
+									point.x < component.type.min.x ||
+											point.y < 0 ||
+											point.x > component.type.max.x ||
+											point.y > 15
+							) {
+								component.setPoint(point, null);
+							}
+						}
+					}
+					nbt1.put("tool_info", tool.serialize());
+					
 					player.setHeldItem(handIn, stack1);
 				}
 			} else {

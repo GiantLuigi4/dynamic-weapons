@@ -6,13 +6,13 @@ import com.tfc.assortedutils.API.gui.screen.SimpleContainerScreen;
 import com.tfc.assortedutils.utils.Color;
 import com.tfc.dynamicweaponry.DynamicWeaponry;
 import com.tfc.dynamicweaponry.block.ToolForgeContainer;
-import com.tfc.dynamicweaponry.block.ToolForgeTileEntity;
 import com.tfc.dynamicweaponry.data.*;
 import com.tfc.dynamicweaponry.item.tool.DynamicTool;
 import com.tfc.dynamicweaponry.item.tool.MaterialPoint;
 import com.tfc.dynamicweaponry.item.tool.Tool;
 import com.tfc.dynamicweaponry.item.tool.ToolComponent;
 import com.tfc.dynamicweaponry.network.PaintPixelPacket;
+import com.tfc.dynamicweaponry.network.PaintToolPacket;
 import com.tfc.dynamicweaponry.network.ToolPacket;
 import com.tfc.dynamicweaponry.registry.Registry;
 import com.tfc.dynamicweaponry.utils.Point;
@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer> {
-	public static final ItemStack defaultTool = ToolForgeTileEntity.defaultTool;
+	public static final ItemStack defaultTool = new ItemStack(Registry.DYNAMIC_TOOL.get());
 	
 	private final ArrayList<ItemSlot> slots = new ArrayList<>();
 	public String currentTool = "";
@@ -39,6 +39,10 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 	public Tool tool = new Tool(defaultTool);
 	
 	public final TextFieldWidget output;
+	
+	public int drawTool = -1;
+	
+	public Point start;
 	
 	public boolean lMouseDown = false;
 	public boolean rMouseDown = false;
@@ -216,6 +220,21 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 			
 			cyclePart(button);
 			this.buttons.add(button);
+			
+			this.buttons.add(
+					new Button(
+							this.width / 2 + 63, j - 50,
+							60, 20,
+							(new TranslationTextComponent("button.dynamic_weaponry.cycle_draw_tool")),
+							(button1) -> {
+								drawTool = drawTool + 1;
+								if (drawTool > 1) {
+									drawTool = -1;
+								}
+							}
+					)
+			);
+			
 			this.buttons.add(output);
 		}
 		
@@ -316,6 +335,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				tool.getComponent(new ResourceLocation(currentPart));
 			} else {
 				locations = new ArrayList<>(Loader.INSTANCE.toolTypes.keySet());
+				if (currentTool.equals("")) currentTool = tool.name;
 				String lastTool = currentTool;
 				currentTool = handleSwitcher(
 						matrixStack,
@@ -577,15 +597,18 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 					hovered = true;
 				}
 				
+				ResourceLocation location = null;
 				if (
 						hovered &&
 								selectedComponent != null &&
-								lMouseDown &&
+//								lMouseDown &&
+								!rMouseDown &&
 								selectedSlot != null &&
 								inBounds
 				) {
-					selectedComponent.setPoint(new Point(x, y), selectedSlot.get().getItem().getRegistryName());
-					DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new PaintPixelPacket(x, y, selectedSlot.get().getItem().getRegistryName().toString(), currentPart));
+//					selectedComponent.setPoint(new Point(x, y), selectedSlot.get().getItem().getRegistryName());
+//					DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new PaintPixelPacket(x, y, selectedSlot.get().getItem().getRegistryName().toString(), currentPart));
+					location = selectedSlot.get().getItem().getRegistryName();
 				} else if (
 						hovered &&
 								selectedComponent != null &&
@@ -593,8 +616,34 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 								selectedSlot != null &&
 								inBounds
 				) {
-					selectedComponent.setPoint(new Point(x, y), null);
-					DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new PaintPixelPacket(x, y, null, currentPart));
+//					selectedComponent.setPoint(new Point(x, y), null);
+//					DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new PaintPixelPacket(x, y, null, currentPart));
+				}
+				
+				if (
+						hovered &&
+								selectedComponent != null &&
+								selectedSlot != null &&
+								inBounds
+				) {
+					if ((lMouseDown || rMouseDown)) {
+						if (drawTool != -1) {
+							if (start == null) {
+								start = new MaterialPoint(x, y, location);
+							}
+						} else {
+							DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new PaintPixelPacket(x, y, location != null ? location.toString() : null, currentPart));
+						}
+					} else if (
+							!(lMouseDown || rMouseDown) &&
+									start != null
+					) {
+						if (drawTool != -1) {
+							DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new PaintToolPacket(
+									start.x, start.y, x, y, drawTool, ((MaterialPoint) start).material != null ? ((MaterialPoint) start).material.toString() : null, currentPart));
+							start = null;
+						}
+					}
 				}
 				
 				RenderSystem.color3f(

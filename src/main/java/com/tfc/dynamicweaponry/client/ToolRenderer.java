@@ -77,7 +77,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 //						if (component.type != null) {
 //							matrixStack.scale(1,1,1+component.type.renderLayer/10f);
 //						}
-						renderCube(r, g, b, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, p_239207_2_ != ItemCameraTransforms.TransformType.GUI);
+						renderCube(r, g, b, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, p_239207_2_ != ItemCameraTransforms.TransformType.GUI, point.x, point.y, component);
 						
 						matrixStack.pop();
 
@@ -117,6 +117,24 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 		}
 		
 		matrixStack.pop();
+	}
+	
+	public void renderCube(float r, float g, float b, float x, float y, float z, IVertexBuilder builder, int combinedOverlay, int combinedLight, MatrixStack matrixStack, boolean useNormals, int pixelX, int pixelZ, ToolComponent tool) {
+		renderSquare(r, g, b, x, y, z + 0.25f, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+		matrixStack.rotate(quat90Y);
+		if (tool.getPoint(pixelX + 1, pixelZ) == null)
+			renderSquare(r, g, b, x - 0.25f, y, z + 0.25f, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+		matrixStack.rotate(quat90Y);
+		renderSquare(r, g, b, -0.25f, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+		matrixStack.rotate(quat90Y);
+		if (tool.getPoint(pixelX - 1, pixelZ) == null)
+			renderSquare(r, g, b, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+		matrixStack.rotate(quat90X);
+		if (tool.getPoint(pixelX, pixelZ - 1) == null)
+			renderSquare(r, g, b, 0, -0.25f, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+		matrixStack.rotate(quat180X);
+		if (tool.getPoint(pixelX, pixelZ + 1) == null)
+			renderSquare(r, g, b, 0, 0, 0.25f, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
 	}
 	
 	public void renderCube(float r, float g, float b, float x, float y, float z, IVertexBuilder builder, int combinedOverlay, int combinedLight, MatrixStack matrixStack, boolean useNormals) {

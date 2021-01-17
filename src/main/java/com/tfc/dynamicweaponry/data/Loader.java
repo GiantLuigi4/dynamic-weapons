@@ -1,12 +1,16 @@
 package com.tfc.dynamicweaponry.data;
 
 import com.google.gson.*;
+import com.mojang.brigadier.StringReader;
 import com.tfc.dynamicweaponry.DynamicWeaponry;
+import com.tfc.dynamicweaponry.block.ToolForgeTileEntity;
 import com.tfc.dynamicweaponry.network.DataPacket;
 import com.tfc.dynamicweaponry.utils.Point;
 import net.minecraft.client.Minecraft;
+import net.minecraft.command.arguments.ItemParser;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.resources.IResource;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.resources.IResourceManagerReloadListener;
@@ -98,14 +102,29 @@ public class Loader implements IResourceManagerReloadListener {
 	private static void parseMaterial(ResourceLocation resourceLocation, String data) {
 		JsonObject material = gson.fromJson(data, JsonObject.class);
 		
-		Material mat = new Material(
-				material.getAsJsonPrimitive("color").getAsInt(),
-				material.getAsJsonPrimitive("durability").getAsInt(),
-				material.getAsJsonPrimitive("weight").getAsDouble(),
-				material.getAsJsonPrimitive("efficiency").getAsDouble(),
-				material.getAsJsonPrimitive("attack").getAsDouble(),
-				new ResourceLocation(material.getAsJsonPrimitive("item").getAsString())
-		);
+		boolean hasBorderColor = material.has("borderColor");
+		
+		Material mat;
+		if (hasBorderColor) {
+			mat = new Material(
+					material.getAsJsonPrimitive("color").getAsInt(),
+					material.getAsJsonPrimitive("borderColor").getAsInt(),
+					material.getAsJsonPrimitive("durability").getAsInt(),
+					material.getAsJsonPrimitive("weight").getAsDouble(),
+					material.getAsJsonPrimitive("efficiency").getAsDouble(),
+					material.getAsJsonPrimitive("attack").getAsDouble(),
+					new ResourceLocation(material.getAsJsonPrimitive("item").getAsString())
+			);
+		} else {
+			mat = new Material(
+					material.getAsJsonPrimitive("color").getAsInt(),
+					material.getAsJsonPrimitive("durability").getAsInt(),
+					material.getAsJsonPrimitive("weight").getAsDouble(),
+					material.getAsJsonPrimitive("efficiency").getAsDouble(),
+					material.getAsJsonPrimitive("attack").getAsDouble(),
+					new ResourceLocation(material.getAsJsonPrimitive("item").getAsString())
+			);
+		}
 		
 		ResourceLocation location = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().substring("weaponry/materials/".length()).replace(".json", ""));
 		INSTANCE.materials.put(location, mat);
@@ -253,6 +272,20 @@ public class Loader implements IResourceManagerReloadListener {
 		return materialAtomicReference.get();
 	}
 	
+	private static String readResource(IResourceManager resourceManager, ResourceLocation location) {
+		try {
+			IResource resource = resourceManager.getResource(location);
+			InputStream stream = resource.getInputStream();
+			byte[] bytes = new byte[stream.available()];
+			stream.read(bytes);
+			stream.close();
+			return new String(bytes);
+		} catch (Throwable err) {
+			err.printStackTrace();
+			return null;
+		}
+	}
+	
 	@Override
 	public void onResourceManagerReload(IResourceManager resourceManager) {
 		partTypes.clear();
@@ -331,6 +364,26 @@ public class Loader implements IResourceManagerReloadListener {
 				}
 			}
 		} catch (Throwable ignored) {
+		}
+		
+		String tool = ("dynamic_weaponry:dynamic_tool{" + readResource(resourceManager, new ResourceLocation(
+				"dynamic_weaponry:weaponry/default_tool.nbtt")) + "}")
+				.replace("\n", "")
+				.replace(" ", "")
+				.replace("\t", "")
+				.replace("\r", "");
+		
+		try {
+			ItemParser parser = new ItemParser(new StringReader(tool), true);
+			parser.readItem();
+			parser.readNBT();
+			
+			ItemStack stack = new ItemStack(parser.getItem());
+			stack.setTag(parser.getNbt());
+			
+			ToolForgeTileEntity.defaultTool = stack;
+		} catch (Throwable err) {
+			err.printStackTrace();
 		}
 		
 		needsGlobalRefresh = true;
