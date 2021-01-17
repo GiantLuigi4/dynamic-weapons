@@ -3,6 +3,8 @@ package com.tfc.dynamicweaponry.client;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.tfc.assortedutils.utils.Color;
+import com.tfc.assortedutils.utils.CustomBuffer;
+import com.tfc.dynamicweaponry.Config;
 import com.tfc.dynamicweaponry.data.Loader;
 import com.tfc.dynamicweaponry.data.Material;
 import com.tfc.dynamicweaponry.item.tool.MaterialPoint;
@@ -15,21 +17,28 @@ import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix3f;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector4f;
+import org.codehaus.plexus.util.FastMap;
+
+//import net.minecraft.client.renderer.texture.OverlayTexture;
 
 public class ToolRenderer extends ItemStackTileEntityRenderer {
 	private static final ModelRenderer cube = new ModelRenderer(16, 16, 0, 0);
 	
 	public static final ToolRenderer render = new ToolRenderer();
 	
+	private static final FastMap<CompoundNBT, CustomBuffer> bufferCache = new FastMap<>();
+	private static final FastMap<CompoundNBT, Tool> toolCache = new FastMap<>();
+	
 	static {
 		//Generated with block bench
-		cube.setRotationPoint(0.0F, 0.0F, 0.0F);
-		cube.setTextureOffset(0, 0).addBox(0.0F, 0.0F, 0.0F, 4.0F, 4.0F, 4.0F, 0.0F, false);
+//		cube.setRotationPoint(0.0F, 0.0F, 0.0F);
+//		cube.setTextureOffset(0, 0).addBox(0.0F, 0.0F, 0.0F, 4.0F, 4.0F, 4.0F, 0.0F, false);
 	}
 	
 	private static final Quaternion quat90X = new Quaternion(90, 0, 0, true);
@@ -39,24 +48,89 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 	@Override
 	public void func_239207_a_(ItemStack stack, ItemCameraTransforms.TransformType p_239207_2_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
 		if (!stack.getOrCreateTag().contains("HideFlags")) stack.getOrCreateTag().putInt("HideFlags", 2);
+		
+		if (Config.CLIENT.cacheBuffers.get() && !(buffer instanceof CustomBuffer)) {
+			CustomBuffer builder;
+
+//			bufferCache.clear();
+			
+			matrixStack.push();
+			matrixStack.translate(0, 0, 0.45);
+			matrixStack.scale(1f / 4, 1f / 4, 1f / 4);
+			if (p_239207_2_.equals(ItemCameraTransforms.TransformType.GUI)) {
+				matrixStack.scale(0.86f, 0.86f, 1);
+				matrixStack.translate(0.35f, 0.35f, 0);
+				combinedLight = LightTexture.packLight(15, 0);
+			}
+			if (!bufferCache.containsKey(stack.getOrCreateTag())) {
+				builder = new CustomBuffer();
+				MatrixStack matrixStack1 = new MatrixStack();
+				func_239207_a_(
+						stack, ItemCameraTransforms.TransformType.FIXED, matrixStack1,
+						builder, combinedLight, combinedOverlay
+				);
+			} else {
+				builder = bufferCache.get(stack.getOrCreateTag());
+			}
+			
+			for (CustomBuffer.CustomVertexBuilder builder2 : builder.builders) {
+				IVertexBuilder builder1 = buffer.getBuffer(builder2.type);
+				for (CustomBuffer.Vertex vert : builder2.vertices) {
+					Vector3f vector3f = translate(matrixStack, (float) vert.x, (float) vert.y, (float) vert.z);
+					Vector3f normal;
+					if (p_239207_2_.equals(ItemCameraTransforms.TransformType.GUI))
+						normal = new Vector3f(0, 1, 0);
+					else
+						normal = new Vector3f(vert.nx, vert.ny, vert.nz);
+					Matrix3f matrix3f = matrixStack.getLast().getNormal();
+					normal.transform(matrix3f);
+					normal.normalize();
+					builder1.addVertex(
+							vector3f.getX(),
+							vector3f.getY(),
+							vector3f.getZ(),
+							vert.r / 255f,
+							vert.g / 255f,
+							vert.b / 255f,
+							vert.a / 255f,
+							vert.u, vert.v,
+							combinedOverlay, combinedLight,
+							normal.getX(), normal.getY(), normal.getZ()
+					);
+				}
+			}
+			matrixStack.pop();
+			
+			bufferCache.put(stack.getOrCreateTag(), builder);
+			
+			return;
+		}
 
 //		super.func_239207_a_(stack, p_239207_2_, matrixStack, buffer, combinedLight, combinedOverlay);
 //		RenderHelper.drawBox(matrixStack, new AxisAlignedBB(0, 0, 0.45, 1, 1, 0.55f), 1, 1, 1, 1);
 		matrixStack.push();
-		matrixStack.translate(0, 0, 0.45);
-		matrixStack.scale(1f / 4, 1f / 4, 1f / 4);
-		
-		if (p_239207_2_.equals(ItemCameraTransforms.TransformType.GUI)) {
-			matrixStack.scale(0.86f, 0.86f, 1);
-			matrixStack.translate(0.35f, 0.35f, 0);
-			combinedLight = LightTexture.packLight(15, 0);
+		if (!Config.CLIENT.cacheBuffers.get()) {
+			matrixStack.translate(0, 0, 0.45);
+			matrixStack.scale(1f / 4, 1f / 4, 1f / 4);
+			if (p_239207_2_.equals(ItemCameraTransforms.TransformType.GUI)) {
+				matrixStack.scale(0.86f, 0.86f, 1);
+				matrixStack.translate(0.35f, 0.35f, 0);
+				combinedLight = LightTexture.packLight(15, 0);
+			}
 		}
 		
-		Tool tool = new Tool(stack);
+		Tool tool;
+		if (
+				!toolCache.containsKey(stack.getOrCreateTag())
+		) {
+			tool = new Tool(stack);
+			toolCache.put(stack.getOrCreateTag(), tool);
+		} else tool = toolCache.get(stack.getOrCreateTag());
 		tool.sort();
 		boolean hasRenderedAnything = false;
 		
 		IVertexBuilder builder = buffer.getBuffer(RenderType.getEntitySolid(new ResourceLocation("dynamic_weaponry:textures/item/white_square.png")));
+		
 		
 		for (ToolComponent component : tool.components) {
 			try {
@@ -175,8 +249,10 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 			normal.normalize();
 			normal.mul(0.5f);
 			
-			Matrix3f matrix3f = matrixStack.getLast().getNormal();
-			normal.transform(matrix3f);
+			if (!Config.CLIENT.cacheBuffers.get()) {
+				Matrix3f matrix3f = matrixStack.getLast().getNormal();
+				normal.transform(matrix3f);
+			}
 		} else {
 			normal = new Vector3f(0, 1, 0);
 		}

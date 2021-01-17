@@ -1,11 +1,7 @@
 package com.tfc.dynamicweaponry;
 
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.config.ModConfig;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
 
 public class Config {
 	public static final Config CLIENT;
@@ -19,6 +15,7 @@ public class Config {
 	
 	public final ForgeConfigSpec.BooleanValue useShading;
 	public final ForgeConfigSpec.BooleanValue useOutlines;
+	public final ForgeConfigSpec.BooleanValue cacheBuffers;
 	
 	public Config(ForgeConfigSpec.Builder builder) {
 		builder.comment("Rendering Settings").push("Client");
@@ -33,11 +30,11 @@ public class Config {
 				.translation("config.dynamic_weaponry.outlines")
 				.define("UseOutlines", true);
 		
+		cacheBuffers = builder
+				.comment("Whether or not to apply cache vertex buffers of custom tools. (Higher RAM usage, doesn't affect visuals, but does increase performance)")
+				.translation("config.dynamic_weaponry.cache_buffers")
+				.define("CacheBuffers", true);
+		
 		builder.pop();
-	}
-	
-	@SubscribeEvent
-	public static void onLoad(final ModConfig.Loading configEvent) {
-		LogManager.getLogger().log(Level.INFO, "Loaded dynamic weaponry config file {}", configEvent.getConfig().getFileName());
 	}
 }
