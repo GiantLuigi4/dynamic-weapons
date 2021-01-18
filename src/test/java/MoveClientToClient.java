@@ -39,9 +39,15 @@ public class MoveClientToClient {
 			
 			File client = new File(file.toString().replace("data", "assets"));
 			if (client.exists()) {
-				JsonObject object2 = gson.fromJson(read(client), JsonObject.class);
-				for (Map.Entry<String, JsonElement> stringJsonElementEntry : object2.entrySet()) {
-					object1.add(stringJsonElementEntry.getKey(), stringJsonElementEntry.getValue());
+				try {
+					JsonObject object2 = gson.fromJson(read(client), JsonObject.class);
+					for (Map.Entry<String, JsonElement> stringJsonElementEntry : object2.entrySet()) {
+						object1.add(stringJsonElementEntry.getKey(), stringJsonElementEntry.getValue());
+					}
+				} catch (Throwable err) {
+					System.out.println(file.toString());
+					System.out.println(client.toString());
+					throw new RuntimeException(err);
 				}
 			}
 			

@@ -12,11 +12,13 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -190,6 +192,10 @@ public class DynamicTool extends Item {
 		if (state.getBlock().getHarvestTool(state) != null)
 			type = state.getBlock().getHarvestTool(state).getName();
 		
+		if (stack.getMaxDamage() <= stack.getDamage()) {
+			return super.getDestroySpeed(stack, state);
+		}
+		
 		Tool tool = new Tool(stack);
 		int count = 0;
 		int toolCount = 0;
@@ -244,7 +250,7 @@ public class DynamicTool extends Item {
 	
 	@Override
 	public boolean hitEntity(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-		if (!attacker.world.isRemote) {
+		if (!attacker.world.isRemote && !((attacker instanceof PlayerEntity) && ((PlayerEntity) attacker).isCreative())) {
 			if (stack.getDamage() >= stack.getMaxDamage()) {
 				stack.setDamage(stack.getMaxDamage());
 			} else {
@@ -275,6 +281,31 @@ public class DynamicTool extends Item {
 	@Override
 	public boolean isDamaged(ItemStack stack) {
 		return stack.getOrCreateTag().contains("Damage") || stack.getOrCreateTag().getInt("Damage") != 0;
+	}
+	
+	@Override
+	public boolean onBlockDestroyed(ItemStack stack, World worldIn, BlockState state, BlockPos pos, LivingEntity entityLiving) {
+		if (!entityLiving.world.isRemote && !((entityLiving instanceof PlayerEntity) && ((PlayerEntity) entityLiving).isCreative())) {
+			if (stack.getDamage() >= stack.getMaxDamage()) {
+				stack.setDamage(stack.getMaxDamage());
+			} else {
+				if (stack.getOrCreateTag().contains("Damage"))
+					stack.getOrCreateTag().putInt("Damage", stack.getOrCreateTag().getInt("Damage") + 1);
+				else stack.getOrCreateTag().putInt("Damage", 1);
+			}
+		}
+		
+		return super.onBlockDestroyed(stack, worldIn, state, pos, entityLiving);
+	}
+	
+	@Override
+	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+		return slotChanged;
+	}
+	
+	@Override
+	public boolean shouldCauseBlockBreakReset(ItemStack oldStack, ItemStack newStack) {
+		return !oldStack.equals(newStack);
 	}
 	
 	@Override

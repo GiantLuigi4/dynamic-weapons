@@ -118,32 +118,32 @@ public class Shading {
 				if (!hitLeft) {
 					MaterialPoint point1 = tool.getPoint(point.x - index, point.y);
 					if (
-							point1 == null ||
-									!point1.material.equals(point.material)
+							point1 == null/* ||
+									(false && !point1.material.equals(point.material))*/
 					) hitLeft = true;
 					else sizeLeft++;
 				}
 				if (!hitRight) {
 					MaterialPoint point1 = tool.getPoint(point.x + index, point.y);
 					if (
-							point1 == null ||
-									!point1.material.equals(point.material)
+							point1 == null/* ||
+									(false && !point1.material.equals(point.material))*/
 					) hitRight = true;
 					else sizeRight++;
 				}
 				if (!hitTop) {
 					MaterialPoint point1 = tool.getPoint(point.x, point.y + index);
 					if (
-							point1 == null ||
-									!point1.material.equals(point.material)
+							point1 == null/* ||
+									(false && !point1.material.equals(point.material))*/
 					) hitTop = true;
 					else sizeTop++;
 				}
 				if (!hitBottom) {
 					MaterialPoint point1 = tool.getPoint(point.x, point.y - index);
 					if (
-							point1 == null ||
-									!point1.material.equals(point.material)
+							point1 == null/* ||
+									(false && !point1.material.equals(point.material))*/
 					) hitBottom = true;
 					else sizeBottom++;
 				}
@@ -184,11 +184,19 @@ public class Shading {
 				err.printStackTrace();
 			}
 		}
-		
-		Color c1 = c.darker(
-				shades[(int) ((distMin / distMax) * (shades.length - 1))],
-				-12f * shades[(int) ((distMin / distMax) * (shades.length - 1))]
-		);
+		Color c1;
+		if (Config.CLIENT.useMaterialPatterns.get() && materialInfo.getPattern() != null) {
+			c1 = c.darker(
+					Config.CLIENT.shadedPatterns.get() ? shades[(int) ((distMin / distMax) * (shades.length - 1))] : 1,
+//					-12f * shades[(int) ((distMin / distMax) * (shades.length - 1))]
+					0
+			);
+		} else {
+			c1 = c.darker(
+					shades[(int) ((distMin / distMax) * (shades.length - 1))],
+					-12f * shades[(int) ((distMin / distMax) * (shades.length - 1))]
+			);
+		}
 		
 		return new Color(
 				c1.getRed(),

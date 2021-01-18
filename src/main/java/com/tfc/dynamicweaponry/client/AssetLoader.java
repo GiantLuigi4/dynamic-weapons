@@ -54,6 +54,8 @@ public class AssetLoader implements IResourceManagerReloadListener {
 	}
 	
 	public void parseMaterial(IResource resource) {
+		ToolRenderer.getInstance().resetCaches();
+		
 		parseMaterial(gson.fromJson(readResource(resource), JsonObject.class));
 	}
 	

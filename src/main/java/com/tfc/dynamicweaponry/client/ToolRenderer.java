@@ -110,7 +110,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 		if (!Config.CLIENT.cacheBuffers.get()) {
 			matrixStack.translate(0, 0, 0.45);
 			matrixStack.scale(1f / 4, 1f / 4, 1f / 4);
-			
+
 			if (p_239207_2_.equals(ItemCameraTransforms.TransformType.GUI)) {
 				matrixStack.scale(0.86f, 0.86f, 1);
 				matrixStack.translate(0.35f, 0.35f, 0);
@@ -152,7 +152,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 //						if (component.type != null) {
 //							matrixStack.scale(1,1,1+component.type.renderLayer/10f);
 //						}
-						renderCube(r, g, b, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, p_239207_2_ != ItemCameraTransforms.TransformType.GUI, point.x, point.y, component);
+						renderCube(r, g, b, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, p_239207_2_ != ItemCameraTransforms.TransformType.GUI, point.x, point.y, tool);
 						
 						matrixStack.pop();
 
@@ -194,7 +194,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 		matrixStack.pop();
 	}
 	
-	public void renderCube(float r, float g, float b, float x, float y, float z, IVertexBuilder builder, int combinedOverlay, int combinedLight, MatrixStack matrixStack, boolean useNormals, int pixelX, int pixelZ, ToolComponent tool) {
+	public void renderCube(float r, float g, float b, float x, float y, float z, IVertexBuilder builder, int combinedOverlay, int combinedLight, MatrixStack matrixStack, boolean useNormals, int pixelX, int pixelZ, Tool tool) {
 		renderSquare(r, g, b, x, y, z + 0.25f, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
 		matrixStack.rotate(quat90Y);
 		if (tool.getPoint(pixelX + 1, pixelZ) == null)

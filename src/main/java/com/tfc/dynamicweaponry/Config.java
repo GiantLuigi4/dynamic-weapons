@@ -17,6 +17,7 @@ public class Config {
 	public final ForgeConfigSpec.BooleanValue useOutlines;
 	public final ForgeConfigSpec.BooleanValue cacheBuffers;
 	public final ForgeConfigSpec.BooleanValue useMaterialPatterns;
+	public final ForgeConfigSpec.BooleanValue shadedPatterns;
 	
 	public Config(ForgeConfigSpec.Builder builder) {
 		builder.comment("Rendering Settings").push("Client");
@@ -40,6 +41,11 @@ public class Config {
 				.comment("Whether or not to use material patterns on custom tools. (Laggier, but looks better)")
 				.translation("config.dynamic_weaponry.use_material_patterns")
 				.define("UseMaterialPatterns", true);
+		
+		shadedPatterns = builder
+				.comment("Whether or not pattern materials should get shading applied to them (Doesn't really affect performance, can make tools look nicer or worse)")
+				.translation("config.dynamic_weaponry.use_material_patterns")
+				.define("ShadedPatterns", false);
 		
 		builder.pop();
 	}

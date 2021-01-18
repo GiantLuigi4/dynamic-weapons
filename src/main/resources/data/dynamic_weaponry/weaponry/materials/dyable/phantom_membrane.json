@@ -1,0 +1,8 @@
+{
+  "durability": 4,
+  "weight": 0.1,
+  "efficiency": 1,
+  "attack": 0.01,
+  "dyable": true,
+  "item": "minecraft:phantom_membrane"
+}
