@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+	{
+	  "rolls": 1,
+	  "entries": [
+		{
+		  "type": "minecraft:item",
+		  "name": "dynamic_weaponry:tool_forge"
+		}
+	  ],
+	  "conditions": [
+		{
+		  "condition": "minecraft:survives_explosion"
+		}
+	  ]
+	}
+  ]
+}

@@ -2,6 +2,7 @@ package com.tfc.dynamicweaponry.item.tool;
 
 import com.tfc.assortedutils.API.nbt.ExtendedCompoundNBT;
 import com.tfc.dynamicweaponry.data.DataLoader;
+import com.tfc.dynamicweaponry.data.Material;
 import com.tfc.dynamicweaponry.data.PartType;
 import com.tfc.dynamicweaponry.utils.Point;
 import net.minecraft.nbt.CompoundNBT;
@@ -227,5 +228,19 @@ public class ToolComponent implements Comparable<ToolComponent> {
 		
 		System.out.println(numHit);
 		return numHit >= (this.type.getRequiredPoints().length) - 1;
+	}
+	
+	public float getHarvestLevel() {
+		float amt = 0;
+		int pointCount = 0;
+		for (MaterialPoint point : points) {
+			Material material = DataLoader.INSTANCE.getMaterial(point.material);
+			if (material != null && material.getHarvestLevel() != -1) {
+				pointCount++;
+				amt += material.getHarvestLevel();
+			}
+		}
+		amt /= (float) pointCount;
+		return amt;
 	}
 }

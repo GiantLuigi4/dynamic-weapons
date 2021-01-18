@@ -3,5 +3,6 @@
   "weight": 3,
   "efficiency": 0.3,
   "attack": 7,
-  "item": "minecraft:brick"
+  "item": "minecraft:brick",
+  "harvestLevel": 0.1
 }

@@ -3,5 +3,6 @@
   "weight": 1,
   "efficiency": 0.4,
   "attack": 5,
-  "item": "minecraft:cobblestone"
+  "item": "minecraft:cobblestone",
+  "harvestLevel": 1
 }

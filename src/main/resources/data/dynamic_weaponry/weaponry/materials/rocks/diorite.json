@@ -3,5 +3,6 @@
   "weight": 1.2,
   "efficiency": 0.5,
   "attack": 2.8,
-  "item": "minecraft:diorite"
+  "item": "minecraft:diorite",
+  "harvestLevel": 1
 }

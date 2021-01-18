@@ -3,5 +3,6 @@
   "weight": 0.7,
   "efficiency": 1,
   "attack": 3,
-  "item": "minecraft:andesite"
+  "item": "minecraft:andesite",
+  "harvestLevel": 1
 }

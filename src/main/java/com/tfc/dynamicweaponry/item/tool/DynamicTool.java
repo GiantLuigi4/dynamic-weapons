@@ -84,7 +84,7 @@ public class DynamicTool extends Item {
 			list.add(new StringTextComponent(""));
 		}
 		
-		list.add(new StringTextComponent("Stats:").mergeStyle(TextFormatting.GRAY));
+		list.add(new StringTextComponent("General Stats:").mergeStyle(TextFormatting.GRAY));
 		list.add(new StringTextComponent(
 				" Weight: ").mergeStyle(TextFormatting.DARK_GREEN).append(new StringTextComponent(
 				String.valueOf(Math.round(tool.getWeight() * 100) / 100f)).mergeStyle(TextFormatting.RED))
@@ -134,11 +134,19 @@ public class DynamicTool extends Item {
 						" " + typeText + " Speed: ").mergeStyle(TextFormatting.DARK_GREEN).append(new StringTextComponent(
 						String.valueOf(Math.round(toolPower * 100) / 100f)).mergeStyle(TextFormatting.RED))
 				);
+				
+				BlockState state = type.equals("pickaxe") ? Blocks.STONE.getDefaultState() : type.equals("axe") ? Blocks.OAK_PLANKS.getDefaultState() : type.equals("shovel") ? Blocks.DIRT.getDefaultState() : type.equals("hoe") ? Blocks.OAK_LEAVES.getDefaultState() : type.equals("sword") ? Blocks.COBWEB.getDefaultState() : Blocks.BEDROCK.getDefaultState();
+				float lvl = tool.calcHarvestLevel(type, state);
+				list.add(new StringTextComponent(
+						" " + typeText + " Level: ").mergeStyle(TextFormatting.DARK_GREEN).append(new StringTextComponent(
+						String.valueOf(Math.round(lvl * 100) / 100f)).mergeStyle(TextFormatting.RED))
+				);
 			});
 		}
 		
 		list.add(new StringTextComponent(""));
 		list.add(new StringTextComponent("When in Main Hand:").mergeStyle(TextFormatting.GRAY));
+//		list.add(new StringTextComponent("Combat Stats:").mergeStyle(TextFormatting.GRAY));
 		list.add(new StringTextComponent(" " + Math.abs(Math.round((tool.getDamage()) * 100) / 100f) + " Attack Damage").mergeStyle(TextFormatting.DARK_GREEN));
 		list.add(new StringTextComponent(" " + Math.abs(Math.round((4 - tool.getAttackSpeed()) * 100) / 100f) + " Attack Speed").mergeStyle(TextFormatting.DARK_GREEN));
 	}
@@ -153,7 +161,10 @@ public class DynamicTool extends Item {
 	public boolean canHarvestBlock(ItemStack stack, BlockState state) {
 		String type = "";
 		
-		if (stack.getMaxDamage() <= stack.getDamage()) {
+		if (
+				stack.getMaxDamage() <= stack.getDamage() ||
+						getHarvestLevel(stack, state.getHarvestTool(), null, state) < state.getHarvestLevel()
+		) {
 			return false;
 		}
 		
@@ -223,18 +234,23 @@ public class DynamicTool extends Item {
 			}
 		}
 		
+		float harvestLvl = getHarvestLevel(stack, state.getHarvestTool(), null, state);
+		int requiredHarvestLvl = state.getHarvestLevel();
+		
+		float efficiency = 1f / (Math.max(1, requiredHarvestLvl) / Math.max(1, harvestLvl));
+		
 		float toolPercent = toolCount / (float) count;
 		
 		if (toolPercent == 0) {
 			float swordPercent = swordCount / (float) count;
 			
 			if (getDestroySpeedMultiplierSword(state) != 1.0F)
-				return (float) (swordPercent * (tool.getEfficiency() * getDestroySpeedMultiplierSword(state)));
+				return (float) (swordPercent * (tool.getEfficiency() * getDestroySpeedMultiplierSword(state))) * efficiency;
 			
-			return super.getDestroySpeed(stack, state);
+			return super.getDestroySpeed(stack, state) * efficiency;
 		}
 		
-		return (float) (toolPercent * (tool.getEfficiency() * 3));
+		return (float) (toolPercent * (tool.getEfficiency() * 3)) * efficiency;
 	}
 	
 	private float getDestroySpeedMultiplierSword(BlockState state) {
@@ -316,5 +332,16 @@ public class DynamicTool extends Item {
 	@Override
 	public int getMaxDamage(ItemStack stack) {
 		return (int) Math.round(new Tool(stack).getDurability());
+	}
+	
+	@Override
+	public int getHarvestLevel(ItemStack stack, ToolType tool, @Nullable PlayerEntity player, @Nullable BlockState state) {
+		if (tool == null) return 0;
+		
+		String type = tool.getName();
+		
+		Tool tool1 = new Tool(stack);
+		
+		return (int) tool1.calcHarvestLevel(type, state);
 	}
 }

@@ -16,6 +16,8 @@ import com.tfc.dynamicweaponry.network.PaintToolPacket;
 import com.tfc.dynamicweaponry.network.ToolPacket;
 import com.tfc.dynamicweaponry.registry.Registry;
 import com.tfc.dynamicweaponry.utils.Point;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.Widget;
@@ -134,7 +136,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		);
 		drawBackground(matrixStack,
 				i + (248 - 73), j,
-				79, 166
+				100, 246
 		);
 		
 		this.minecraft.getTextureManager().bindTexture(new ResourceLocation("textures/gui/container/inventory.png"));
@@ -143,6 +145,9 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
 		matrixStack.push();
 		matrixStack.translate(0, -40, 0);
+		
+		drawString(matrixStack, font, "Draw Tool: " + (drawTool == -1 ? "pixel" : drawTool == 0 ? "rectangle" : "line"),
+				i + 180, j + 60, new Color(255, 255, 255).getRGB());
 		
 		{
 			int r = 128;
@@ -161,6 +166,26 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 						i + 180, j + 110, new Color(r, g, b).getRGB());
 				drawString(matrixStack, font, "Durability: " + Math.round(tool.getDurability()),
 						i + 180, j + 120, new Color(r, g, b).getRGB());
+				
+				String[] types = new String[]{
+						net.minecraftforge.common.ToolType.PICKAXE.getName(),
+						net.minecraftforge.common.ToolType.AXE.getName(),
+						net.minecraftforge.common.ToolType.SHOVEL.getName(),
+						net.minecraftforge.common.ToolType.HOE.getName(),
+						"sword"
+				};
+				int index = 0;
+				for (String type : types) {
+					BlockState state = type.equals("pickaxe") ? Blocks.STONE.getDefaultState() : type.equals("axe") ? Blocks.OAK_PLANKS.getDefaultState() : type.equals("shovel") ? Blocks.DIRT.getDefaultState() : type.equals("hoe") ? Blocks.OAK_LEAVES.getDefaultState() : type.equals("sword") ? Blocks.COBWEB.getDefaultState() : Blocks.BEDROCK.getDefaultState();
+					String typeName = type.substring(0, 1).toUpperCase() + type.substring(1);
+					float lvl = Math.round(tool.calcHarvestLevel(type, state) * 100f) / 100f;
+					if (lvl != 0) {
+						drawString(matrixStack, font, typeName + " Level: " + lvl,
+								i + 180, j + 130 + (index++ * 10), new Color(r, g, b).getRGB());
+//						drawString(matrixStack, font, typeName + " Speed: " + lvl,
+//								i + 180, j + 130 + (index++ * 10), new Color(r, g, b).getRGB());
+					}
+				}
 			} catch (Throwable ignored) {
 				System.out.println(tool);
 			}
@@ -239,8 +264,8 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 							}
 					)
 			);
-			
-			this.buttons.add(output);
+
+//			this.buttons.add(output);
 		}
 		
 		int minX = 0;
@@ -980,6 +1005,10 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 			list.add(new StringTextComponent(
 					"Durability: ").mergeStyle(TextFormatting.GREEN).append(new StringTextComponent(
 					String.valueOf(material.durability)).mergeStyle(TextFormatting.RED))
+			);
+			list.add(new StringTextComponent(
+					"Harvest Level: ").mergeStyle(TextFormatting.GREEN).append(new StringTextComponent(
+					String.valueOf(material.getHarvestLevel())).mergeStyle(TextFormatting.RED))
 			);
 			ClientMaterialInfo materialInfo = AssetLoader.INSTANCE.getMaterial(material.item);
 			list.add(new StringTextComponent(

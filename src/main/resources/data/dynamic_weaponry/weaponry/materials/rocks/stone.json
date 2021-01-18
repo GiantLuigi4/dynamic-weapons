@@ -3,5 +3,6 @@
   "weight": 1,
   "efficiency": 0.4,
   "attack": 5,
-  "item": "minecraft:stone"
+  "item": "minecraft:stone",
+  "harvestLevel": 1
 }

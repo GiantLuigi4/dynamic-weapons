@@ -5,13 +5,17 @@ import com.tfc.dynamicweaponry.data.Material;
 import com.tfc.dynamicweaponry.data.ToolPart;
 import com.tfc.dynamicweaponry.data.ToolType;
 import com.tfc.dynamicweaponry.registry.Registry;
+import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.util.Constants;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
@@ -308,5 +312,35 @@ public class Tool {
 		}
 		
 		return amt;
+	}
+	
+	public float calcHarvestLevel(@Nonnull String type, @Nullable BlockState state) {
+		int toolCount = 0;
+		
+		float harvestLevel = 0;
+		
+		for (ToolComponent component : this.components) {
+			if (component.type != null && component.type.getContributesTo() != null && component.type.getContributesTo().length >= 1) {
+				
+				for (String s : component.type.getContributesTo()) {
+					if (
+							s.equals(type) || (state != null && (
+									state.isToolEffective(net.minecraftforge.common.ToolType.get(s)) ||
+											(s.equals("pickaxe") && Items.NETHERITE_PICKAXE.canHarvestBlock(new ItemStack(Items.NETHERITE_PICKAXE), state)) ||
+											(s.equals("axe") && Items.NETHERITE_AXE.canHarvestBlock(new ItemStack(Items.NETHERITE_AXE), state)) ||
+											(s.equals("shovel") && Items.NETHERITE_SHOVEL.canHarvestBlock(new ItemStack(Items.NETHERITE_SHOVEL), state)) ||
+											(s.equals("hoe") && Items.NETHERITE_HOE.canHarvestBlock(new ItemStack(Items.NETHERITE_HOE), state)) ||
+											(s.equals("sword") && Items.NETHERITE_SWORD.canHarvestBlock(new ItemStack(Items.NETHERITE_SWORD), state))))
+					) {
+						toolCount++;
+						harvestLevel += component.getHarvestLevel();
+					}
+				}
+			}
+		}
+		
+		harvestLevel /= toolCount;
+		
+		return harvestLevel;
 	}
 }

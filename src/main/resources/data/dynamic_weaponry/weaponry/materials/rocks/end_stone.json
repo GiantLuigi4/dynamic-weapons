@@ -3,5 +3,6 @@
   "weight": 2,
   "efficiency": 1,
   "attack": 4,
-  "item": "minecraft:end_stone"
+  "item": "minecraft:end_stone",
+  "harvestLevel": 1
 }

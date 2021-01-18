@@ -113,9 +113,14 @@ public class DataLoader implements IResourceManagerReloadListener {
 				new ResourceLocation(material.getAsJsonPrimitive("item").getAsString())
 		);
 		
-		if (material.has("dyable")) {
+		if (material.has("dyable"))
 			mat.setDyable(material.getAsJsonPrimitive("dyable").getAsBoolean());
-		}
+		
+		if (material.has("tier"))
+			mat.harvestLevel = (material.getAsJsonPrimitive("tier").getAsFloat());
+		
+		if (material.has("harvestLevel"))
+			mat.harvestLevel = (material.getAsJsonPrimitive("harvestLevel").getAsFloat());
 		
 		mat.lock();
 		

@@ -9,8 +9,13 @@ public class Material {
 	public final double attack;
 	public final ResourceLocation item;
 	protected boolean isDyable = false;
+	protected float harvestLevel = 0;
 	
 	private boolean isLocked = false;
+	
+	public float getHarvestLevel() {
+		return harvestLevel;
+	}
 	
 	public Material(int durability, double weight, double efficiency, double attack, ResourceLocation item) {
 		this.durability = durability;

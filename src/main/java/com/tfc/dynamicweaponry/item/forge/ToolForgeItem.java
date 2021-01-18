@@ -11,7 +11,7 @@ public class ToolForgeItem extends BlockItem {
 	}
 	
 	public static Properties getProperties() {
-		Properties properties = new Properties().maxStackSize(1);
+		Properties properties = new Properties().maxStackSize(64);
 		
 		if (FMLEnvironment.dist.isClient()) {
 			properties.setISTER(() -> ToolForgeItemRenderer::new);
