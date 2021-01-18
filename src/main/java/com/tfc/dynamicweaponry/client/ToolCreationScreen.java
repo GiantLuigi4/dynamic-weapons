@@ -646,6 +646,18 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 						(rgb) / (inBounds ? 2 : 4)
 				);
 				
+				if (selectedComponent != null) {
+					for (Point requiredPoint : selectedComponent.type.getRequiredPoints()) {
+						if (requiredPoint.x == x && requiredPoint.y == y) {
+							if (checkPoint(selectedComponent, requiredPoint)) {
+								RenderSystem.color3f(0, 255, 0);
+							} else {
+								RenderSystem.color3f(255, 0, 0);
+							}
+						}
+					}
+				}
+				
 				blit(matrixStack, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0);
 				matrixStack.pop();
 				alternator = !alternator;
@@ -702,6 +714,20 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 					RenderSystem.enableBlend();
 					blit(matrixStack, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0);
 					
+					if (selectedComponent != null) {
+						for (Point requiredPoint : selectedComponent.type.getRequiredPoints()) {
+							if (requiredPoint.x == x && requiredPoint.y == y) {
+								if (checkPoint(selectedComponent, requiredPoint)) {
+									RenderSystem.color4f(0, 255, 0, 0.15f);
+								} else {
+									RenderSystem.color4f(255, 0, 0, 0.15f);
+								}
+							}
+						}
+					}
+					
+					blit(matrixStack, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0);
+					
 					RenderSystem.color4f(
 							1, 1, 1,
 							isSelected ? 1 : 0
@@ -716,6 +742,74 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		
 		RenderSystem.color3f(1, 1, 1);
 		RenderSystem.enableTexture();
+	}
+	
+	private boolean checkPoint(ToolComponent selectedComponent, Point requiredPoint) {
+//		RenderSystem.color3f(255, 0, 0);
+		ArrayList<Point> checkedPoints = new ArrayList<>();
+		ArrayList<Point> justCheckedPoints = new ArrayList<>();
+		ArrayList<Point> checkingPoints = new ArrayList<>();
+		
+		if (selectedComponent.getPoint(requiredPoint.x, requiredPoint.y) != null) checkingPoints.add(requiredPoint);
+		else return false;
+		
+		int numHit = 0;
+		
+		for (Point requiredPoint1 : selectedComponent.type.getRequiredPoints()) {
+			boolean hit = false;
+			
+			if (checkedPoints.contains(requiredPoint1)) {
+				numHit++;
+				continue;
+			} else {
+				checkingPoints.addAll(checkedPoints);
+				checkedPoints.clear();
+			}
+			
+			if (requiredPoint1.equals(requiredPoint)) continue;
+			
+			while (!checkingPoints.isEmpty()) {
+				for (Point p1 : checkingPoints) {
+					for (int xOff = -1; xOff <= 1; xOff++) {
+						for (int yOff = -1; yOff <= 1; yOff++) {
+							if (Math.abs(xOff) == Math.abs(yOff)) continue;
+							
+							Point p = new Point(p1.x + xOff, p1.y + yOff);
+							
+							if (
+									!checkedPoints.contains(p) &&
+											!justCheckedPoints.contains(p) &&
+											!checkingPoints.contains(p) &&
+											selectedComponent.getPoint(p.x, p.y) != null
+							) {
+								justCheckedPoints.add(p);
+								
+								if (p.x == requiredPoint1.x && p.y == requiredPoint1.y) {
+									hit = true;
+									break;
+								}
+							}
+						}
+						
+						if (hit) break;
+					}
+					
+					if (hit) break;
+				}
+				checkingPoints.clear();
+				checkingPoints.addAll(justCheckedPoints);
+				checkedPoints.addAll(checkingPoints);
+				justCheckedPoints.clear();
+				
+				if (hit) {
+					numHit++;
+					break;
+				}
+			}
+		}
+		
+		System.out.println(numHit);
+		return numHit >= (selectedComponent.type.getRequiredPoints().length) - 1;
 	}
 	
 	private void cyclePart(Button button) {
@@ -807,6 +901,19 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 //
 //		DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new ToolPacket(tool));
 //	}
+	
+	public boolean hasNeighbor(ToolComponent component, Point point) {
+		for (int x = -1; x <= 1; x++) {
+			for (int y = -1; y <= 1; y++) {
+				if (Math.abs(x) != Math.abs(y)) {
+					MaterialPoint point1 = tool.getPoint(point.x + x, point.y + y);
+					if (point1 != null) return true;
+					break;
+				}
+			}
+		}
+		return false;
+	}
 	
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {

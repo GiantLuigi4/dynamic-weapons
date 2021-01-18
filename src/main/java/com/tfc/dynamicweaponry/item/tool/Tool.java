@@ -255,17 +255,23 @@ public class Tool {
 	
 	public boolean hasIncompatibility(ToolPart toolPart) {
 		for (ToolComponent component : components) {
-			ToolPart componentPart = toolPart.toolType.getPart(component.type.name);
-			if (
-					toolPart.type != null &&
-							component.type != null &&
-							componentPart != null &&
-							toolPart.listIndex ==
-									componentPart.listIndex &&
-							!component.points.isEmpty() &&
-							!toolPart.type.name.equals(component.type.name)
-			) {
-				return true;
+			if (toolPart.toolType == null) return true;
+			try {
+				ToolPart componentPart = toolPart.toolType.getPart(component.type.name);
+				if (
+						toolPart.type != null &&
+								component.type != null &&
+								componentPart != null &&
+								toolPart.listIndex ==
+										componentPart.listIndex &&
+								!component.points.isEmpty() &&
+								!toolPart.type.name.equals(component.type.name)
+				) {
+					return true;
+				}
+			} catch (Throwable err) {
+				err.printStackTrace();
+				return false;
 			}
 		}
 		for (ToolPart incompatibility : toolPart.getIncompatibilities()) {
