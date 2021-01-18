@@ -15,6 +15,7 @@
   "tooltip.dynamic_weaponry.durability": "Durability: %val%",
   "tooltip.dynamic_weaponry.cooldown": "Cooldown: %val%",
   "tooltip.dynamic_weaponry.attack": "Attack: %val%",
+  "tooltip.dynamic_weaponry.broken": "BROKEN: all stats are nullified",
   "problem.dynamic_weaponry.part_incompatibility": "%type1% is incompatible with %type2%.",
   "problem.dynamic_weaponry.part_dependency": "%type1% requires %type2%, but only %type1% is present.",
   "button.dynamic_weaponry.toggle_tool_switcher": "Toggle Tool Switcher",

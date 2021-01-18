@@ -80,10 +80,14 @@ public class Tool {
 		
 		if (divisor != 0)
 			amt /= (divisor);
-
-//		amt -= Math.max(0,20-count);
 		
-		return amt + (getWeight() / 20f) - 1;
+		amt += (getWeight() / 40f) - 1;
+		if (getAttackSpeed() >= 3.99) {
+			double speed = MathHelper.lerp(0.25, ((getWeight()) * (0.1 / getEfficiency())), 1.6) / 2f;
+			amt *= (3f / (speed - 3.99));
+		}
+		
+		return amt;
 	}
 	
 	public double getWeight() {

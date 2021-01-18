@@ -13,7 +13,13 @@ public class PartType {
 	public final int renderLayer;
 	public ResourceLocation name;
 	
+	protected String[] contributesTo = null;
+	
 	private boolean isLocked = false;
+	
+	public String[] getContributesTo() {
+		return contributesTo;
+	}
 	
 	public PartType(ResourceLocation name, Point min, Point max, int renderLayer) {
 		this.name = name;

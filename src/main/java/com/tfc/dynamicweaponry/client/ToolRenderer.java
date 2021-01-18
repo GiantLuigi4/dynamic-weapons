@@ -30,7 +30,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 	public static final ToolRenderer render = new ToolRenderer();
 	
 	private static final Object2ObjectLinkedOpenHashMap<CompoundNBT, CustomBuffer> bufferCache = new Object2ObjectLinkedOpenHashMap<>();
-	private static final Object2ObjectLinkedOpenHashMap<CompoundNBT, Tool> toolCache = new Object2ObjectLinkedOpenHashMap<>();
+//	private static final Object2ObjectLinkedOpenHashMap<CompoundNBT, Tool> toolCache = new Object2ObjectLinkedOpenHashMap<>();
 	
 	private static final Quaternion quat90X = new Quaternion(90, 0, 0, true);
 	private static final Quaternion quat180X = new Quaternion(180, 0, 0, true);
@@ -38,8 +38,6 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 	
 	@Override
 	public void func_239207_a_(ItemStack stack, ItemCameraTransforms.TransformType p_239207_2_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
-		if (!stack.getOrCreateTag().contains("HideFlags")) stack.getOrCreateTag().putInt("HideFlags", 2);
-		
 		if (Config.CLIENT.cacheBuffers.get() && !(buffer instanceof CustomBuffer)) {
 			CustomBuffer builder;
 
@@ -97,12 +95,11 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 			return;
 		}
 
-//		super.func_239207_a_(stack, p_239207_2_, matrixStack, buffer, combinedLight, combinedOverlay);
-//		RenderHelper.drawBox(matrixStack, new AxisAlignedBB(0, 0, 0.45, 1, 1, 0.55f), 1, 1, 1, 1);
 		matrixStack.push();
 		if (!Config.CLIENT.cacheBuffers.get()) {
 			matrixStack.translate(0, 0, 0.45);
 			matrixStack.scale(1f / 4, 1f / 4, 1f / 4);
+			
 			if (p_239207_2_.equals(ItemCameraTransforms.TransformType.GUI)) {
 				matrixStack.scale(0.86f, 0.86f, 1);
 				matrixStack.translate(0.35f, 0.35f, 0);
@@ -111,12 +108,14 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 		}
 		
 		Tool tool;
-		if (
-				!toolCache.containsKey(stack.getOrCreateTag())
-		) {
-			tool = new Tool(stack);
-			toolCache.put(stack.getOrCreateTag(), tool);
-		} else tool = toolCache.get(stack.getOrCreateTag());
+
+//		if (
+//				!toolCache.containsKey(stack.getOrCreateTag())
+//		) {
+		tool = new Tool(stack);
+//			toolCache.put(stack.getOrCreateTag(), tool);
+//		} else tool = toolCache.get(stack.getOrCreateTag());
+		
 		tool.sort();
 		boolean hasRenderedAnything = false;
 		
@@ -236,14 +235,15 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 					(normalU.getZ() * normalV.getX()) - (normalU.getX() * normalV.getZ()),
 					(normalU.getX() * normalV.getY()) - (normalU.getY() * normalV.getX())
 			);
+
+//			normal.mul(0.5f);
+
+//			if (!Config.CLIENT.cacheBuffers.get()) {
+			Matrix3f matrix3f = matrixStack.getLast().getNormal();
+			normal.transform(matrix3f);
+//			}
 			
 			normal.normalize();
-			normal.mul(0.5f);
-			
-			if (!Config.CLIENT.cacheBuffers.get()) {
-				Matrix3f matrix3f = matrixStack.getLast().getNormal();
-				normal.transform(matrix3f);
-			}
 		} else {
 			normal = new Vector3f(0, 1, 0);
 		}
@@ -255,6 +255,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 				combinedOverlay, combinedLight,
 				normal.getX(), normal.getY(), normal.getZ()
 		);
+		
 		builder.addVertex(
 				corner2.getX(), corner2.getY(), corner2.getZ(),
 				r, g, b, 1,
@@ -262,6 +263,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 				combinedOverlay, combinedLight,
 				normal.getX(), normal.getY(), normal.getZ()
 		);
+		
 		builder.addVertex(
 				corner3.getX(), corner3.getY(), corner3.getZ(),
 				r, g, b, 1,
@@ -269,6 +271,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 				combinedOverlay, combinedLight,
 				normal.getX(), normal.getY(), normal.getZ()
 		);
+		
 		builder.addVertex(
 				corner4.getX(), corner4.getY(), corner4.getZ(),
 				r, g, b, 1,

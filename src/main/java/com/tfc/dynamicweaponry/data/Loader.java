@@ -221,6 +221,12 @@ public class Loader implements IResourceManagerReloadListener {
 				Integer.parseInt(properties.getValue("order"))
 		);
 		
+		if (properties.getEntries().contains("contributesTo")) {
+			type.contributesTo = properties.getValue("contributesTo").split(",");
+		} else {
+			type.contributesTo = new String[0];
+		}
+		
 		for (int i = 0; i < reqPoints; i++) {
 			int pointX = Integer.parseInt(properties.getValue("requiredPoint" + (i + 1) + "_X"));
 			int pointY = Integer.parseInt(properties.getValue("requiredPoint" + (i + 1) + "_Y"));
@@ -229,7 +235,7 @@ public class Loader implements IResourceManagerReloadListener {
 		}
 		
 		type.lock();
-
+		
 		INSTANCE.partTypes.put(location, type);
 		INSTANCE.partTypesRaw.put(location, data);
 	}

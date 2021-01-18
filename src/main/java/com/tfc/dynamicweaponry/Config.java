@@ -31,7 +31,7 @@ public class Config {
 				.define("UseOutlines", true);
 		
 		cacheBuffers = builder
-				.comment("Whether or not to apply cache vertex buffers of custom tools. (Higher RAM usage, doesn't affect visuals, but does increase performance)")
+				.comment("Whether or not to cache vertex buffers of custom tools. (Higher RAM usage, doesn't affect visuals, but does increase performance. If this is on, shading and outlines will be calculated once, and thus won't really affect performance)")
 				.translation("config.dynamic_weaponry.cache_buffers")
 				.define("CacheBuffers", true);
 		
