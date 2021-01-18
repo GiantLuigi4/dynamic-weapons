@@ -103,7 +103,7 @@ public class Shading {
 		float distMin = Math.min(dist, dist1);
 		float distMax = Math.max(dist, dist1);
 		
-		if (materialInfo != null && materialInfo.pattern != null) {
+		if (Config.CLIENT.useMaterialPatterns.get() && materialInfo.pattern != null) {
 			int sizeLeft = 0;
 			int sizeRight = 0;
 			boolean hitLeft = false;
