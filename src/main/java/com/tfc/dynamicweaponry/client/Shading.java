@@ -2,7 +2,7 @@ package com.tfc.dynamicweaponry.client;
 
 import com.tfc.assortedutils.utils.Color;
 import com.tfc.dynamicweaponry.Config;
-import com.tfc.dynamicweaponry.data.Loader;
+import com.tfc.dynamicweaponry.data.DataLoader;
 import com.tfc.dynamicweaponry.data.Material;
 import com.tfc.dynamicweaponry.item.tool.MaterialPoint;
 import com.tfc.dynamicweaponry.item.tool.Tool;
@@ -82,8 +82,9 @@ public class Shading {
 //		dist1 /= 15f;
 //		dist1 *= shades.length - 1;
 		
-		Material material = Loader.INSTANCE.getMaterial(point.material);
-		Color c = new Color(isBorder ? material.colorBorder : material.color);
+		Material material = DataLoader.INSTANCE.getMaterial(point.material);
+		ClientMaterialInfo materialInfo = AssetLoader.INSTANCE.getMaterial(material.item);
+		Color c = new Color(isBorder ? materialInfo.colorBorder : materialInfo.color);
 
 //		return new Color(
 //				(int) (c.getRed() * shades[(int) dist]),
@@ -101,6 +102,88 @@ public class Shading {
 		
 		float distMin = Math.min(dist, dist1);
 		float distMax = Math.max(dist, dist1);
+		
+		if (materialInfo != null && materialInfo.pattern != null) {
+			int sizeLeft = 0;
+			int sizeRight = 0;
+			boolean hitLeft = false;
+			boolean hitRight = false;
+			
+			int sizeTop = 0;
+			int sizeBottom = 0;
+			boolean hitTop = false;
+			boolean hitBottom = false;
+			
+			for (int index = 0; index < 16; index++) {
+				if (!hitLeft) {
+					MaterialPoint point1 = tool.getPoint(point.x - index, point.y);
+					if (
+							point1 == null ||
+									!point1.material.equals(point.material)
+					) hitLeft = true;
+					else sizeLeft++;
+				}
+				if (!hitRight) {
+					MaterialPoint point1 = tool.getPoint(point.x + index, point.y);
+					if (
+							point1 == null ||
+									!point1.material.equals(point.material)
+					) hitRight = true;
+					else sizeRight++;
+				}
+				if (!hitTop) {
+					MaterialPoint point1 = tool.getPoint(point.x, point.y + index);
+					if (
+							point1 == null ||
+									!point1.material.equals(point.material)
+					) hitTop = true;
+					else sizeTop++;
+				}
+				if (!hitBottom) {
+					MaterialPoint point1 = tool.getPoint(point.x, point.y - index);
+					if (
+							point1 == null ||
+									!point1.material.equals(point.material)
+					) hitBottom = true;
+					else sizeBottom++;
+				}
+				if (
+						hitLeft &&
+								hitRight &&
+								hitTop &&
+								hitBottom
+				) break;
+			}
+			
+			int[][] pattern = materialInfo.getPattern();
+			
+			try {
+				int totalSizeY = sizeTop + sizeBottom;
+//				float patProgressY = sizeTop / (float) totalSizeY;
+//				float entryY = (int) (patProgressY * (pattern.length));
+//				if (entryY < pattern.length/2f) entryY = (float)Math.floor(entryY);
+//				else entryY = (float)Math.ceil(entryY);
+				float entryY = (sizeTop / (float) totalSizeY) * pattern.length;
+				if (sizeTop == 1) entryY = 0;
+				if (sizeBottom == 1) entryY = pattern.length - 1;
+				int[] row = pattern[((int) (entryY))];
+				
+				int totalSizeX = sizeLeft + sizeRight;
+//				float patProgressX = sizeLeft / (float) totalSizeX;
+//				float entryX = (patProgressX * (row.length));
+//				if (entryX <= row.length/2f) entryX = (float)Math.floor(entryX-1);
+//				else entryX = (float)Math.ceil(entryX-1);
+				float entryX = (sizeLeft / (float) totalSizeX) * row.length;
+				if (sizeLeft == 1) entryX = 0;
+				if (sizeRight == 1) entryX = row.length - 1;
+				int col = row[((int) (entryX))];
+
+//			isBorder ? material.colorBorder : material.color
+				c = new Color(col);
+			} catch (Throwable err) {
+				err.printStackTrace();
+			}
+		}
 		
 		Color c1 = c.darker(
 				shades[(int) ((distMin / distMax) * (shades.length - 1))],

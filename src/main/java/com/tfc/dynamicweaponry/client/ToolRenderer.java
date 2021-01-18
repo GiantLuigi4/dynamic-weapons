@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.tfc.assortedutils.utils.Color;
 import com.tfc.assortedutils.utils.CustomBuffer;
 import com.tfc.dynamicweaponry.Config;
-import com.tfc.dynamicweaponry.data.Loader;
+import com.tfc.dynamicweaponry.data.DataLoader;
 import com.tfc.dynamicweaponry.data.Material;
 import com.tfc.dynamicweaponry.item.tool.MaterialPoint;
 import com.tfc.dynamicweaponry.item.tool.Tool;
@@ -23,6 +23,8 @@ import net.minecraft.util.math.vector.Matrix3f;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector4f;
+
+import java.util.ConcurrentModificationException;
 //import org.codehaus.plexus.util.FastMap;
 //import net.minecraft.client.renderer.texture.OverlayTexture;
 
@@ -31,6 +33,10 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 	
 	private static final Object2ObjectLinkedOpenHashMap<CompoundNBT, CustomBuffer> bufferCache = new Object2ObjectLinkedOpenHashMap<>();
 //	private static final Object2ObjectLinkedOpenHashMap<CompoundNBT, Tool> toolCache = new Object2ObjectLinkedOpenHashMap<>();
+	
+	public void resetCaches() {
+		bufferCache.clear();
+	}
 	
 	private static final Quaternion quat90X = new Quaternion(90, 0, 0, true);
 	private static final Quaternion quat180X = new Quaternion(180, 0, 0, true);
@@ -62,35 +68,40 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 				builder = bufferCache.get(stack.getOrCreateTag());
 			}
 			
-			for (CustomBuffer.CustomVertexBuilder builder2 : builder.builders) {
-				IVertexBuilder builder1 = buffer.getBuffer(builder2.type);
-				for (CustomBuffer.Vertex vert : builder2.vertices) {
-					Vector3f vector3f = translate(matrixStack, (float) vert.x, (float) vert.y, (float) vert.z);
-					Vector3f normal;
-					if (p_239207_2_.equals(ItemCameraTransforms.TransformType.GUI))
-						normal = new Vector3f(0, 1, 0);
-					else
-						normal = new Vector3f(vert.nx, vert.ny, vert.nz);
-					Matrix3f matrix3f = matrixStack.getLast().getNormal();
-					normal.transform(matrix3f);
-					normal.normalize();
-					builder1.addVertex(
-							vector3f.getX(),
-							vector3f.getY(),
-							vector3f.getZ(),
-							vert.r / 255f,
-							vert.g / 255f,
-							vert.b / 255f,
-							vert.a / 255f,
-							vert.u, vert.v,
-							combinedOverlay, combinedLight,
-							normal.getX(), normal.getY(), normal.getZ()
-					);
+			try {
+				for (CustomBuffer.CustomVertexBuilder builder2 : builder.builders) {
+					IVertexBuilder builder1 = buffer.getBuffer(builder2.type);
+					for (CustomBuffer.Vertex vert : builder2.vertices) {
+						Vector3f vector3f = translate(matrixStack, (float) vert.x, (float) vert.y, (float) vert.z);
+						Vector3f normal;
+						if (p_239207_2_.equals(ItemCameraTransforms.TransformType.GUI))
+							normal = new Vector3f(0, 1, 0);
+						else
+							normal = new Vector3f(vert.nx, vert.ny, vert.nz);
+						Matrix3f matrix3f = matrixStack.getLast().getNormal();
+						normal.transform(matrix3f);
+						normal.normalize();
+						builder1.addVertex(
+								vector3f.getX(),
+								vector3f.getY(),
+								vector3f.getZ(),
+								vert.r / 255f,
+								vert.g / 255f,
+								vert.b / 255f,
+								vert.a / 255f,
+								vert.u, vert.v,
+								combinedOverlay, combinedLight,
+								normal.getX(), normal.getY(), normal.getZ()
+						);
+					}
 				}
+			} catch (ConcurrentModificationException err) {
+				err.printStackTrace();
 			}
 			matrixStack.pop();
 			
-			bufferCache.put(stack.getOrCreateTag(), builder);
+			if (!bufferCache.containsKey(stack.getOrCreateTag()))
+				bufferCache.put(stack.getOrCreateTag(), builder);
 			
 			return;
 		}
@@ -125,7 +136,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 		for (ToolComponent component : tool.components) {
 			try {
 				for (MaterialPoint point : component.points) {
-					Material material = Loader.INSTANCE.getMaterial(point.material);
+					Material material = DataLoader.INSTANCE.getMaterial(point.material);
 					
 					if (material != null) {
 						Color color = Shading.shade(point, tool, component);

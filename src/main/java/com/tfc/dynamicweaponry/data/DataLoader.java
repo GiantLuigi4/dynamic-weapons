@@ -4,6 +4,8 @@ import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
 import com.tfc.dynamicweaponry.DynamicWeaponry;
 import com.tfc.dynamicweaponry.block.ToolForgeTileEntity;
+import com.tfc.dynamicweaponry.client.AssetLoader;
+import com.tfc.dynamicweaponry.client.ToolRenderer;
 import com.tfc.dynamicweaponry.network.DataPacket;
 import com.tfc.dynamicweaponry.utils.Point;
 import net.minecraft.client.Minecraft;
@@ -29,10 +31,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class Loader implements IResourceManagerReloadListener {
+public class DataLoader implements IResourceManagerReloadListener {
 	private static final Gson gson = new GsonBuilder().create();
 	
-	public static final Loader INSTANCE = new Loader();
+	public static final DataLoader INSTANCE = new DataLoader();
 	
 	public static boolean needsGlobalRefresh = false;
 	
@@ -68,6 +70,7 @@ public class Loader implements IResourceManagerReloadListener {
 	public static void resyncData(ServerPlayerEntity entity) {
 		if (FMLEnvironment.dist.isClient()) {
 			if (Minecraft.getInstance().player != null && Minecraft.getInstance().player.getUniqueID().equals(entity.getUniqueID())) {
+				ToolRenderer.getInstance().resetCaches();
 				return;
 			}
 		}
@@ -102,33 +105,31 @@ public class Loader implements IResourceManagerReloadListener {
 	private static void parseMaterial(ResourceLocation resourceLocation, String data) {
 		JsonObject material = gson.fromJson(data, JsonObject.class);
 		
-		boolean hasBorderColor = material.has("borderColor");
+		Material mat = new Material(
+				material.getAsJsonPrimitive("durability").getAsInt(),
+				material.getAsJsonPrimitive("weight").getAsDouble(),
+				material.getAsJsonPrimitive("efficiency").getAsDouble(),
+				material.getAsJsonPrimitive("attack").getAsDouble(),
+				new ResourceLocation(material.getAsJsonPrimitive("item").getAsString())
+		);
 		
-		Material mat;
-		if (hasBorderColor) {
-			mat = new Material(
-					material.getAsJsonPrimitive("color").getAsInt(),
-					material.getAsJsonPrimitive("borderColor").getAsInt(),
-					material.getAsJsonPrimitive("durability").getAsInt(),
-					material.getAsJsonPrimitive("weight").getAsDouble(),
-					material.getAsJsonPrimitive("efficiency").getAsDouble(),
-					material.getAsJsonPrimitive("attack").getAsDouble(),
-					new ResourceLocation(material.getAsJsonPrimitive("item").getAsString())
-			);
-		} else {
-			mat = new Material(
-					material.getAsJsonPrimitive("color").getAsInt(),
-					material.getAsJsonPrimitive("durability").getAsInt(),
-					material.getAsJsonPrimitive("weight").getAsDouble(),
-					material.getAsJsonPrimitive("efficiency").getAsDouble(),
-					material.getAsJsonPrimitive("attack").getAsDouble(),
-					new ResourceLocation(material.getAsJsonPrimitive("item").getAsString())
-			);
+		if (material.has("dyable")) {
+			mat.setDyable(material.getAsJsonPrimitive("dyable").getAsBoolean());
 		}
+		
+		mat.lock();
 		
 		ResourceLocation location = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().substring("weaponry/materials/".length()).replace(".json", ""));
 		INSTANCE.materials.put(location, mat);
 		INSTANCE.materialsRaw.put(resourceLocation, data);
+		
+		if (FMLEnvironment.dist.isClient()) {
+			parseClientMaterialInfo(material);
+		}
+	}
+	
+	private static void parseClientMaterialInfo(JsonObject material) {
+		AssetLoader.INSTANCE.parseMaterial(material);
 	}
 	
 	private static void parseToolTypes(ResourceLocation resourceLocation, String data) {
@@ -258,6 +259,8 @@ public class Loader implements IResourceManagerReloadListener {
 		{
 			parseToolTypes(new ResourceLocation("server:tools"), packet.tools);
 		}
+		
+		ToolRenderer.getInstance().resetCaches();
 	}
 	
 	public Material getMaterial(ResourceLocation location) {

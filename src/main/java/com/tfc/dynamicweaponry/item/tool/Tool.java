@@ -1,6 +1,6 @@
 package com.tfc.dynamicweaponry.item.tool;
 
-import com.tfc.dynamicweaponry.data.Loader;
+import com.tfc.dynamicweaponry.data.DataLoader;
 import com.tfc.dynamicweaponry.data.Material;
 import com.tfc.dynamicweaponry.data.ToolPart;
 import com.tfc.dynamicweaponry.data.ToolType;
@@ -63,7 +63,7 @@ public class Tool {
 			HashMap<Material, Integer> counts = new HashMap<>();
 			
 			for (MaterialPoint point : component.points) {
-				Material mat = Loader.INSTANCE.getMaterial(point.material);
+				Material mat = DataLoader.INSTANCE.getMaterial(point.material);
 				if (mat == null || mat.item == null || mat.item.toString().equals("minecraft:air")) continue;
 				count++;
 				if (!counts.containsKey(mat)) counts.put(mat, 1);
@@ -94,7 +94,7 @@ public class Tool {
 		double amt = 0;
 		for (ToolComponent component : this.components) {
 			for (MaterialPoint point : component.points) {
-				Material mat = Loader.INSTANCE.getMaterial(point.material);
+				Material mat = DataLoader.INSTANCE.getMaterial(point.material);
 				if (mat != null)
 					amt += mat.weight;
 			}
@@ -119,7 +119,7 @@ public class Tool {
 			HashMap<Material, Integer> counts = new HashMap<>();
 			
 			for (MaterialPoint point : component.points) {
-				Material mat = Loader.INSTANCE.getMaterial(point.material);
+				Material mat = DataLoader.INSTANCE.getMaterial(point.material);
 				count++;
 				if (point.material == null) continue;
 				if (!counts.containsKey(mat)) counts.put(mat, 1);
@@ -154,7 +154,7 @@ public class Tool {
 		
 		for (ToolComponent component : this.components) {
 			for (MaterialPoint point : component.points) {
-				Material mat = Loader.INSTANCE.getMaterial(point.material);
+				Material mat = DataLoader.INSTANCE.getMaterial(point.material);
 //				count++;
 //				if (!counts.containsKey(mat)) counts.put(mat, 1);
 //				else counts.replace(mat, counts.get(mat) + 1);
@@ -239,7 +239,7 @@ public class Tool {
 	}
 	
 	public boolean isPartCompatible(ResourceLocation type) {
-		ToolType toolType = Loader.INSTANCE.toolTypes.get(new ResourceLocation(name));
+		ToolType toolType = DataLoader.INSTANCE.toolTypes.get(new ResourceLocation(name));
 		
 		if (toolType == null) return true;
 		

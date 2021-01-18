@@ -1,7 +1,7 @@
 package com.tfc.dynamicweaponry.network;
 
 import com.tfc.assortedutils.API.networking.SimplePacket;
-import com.tfc.dynamicweaponry.data.Loader;
+import com.tfc.dynamicweaponry.data.DataLoader;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -15,7 +15,7 @@ public class DataPacket extends SimplePacket {
 	
 	public DataPacket(PacketBuffer buffer) {
 		readPacketData(buffer);
-		if (FMLEnvironment.dist.isClient()) Loader.deserializePacket(this);
+		if (FMLEnvironment.dist.isClient()) DataLoader.deserializePacket(this);
 	}
 	
 	public DataPacket(String[] materials, String[] parts, String tools) {

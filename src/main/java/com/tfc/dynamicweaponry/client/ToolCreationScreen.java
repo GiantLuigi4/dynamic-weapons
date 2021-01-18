@@ -27,7 +27,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer> {
@@ -81,17 +80,23 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		if (minecraft != null && minecraft.player != null) {
 			for (int i = 0; i < 9; i++) {
 				ItemSlot slot = new ItemSlot(minecraft.player.inventory, i, i * 18 + 8, 182);
-				Material material = Loader.INSTANCE.getMaterial(slot.get().getItem().getRegistryName());
-				if (material != null) slot.color = new Color(material.color);
-				else slot.color = new Color(255, 255, 255);
+				Material material = DataLoader.INSTANCE.getMaterial(slot.get().getItem().getRegistryName());
+				if (material != null) {
+					ClientMaterialInfo materialInfo = AssetLoader.INSTANCE.getMaterial(material.item);
+					if (materialInfo != null) slot.color = new Color(materialInfo.color);
+					else slot.color = new Color(255, 255, 255);
+				}
 				slots.add(slot);
 			}
 			
 			for (int i = 9; i < 36; i++) {
 				ItemSlot slot = new ItemSlot(minecraft.player.inventory, i, (i % 9) * 18 + 8, 106 + (i / 9) * 18);
-				Material material = Loader.INSTANCE.getMaterial(slot.get().getItem().getRegistryName());
-				if (material != null) slot.color = new Color(material.color);
-				else slot.color = new Color(255, 255, 255);
+				Material material = DataLoader.INSTANCE.getMaterial(slot.get().getItem().getRegistryName());
+				if (material != null) {
+					ClientMaterialInfo materialInfo = AssetLoader.INSTANCE.getMaterial(material.item);
+					if (materialInfo != null) slot.color = new Color(materialInfo.color);
+					else slot.color = new Color(255, 255, 255);
+				}
 				slots.add(slot);
 			}
 		}
@@ -179,7 +184,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 							(button) -> {
 								isSwitcherOpen = !isSwitcherOpen;
 								isToolSwitcher = true;
-								ResourceLocation[] locations = Loader.INSTANCE.toolTypes.keySet().toArray(new ResourceLocation[0]);
+								ResourceLocation[] locations = DataLoader.INSTANCE.toolTypes.keySet().toArray(new ResourceLocation[0]);
 								for (int i1 = 0; i1 < locations.length; i1++) {
 									if (locations[i1].toString().equals(tool.name)) {
 										switcherIndex = i1;
@@ -195,7 +200,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 					(new TranslationTextComponent("button.dynamic_weaponry.toggle_part_switcher")),
 //					this::cyclePart
 					(button1) -> {
-						ToolType type = Loader.INSTANCE.toolTypes.get(new ResourceLocation(tool.name));
+						ToolType type = DataLoader.INSTANCE.toolTypes.get(new ResourceLocation(tool.name));
 						ToolPart[] parts = type.getParts();
 						
 						ArrayList<ResourceLocation> locations1 = new ArrayList<>();
@@ -244,7 +249,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		int maxY = -1;
 		
 		if (!currentPart.equals("")) {
-			PartType type = Loader.INSTANCE.partTypes.get(new ResourceLocation(currentPart));
+			PartType type = DataLoader.INSTANCE.partTypes.get(new ResourceLocation(currentPart));
 			
 			if (type != null) {
 				minX = type.min.x;
@@ -286,9 +291,11 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		
 		matrixStack.push();
 		
+		for (ItemSlot slot : slots) slot.render(matrixStack, mouseX, mouseY, i, j, this);
+		
 		for (ItemSlot slot : slots) {
 			slot.renderToolTip = !isSwitcherOpen;
-			slot.render(matrixStack, mouseX, mouseY, i, j, this);
+			slot.renderTooltip(matrixStack, mouseX, mouseY, i, j, this);
 		}
 		
 		matrixStack.pop();
@@ -296,23 +303,10 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		if (isSwitcherOpen) {
 			matrixStack.push();
 			matrixStack.translate(0, 0, 200);
-			List<ResourceLocation> locations = Collections.emptyList();
+			List<ResourceLocation> locations;
 			
 			if (!isToolSwitcher) {
-//				int index = 0;
-//				ResourceLocation[] typeNames = Loader.INSTANCE.toolTypes.keySet().toArray(new ResourceLocation[0]);
-//				ToolType[] types = Loader.INSTANCE.toolTypes.values().toArray(new ToolType[0]);
-//
-//				for (ResourceLocation location : typeNames) {
-//					if (location.toString().equals(tool.name)) {
-//						break;
-//					}
-//
-//					index++;
-//				}
-//
-//				ToolType type = types[index];
-				ToolType type = Loader.INSTANCE.toolTypes.get(new ResourceLocation(tool.name));
+				ToolType type = DataLoader.INSTANCE.toolTypes.get(new ResourceLocation(tool.name));
 				ToolPart[] parts = type.getParts();
 				
 				ArrayList<ResourceLocation> locations1 = new ArrayList<>();
@@ -334,7 +328,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				
 				tool.getComponent(new ResourceLocation(currentPart));
 			} else {
-				locations = new ArrayList<>(Loader.INSTANCE.toolTypes.keySet());
+				locations = new ArrayList<>(DataLoader.INSTANCE.toolTypes.keySet());
 				if (currentTool.equals("")) currentTool = tool.name;
 				String lastTool = currentTool;
 				currentTool = handleSwitcher(
@@ -664,7 +658,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 			boolean selected = component.name.equals(currentPart);
 			
 			for (MaterialPoint point : component.points) {
-				Material material = Loader.INSTANCE.getMaterial(point.material);
+				Material material = DataLoader.INSTANCE.getMaterial(point.material);
 				
 				if (material != null) {
 					Color color = Shading.shade(point, tool, component);
@@ -727,8 +721,8 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 	private void cyclePart(Button button) {
 		try {
 			int index = 0;
-			ResourceLocation[] typeNames = Loader.INSTANCE.toolTypes.keySet().toArray(new ResourceLocation[0]);
-			ToolType[] types = Loader.INSTANCE.toolTypes.values().toArray(new ToolType[0]);
+			ResourceLocation[] typeNames = DataLoader.INSTANCE.toolTypes.keySet().toArray(new ResourceLocation[0]);
+			ToolType[] types = DataLoader.INSTANCE.toolTypes.values().toArray(new ToolType[0]);
 			
 			for (ResourceLocation location : typeNames) {
 				if (location.toString().equals(tool.name)) {
@@ -783,36 +777,36 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 			err.printStackTrace();
 		}
 	}
-	
-	public void cycleTool(Button button) {
-		int index = 0;
-		ResourceLocation[] types = Loader.INSTANCE.toolTypes.keySet().toArray(new ResourceLocation[0]);
-		
-		for (ResourceLocation location : types) {
-			if (location.toString().equals(tool.name)) {
-				break;
-			}
-			
-			index++;
-		}
-		
-		if (index + 1 >= types.length) index = -1;
-		currentTool = types[index + 1].toString();
-		tool.name = currentTool;
-		
-		ResourceLocation name = new ResourceLocation(tool.name);
-		button.setMessage(new TranslationTextComponent("tool_type." + name.getNamespace() + "." + name.getPath().replace("/", ".")));
-		
-		ItemStack newStack = new ItemStack(Registry.DYNAMIC_TOOL.get());
-		CompoundNBT nbt = newStack.getOrCreateTag();
-		CompoundNBT tool_info = new CompoundNBT();
-		cyclePart((Button) (buttons.get(1)));
-		tool_info.putString("tool_type", currentTool);
-		nbt.put("tool_info", tool_info);
-		this.tool = new Tool(newStack);
-		
-		DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new ToolPacket(tool));
-	}
+
+//	public void cycleTool(Button button) {
+//		int index = 0;
+//		ResourceLocation[] types = Loader.INSTANCE.toolTypes.keySet().toArray(new ResourceLocation[0]);
+//
+//		for (ResourceLocation location : types) {
+//			if (location.toString().equals(tool.name)) {
+//				break;
+//			}
+//
+//			index++;
+//		}
+//
+//		if (index + 1 >= types.length) index = -1;
+//		currentTool = types[index + 1].toString();
+//		tool.name = currentTool;
+//
+//		ResourceLocation name = new ResourceLocation(tool.name);
+//		button.setMessage(new TranslationTextComponent("tool_type." + name.getNamespace() + "." + name.getPath().replace("/", ".")));
+//
+//		ItemStack newStack = new ItemStack(Registry.DYNAMIC_TOOL.get());
+//		CompoundNBT nbt = newStack.getOrCreateTag();
+//		CompoundNBT tool_info = new CompoundNBT();
+//		cyclePart((Button) (buttons.get(1)));
+//		tool_info.putString("tool_type", currentTool);
+//		nbt.put("tool_info", tool_info);
+//		this.tool = new Tool(newStack);
+//
+//		DynamicWeaponry.NETWORK_INSTANCE.sendToServer(new ToolPacket(tool));
+//	}
 	
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -834,13 +828,16 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				boolean clicked = slot.click((int) mouseX, (int) mouseY, i, j, this);
 				
 				if (clicked) {
-					Material material = Loader.INSTANCE.getMaterial(slot.get().getItem().getRegistryName());
+					Material material = DataLoader.INSTANCE.getMaterial(slot.get().getItem().getRegistryName());
 					
 					if (material != null) {
 						for (ItemSlot slot1 : slots) {
-							material = Loader.INSTANCE.getMaterial(slot1.get().getItem().getRegistryName());
-							if (material != null) slot1.color = new Color(material.color);
-							else slot1.color = new Color(255, 255, 255);
+							material = DataLoader.INSTANCE.getMaterial(slot1.get().getItem().getRegistryName());
+							if (material != null) {
+								ClientMaterialInfo materialInfo = AssetLoader.INSTANCE.getMaterial(material.item);
+								if (materialInfo != null) slot.color = new Color(materialInfo.color);
+								else slot.color = new Color(255, 255, 255);
+							}
 						}
 						
 						selectedSlot = slot;
@@ -922,7 +919,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 	@Override
 	public List<ITextComponent> getTooltipFromItem(ItemStack itemStack) {
 		ArrayList<ITextComponent> list = new ArrayList(super.getTooltipFromItem(itemStack));
-		Material material = Loader.INSTANCE.getMaterial(itemStack.getItem().getRegistryName());
+		Material material = DataLoader.INSTANCE.getMaterial(itemStack.getItem().getRegistryName());
 		
 		if (material != null) {
 			list.add(new StringTextComponent(
@@ -941,9 +938,10 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 					"Durability: ").mergeStyle(TextFormatting.GREEN).append(new StringTextComponent(
 					String.valueOf(material.durability)).mergeStyle(TextFormatting.RED))
 			);
+			ClientMaterialInfo materialInfo = AssetLoader.INSTANCE.getMaterial(material.item);
 			list.add(new StringTextComponent(
 					"Color: ").mergeStyle(TextFormatting.GREEN).append(new StringTextComponent(
-					String.valueOf(material.color)).mergeStyle(Style.EMPTY.setColor(net.minecraft.util.text.Color.fromInt(material.color))))
+					String.valueOf(materialInfo.color)).mergeStyle(Style.EMPTY.setColor(net.minecraft.util.text.Color.fromInt(materialInfo.color))))
 			);
 		}
 		

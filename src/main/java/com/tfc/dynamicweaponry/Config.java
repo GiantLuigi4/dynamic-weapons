@@ -16,6 +16,7 @@ public class Config {
 	public final ForgeConfigSpec.BooleanValue useShading;
 	public final ForgeConfigSpec.BooleanValue useOutlines;
 	public final ForgeConfigSpec.BooleanValue cacheBuffers;
+	public final ForgeConfigSpec.BooleanValue useMaterialPatterns;
 	
 	public Config(ForgeConfigSpec.Builder builder) {
 		builder.comment("Rendering Settings").push("Client");
@@ -34,6 +35,11 @@ public class Config {
 				.comment("Whether or not to cache vertex buffers of custom tools. (Higher RAM usage, doesn't affect visuals, but does increase performance. If this is on, shading and outlines will be calculated once, and thus won't really affect performance)")
 				.translation("config.dynamic_weaponry.cache_buffers")
 				.define("CacheBuffers", true);
+		
+		useMaterialPatterns = builder
+				.comment("Whether or not to use material patterns on custom tools. (Laggier, but looks better)")
+				.translation("config.dynamic_weaponry.use_material_patterns")
+				.define("UseMaterialPatterns", true);
 		
 		builder.pop();
 	}

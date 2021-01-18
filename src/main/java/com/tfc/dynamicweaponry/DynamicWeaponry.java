@@ -3,8 +3,9 @@ package com.tfc.dynamicweaponry;
 import com.tfc.assortedutils.API.networking.AutomatedSimpleChannel;
 import com.tfc.dynamicweaponry.block.ToolForgeContainer;
 import com.tfc.dynamicweaponry.block.ToolForgeTileEntity;
+import com.tfc.dynamicweaponry.client.AssetLoader;
 import com.tfc.dynamicweaponry.client.Setup;
-import com.tfc.dynamicweaponry.data.Loader;
+import com.tfc.dynamicweaponry.data.DataLoader;
 import com.tfc.dynamicweaponry.item.tool.ToolComponent;
 import com.tfc.dynamicweaponry.network.DataPacket;
 import com.tfc.dynamicweaponry.network.PaintPixelPacket;
@@ -13,7 +14,9 @@ import com.tfc.dynamicweaponry.network.ToolPacket;
 import com.tfc.dynamicweaponry.registry.Registry;
 import com.tfc.dynamicweaponry.registry.RegistryClient;
 import com.tfc.dynamicweaponry.utils.Point;
+import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.container.Container;
+import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -50,9 +53,9 @@ public class DynamicWeaponry {
 		Registry.TILE_ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
 		Registry.CONTAINERS.register(FMLJavaModLoadingContext.get().getModEventBus());
 		
-		MinecraftForge.EVENT_BUS.addListener(Loader::serverStartup);
-		MinecraftForge.EVENT_BUS.addListener(Loader::onPlayerJoin);
-		MinecraftForge.EVENT_BUS.addListener(Loader::tick);
+		MinecraftForge.EVENT_BUS.addListener(DataLoader::serverStartup);
+		MinecraftForge.EVENT_BUS.addListener(DataLoader::onPlayerJoin);
+		MinecraftForge.EVENT_BUS.addListener(DataLoader::tick);
 		
 		NETWORK_INSTANCE.registerPacket(DataPacket.class, DataPacket::new);
 		NETWORK_INSTANCE.registerPacket(ToolPacket.class, ToolPacket::new, (packet, context) -> {
@@ -196,15 +199,18 @@ public class DynamicWeaponry {
 				context.get().setPacketHandled(true);
 			}
 		});
-//		NETWORK_INSTANCE.registerPacket(ToolForgeDataPacket.class, ToolForgeDataPacket::new);
-		
+
 		if (FMLEnvironment.dist.isClient()) {
+			IReloadableResourceManager reloadableResourceManager = (IReloadableResourceManager) Minecraft.getInstance().getResourceManager();
+			reloadableResourceManager.addReloadListener(AssetLoader.INSTANCE);
+			
 			FMLJavaModLoadingContext.get().getModEventBus().addListener(Setup::setup);
 			RegistryClient.CONTAINERS_SCREENS.register(FMLJavaModLoadingContext.get().getModEventBus());
 			
 			ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.clientSpec);
+//			MinecraftForge.EVENT_BUS.addListener(AssetLoader::clientSetup);
 		}
-		
+
 //		MinecraftForge.EVENT_BUS.addListener(DynamicWeaponry::tick);
 	}
 

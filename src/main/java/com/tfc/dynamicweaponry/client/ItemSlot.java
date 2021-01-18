@@ -48,9 +48,11 @@ public class ItemSlot {
 				stack, guiLeft + x, guiTop + y
 		);
 		
+		matrixStack.push();
 		Minecraft.getInstance().getItemRenderer().renderItemOverlayIntoGUI(Minecraft.getInstance().fontRenderer, stack,
 				guiLeft + x, guiTop + y, null
 		);
+		matrixStack.pop();
 		
 		if (
 				mouseX >= guiLeft + x - 1 &&
@@ -75,6 +77,43 @@ public class ItemSlot {
 						0, 0, 16, 16
 				);
 				if (!stack.isEmpty() && renderToolTip) {
+					matrixStack.translate(0, 0, 450);
+					renderTooltip(
+							matrixStack, stack, mouseX, mouseY, screen
+					);
+				}
+				matrixStack.pop();
+			}
+		}
+	}
+	
+	public void renderTooltip(MatrixStack matrixStack, int mouseX, int mouseY, int guiLeft, int guiTop, Screen screen) {
+		ItemStack stack = screen.getMinecraft().player.inventory.getStackInSlot(index);
+		
+		if (
+				mouseX >= guiLeft + x - 1 &&
+						mouseX < guiLeft + x + 17
+		) {
+			if (
+					mouseY >= guiTop + y - 1 &&
+							mouseY < guiTop + y + 17
+			) {
+				RenderSystem.disableTexture();
+				RenderSystem.color4f(
+						1, 1, 1, 0.5f
+				);
+				matrixStack.push();
+				matrixStack.translate(0, 0, 128);
+				RenderSystem.enableAlphaTest();
+				RenderSystem.enableBlend();
+				screen.blit(
+						matrixStack,
+						guiLeft + x,
+						guiTop + y,
+						0, 0, 16, 16
+				);
+				if (!stack.isEmpty() && renderToolTip) {
+					matrixStack.translate(0, 0, 450);
 					renderTooltip(
 							matrixStack, stack, mouseX, mouseY, screen
 					);

@@ -1,7 +1,7 @@
 package com.tfc.dynamicweaponry.item.tool;
 
 import com.tfc.assortedutils.API.nbt.ExtendedCompoundNBT;
-import com.tfc.dynamicweaponry.data.Loader;
+import com.tfc.dynamicweaponry.data.DataLoader;
 import com.tfc.dynamicweaponry.data.PartType;
 import com.tfc.dynamicweaponry.utils.Point;
 import net.minecraft.nbt.CompoundNBT;
@@ -28,7 +28,7 @@ public class ToolComponent implements Comparable<ToolComponent> {
 	
 	public void deserialize(CompoundNBT nbt, ResourcePallet pallet) {
 		name = nbt.getString("name");
-		type = Loader.INSTANCE.partTypes.get(new ResourceLocation(name));
+		type = DataLoader.INSTANCE.partTypes.get(new ResourceLocation(name));
 		
 		points = new ArrayList<>();
 		if (nbt.contains("points")) {
