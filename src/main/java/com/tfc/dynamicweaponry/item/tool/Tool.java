@@ -294,4 +294,19 @@ public class Tool {
 		}
 		return null;
 	}
+	
+	public float getMaterialCost(Material material) {
+		float amt = 0;
+		float matPerPixel = 0.03f;
+		
+		for (ToolComponent component : components) {
+			for (MaterialPoint point : component.points) {
+				if (point.material != null && point.material.equals(material.item)) {
+					amt += matPerPixel;
+				}
+			}
+		}
+		
+		return amt;
+	}
 }

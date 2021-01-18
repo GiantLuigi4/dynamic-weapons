@@ -1,9 +1,12 @@
 package com.tfc.dynamicweaponry.block;
 
+import com.tfc.dynamicweaponry.data.DataLoader;
+import com.tfc.dynamicweaponry.data.Material;
 import com.tfc.dynamicweaponry.item.tool.MaterialPoint;
 import com.tfc.dynamicweaponry.item.tool.Tool;
 import com.tfc.dynamicweaponry.item.tool.ToolComponent;
 import com.tfc.dynamicweaponry.registry.Registry;
+import com.tfc.dynamicweaponry.utils.Point;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ITileEntityProvider;
@@ -20,11 +23,15 @@ import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ToolType;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ToolForge extends Block implements ITileEntityProvider {
 	public ToolForge(Properties properties) {
@@ -89,6 +96,7 @@ public class ToolForge extends Block implements ITileEntityProvider {
 			
 			if (player.isSneaking()) {
 				ItemStack stack = player.getHeldItem(handIn);
+				
 				if (stack.isEmpty()) {
 					CompoundNBT nbt = tileEntity.serializeNBT();
 					ItemStack stack1 = new ItemStack(Registry.DYNAMIC_TOOL.get());
@@ -96,6 +104,7 @@ public class ToolForge extends Block implements ITileEntityProvider {
 					nbt1.put("tool_info", nbt.getCompound("tool"));
 					
 					Tool tool = new Tool(stack1);
+					
 					for (ToolComponent component : tool.components) {
 						for (MaterialPoint point : component.points.toArray(new MaterialPoint[0])) {
 							if (
@@ -107,7 +116,59 @@ public class ToolForge extends Block implements ITileEntityProvider {
 								component.setPoint(point, null);
 							}
 						}
+						
+						for (Point requiredPoint : component.type.getRequiredPoints()) {
+							if (!component.checkPoint(requiredPoint)) {
+								return ActionResultType.FAIL;
+							}
+						}
 					}
+					
+					if (!player.isCreative()) {
+						ArrayList<Material> materials = new ArrayList<>();
+						HashMap<Material, Float> costs = new HashMap<>();
+						
+						for (ToolComponent component : tool.components) {
+							for (MaterialPoint point : component.points) {
+								Material material = DataLoader.INSTANCE.getMaterial(point.material);
+								
+								if (material != null) {
+									if (!materials.contains(material)) {
+										materials.add(material);
+										float amt = tool.getMaterialCost(material);
+										int count = player.inventory.count(ForgeRegistries.ITEMS.getValue(material.item));
+										
+										if (count < Math.ceil(amt)) {
+											player.sendStatusMessage(new StringTextComponent("Need " + (int) ((amt - Math.ceil(count)) + 1) + " more " + material.item), true);
+											return ActionResultType.FAIL;
+										}
+										
+										costs.put(material, amt);
+									}
+								}
+							}
+						}
+						
+						if (!worldIn.isRemote) return ActionResultType.SUCCESS;
+						
+						for (Material material1 : materials) {
+							int amtRemoved = 0;
+							int cost = (int) Math.ceil(costs.get(material1));
+							
+							for (int index = 0; index < player.inventory.getSizeInventory(); index++) {
+								ItemStack stack2 = player.inventory.getStackInSlot(index);
+								
+								if (stack2.getItem().getRegistryName().equals(material1.item)) {
+									int consumed = Math.min(cost, stack2.getCount());
+									player.inventory.decrStackSize(index, consumed);
+									amtRemoved -= consumed;
+									
+									if (consumed >= amtRemoved) break;
+								}
+							}
+						}
+					}
+					
 					nbt1.put("tool_info", tool.serialize());
 					
 					player.setHeldItem(handIn, stack1);

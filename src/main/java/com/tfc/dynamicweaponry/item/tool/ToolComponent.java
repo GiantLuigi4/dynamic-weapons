@@ -161,4 +161,71 @@ public class ToolComponent implements Comparable<ToolComponent> {
 	public int hashCode() {
 		return Objects.hash(points, name, type);
 	}
+	
+	public boolean checkPoint(Point requiredPoint) {
+		ArrayList<Point> checkedPoints = new ArrayList<>();
+		ArrayList<Point> justCheckedPoints = new ArrayList<>();
+		ArrayList<Point> checkingPoints = new ArrayList<>();
+		
+		if (this.getPoint(requiredPoint.x, requiredPoint.y) != null) checkingPoints.add(requiredPoint);
+		else return false;
+		
+		int numHit = 0;
+		
+		for (Point requiredPoint1 : this.type.getRequiredPoints()) {
+			boolean hit = false;
+			
+			if (checkedPoints.contains(requiredPoint1)) {
+				numHit++;
+				continue;
+			} else {
+				checkingPoints.addAll(checkedPoints);
+				checkedPoints.clear();
+			}
+			
+			if (requiredPoint1.equals(requiredPoint)) continue;
+			
+			while (!checkingPoints.isEmpty()) {
+				for (Point p1 : checkingPoints) {
+					for (int xOff = -1; xOff <= 1; xOff++) {
+						for (int yOff = -1; yOff <= 1; yOff++) {
+							if (Math.abs(xOff) == Math.abs(yOff)) continue;
+							
+							Point p = new Point(p1.x + xOff, p1.y + yOff);
+							
+							if (
+									!checkedPoints.contains(p) &&
+											!justCheckedPoints.contains(p) &&
+											!checkingPoints.contains(p) &&
+											this.getPoint(p.x, p.y) != null
+							) {
+								justCheckedPoints.add(p);
+								
+								if (p.x == requiredPoint1.x && p.y == requiredPoint1.y) {
+									hit = true;
+									break;
+								}
+							}
+						}
+						
+						if (hit) break;
+					}
+					
+					if (hit) break;
+				}
+				checkingPoints.clear();
+				checkingPoints.addAll(justCheckedPoints);
+				checkedPoints.addAll(checkingPoints);
+				justCheckedPoints.clear();
+				
+				if (hit) {
+					numHit++;
+					break;
+				}
+			}
+		}
+		
+		System.out.println(numHit);
+		return numHit >= (this.type.getRequiredPoints().length) - 1;
+	}
 }
