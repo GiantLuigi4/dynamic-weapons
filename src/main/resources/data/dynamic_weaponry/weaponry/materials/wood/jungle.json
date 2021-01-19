@@ -3,5 +3,6 @@
   "weight": 1.2,
   "efficiency": 2.1,
   "attack": 4.5,
-  "item": "minecraft:jungle_planks"
+  "item": "minecraft:jungle_planks",
+  "drawSpeed": 1.8
 }

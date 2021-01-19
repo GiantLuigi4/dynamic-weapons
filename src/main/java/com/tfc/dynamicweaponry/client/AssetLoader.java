@@ -8,7 +8,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -68,29 +67,22 @@ public class AssetLoader implements IResourceManagerReloadListener {
 		
 		if (material.has("pattern") && FMLEnvironment.dist.isClient()) {
 			JsonArray pattern = material.getAsJsonArray("pattern");
-			ArrayList<int[]> arrayList = new ArrayList<>();
+			int[][] patternArray = new int[pattern.size()][];
 			
-			for (JsonElement column : pattern) {
+			for (int columnIndex = 0; columnIndex < pattern.size(); columnIndex++) {
+				JsonElement column = pattern.get(columnIndex);
+				
 				if (column.isJsonArray()) {
 					JsonArray row = column.getAsJsonArray();
-					ArrayList<Integer> rowArrayList = new ArrayList<>();
+					int[] array = new int[row.size()];
 					
-					for (JsonElement jsonElement : row) {
-						JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
-						
-						if (primitive.isNumber()) {
-							rowArrayList.add(primitive.getAsInt());
-						}
-					}
+					for (int index = 0; index < row.size(); index++)
+						array[index] = row.get(index).getAsInt();
 					
-					int[] intArray = new int[rowArrayList.size()];
-					for (int index = 0; index < rowArrayList.size(); index++) intArray[index] = rowArrayList.get(index);
-					arrayList.add(intArray);
+					patternArray[columnIndex] = array;
 				}
 			}
-			int[][] intArray = new int[arrayList.size()][];
-			for (int index = 0; index < arrayList.size(); index++) intArray[index] = arrayList.get(index);
-			mat.pattern = intArray;
+			mat.pattern = patternArray;
 		}
 		
 		if (materialInfos.containsKey(mat.item)) {

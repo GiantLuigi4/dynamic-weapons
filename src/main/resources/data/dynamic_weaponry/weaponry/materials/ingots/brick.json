@@ -4,5 +4,6 @@
   "efficiency": 0.3,
   "attack": 7,
   "item": "minecraft:brick",
-  "harvestLevel": 0.1
+  "harvestLevel": 0.1,
+  "drawSpeed": 0.1
 }

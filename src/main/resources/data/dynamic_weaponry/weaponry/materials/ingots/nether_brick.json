@@ -4,5 +4,6 @@
   "efficiency": 3,
   "attack": 4,
   "item": "minecraft:nether_brick",
-  "harvestLevel": 0.4
+  "harvestLevel": 0.4,
+  "drawSpeed": 0.3
 }

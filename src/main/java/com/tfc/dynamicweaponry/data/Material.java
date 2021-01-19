@@ -10,6 +10,7 @@ public class Material {
 	public final ResourceLocation item;
 	protected boolean isDyable = false;
 	protected float harvestLevel = 0;
+	protected float drawSpeed = 0;
 	
 	private boolean isLocked = false;
 	
@@ -37,5 +38,9 @@ public class Material {
 	
 	protected void lock() {
 		this.isLocked = true;
+	}
+	
+	public float getDrawSpeed() {
+		return drawSpeed;
 	}
 }

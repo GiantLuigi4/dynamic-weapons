@@ -10,6 +10,7 @@ import com.tfc.dynamicweaponry.data.Material;
 import com.tfc.dynamicweaponry.item.tool.MaterialPoint;
 import com.tfc.dynamicweaponry.item.tool.Tool;
 import com.tfc.dynamicweaponry.item.tool.ToolComponent;
+import com.tfc.dynamicweaponry.utils.Point;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.LightTexture;
@@ -25,6 +26,7 @@ import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector4f;
 
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 //import org.codehaus.plexus.util.FastMap;
 //import net.minecraft.client.renderer.texture.OverlayTexture;
 
@@ -33,6 +35,12 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 	
 	private static final Object2ObjectLinkedOpenHashMap<CompoundNBT, CustomBuffer> bufferCache = new Object2ObjectLinkedOpenHashMap<>();
 //	private static final Object2ObjectLinkedOpenHashMap<CompoundNBT, Tool> toolCache = new Object2ObjectLinkedOpenHashMap<>();
+	
+	private static final HashMap<ResourceLocation, Point> pointsOfInterest = new HashMap<>();
+	
+	static {
+		pointsOfInterest.put(new ResourceLocation("dynamic_weaponry:bow_string"), new Point(12, 11));
+	}
 	
 	public void resetCaches() {
 		bufferCache.clear();
@@ -50,6 +58,11 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 //			bufferCache.clear();
 			
 			matrixStack.push();
+			if (p_239207_2_.isFirstPerson() && stack.getOrCreateTag().contains("pull_time")) {
+//				Minecraft.getInstance().getFirstPersonRenderer().prevEquippedProgressMainHand = Minecraft.getInstance().getFirstPersonRenderer().equippedProgressMainHand;
+//				Minecraft.getInstance().getFirstPersonRenderer().equippedProgressMainHand = (stack.getOrCreateTag().getFloat("pull_time")+((Minecraft.getInstance().getRenderPartialTicks()*new Tool(stack).getDrawSpeed())/10f));
+			}
+			
 			matrixStack.translate(0, 0, 0.45);
 			matrixStack.scale(1f / 4, 1f / 4, 1f / 4);
 			if (p_239207_2_.equals(ItemCameraTransforms.TransformType.GUI)) {
@@ -57,6 +70,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 				matrixStack.translate(0.35f, 0.35f, 0);
 				combinedLight = LightTexture.packLight(15, 0);
 			}
+			
 			if (!bufferCache.containsKey(stack.getOrCreateTag())) {
 				builder = new CustomBuffer();
 				MatrixStack matrixStack1 = new MatrixStack();
@@ -131,7 +145,6 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 		boolean hasRenderedAnything = false;
 		
 		IVertexBuilder builder = buffer.getBuffer(RenderType.getEntitySolid(new ResourceLocation("dynamic_weaponry:textures/item/white_square.png")));
-		
 		
 		for (ToolComponent component : tool.components) {
 			try {

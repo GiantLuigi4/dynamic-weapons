@@ -5,32 +5,21 @@
       {
         "name": "dynamic_weaponry:sword_blade",
         "incompatibilities": [
-          {
-            "part": 2,
-            "name": "dynamic_weaponry:long_stick"
-          }
+          {"part": 1, "name": "dynamic_weaponry:shovel_head"},
+          {"part": 2, "name": "dynamic_weaponry:long_stick"}
         ]
       }, {
         "name": "dynamic_weaponry:shovel_head",
         "incompatibilities": [
-          {
-            "part": 2,
-            "name": "dynamic_weaponry:short_stick"
-          }
+          {"part": 1, "name": "dynamic_weaponry:sword_blade"},
+          {"part": 2, "name": "dynamic_weaponry:short_stick"}
         ]
       }
     ],
     "part2": [
-      {
-        "name": "dynamic_weaponry:short_stick"
-      }, {
-        "name": "dynamic_weaponry:long_stick"
-      }
+      {"name": "dynamic_weaponry:short_stick"},
+      {"name": "dynamic_weaponry:long_stick"}
     ],
-    "part3": [
-      {
-        "name": "dynamic_weaponry:sword_guard"
-      }
-    ]
+    "part3": [{"name": "dynamic_weaponry:sword_guard"}]
   }
 }

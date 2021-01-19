@@ -17,6 +17,7 @@ import net.minecraftforge.common.util.Constants;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -342,5 +343,30 @@ public class Tool {
 		harvestLevel /= toolCount;
 		
 		return harvestLevel;
+	}
+	
+	public boolean isBow() {
+		for (ToolComponent component : components) {
+			if (component.type != null && Arrays.asList(component.type.getContributesTo()).contains("bow")) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public float getDrawSpeed() {
+		float amt = 0;
+		int count = 0;
+		for (ToolComponent component : components) {
+			for (MaterialPoint point : component.points) {
+				Material material = DataLoader.INSTANCE.getMaterial(point.material);
+				if (material != null) {
+					amt += material.getDrawSpeed();
+					count++;
+				}
+			}
+		}
+		amt /= count;
+		return amt / 25f;
 	}
 }

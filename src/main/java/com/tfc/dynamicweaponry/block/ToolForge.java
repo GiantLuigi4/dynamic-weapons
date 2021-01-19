@@ -105,21 +105,23 @@ public class ToolForge extends Block implements ITileEntityProvider {
 					
 					Tool tool = new Tool(stack1);
 					
-					for (ToolComponent component : tool.components) {
-						for (MaterialPoint point : component.points.toArray(new MaterialPoint[0])) {
-							if (
-									point.x < component.type.min.x ||
-											point.y < 0 ||
-											point.x > component.type.max.x ||
-											point.y > 15
-							) {
-								component.setPoint(point, null);
+					if (!player.isCreative()) {
+						for (ToolComponent component : tool.components) {
+							for (MaterialPoint point : component.points.toArray(new MaterialPoint[0])) {
+								if (
+										point.x < component.type.min.x ||
+												point.y < 0 ||
+												point.x > component.type.max.x ||
+												point.y > 15
+								) {
+									component.setPoint(point, null);
+								}
 							}
-						}
-						
-						for (Point requiredPoint : component.type.getRequiredPoints()) {
-							if (!component.checkPoint(requiredPoint)) {
-								return ActionResultType.FAIL;
+							
+							for (Point requiredPoint : component.type.getRequiredPoints()) {
+								if (!component.checkPoint(requiredPoint)) {
+									return ActionResultType.FAIL;
+								}
 							}
 						}
 					}

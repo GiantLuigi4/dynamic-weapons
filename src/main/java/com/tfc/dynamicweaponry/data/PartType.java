@@ -12,6 +12,11 @@ public class PartType {
 	public final Point min, max;
 	public final int renderLayer;
 	public ResourceLocation name;
+	protected boolean allowAngles = false;
+	
+	public boolean isAllowAngles() {
+		return allowAngles;
+	}
 	
 	protected String[] contributesTo = null;
 	

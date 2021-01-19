@@ -1,0 +1,8 @@
+{
+  "dynamic_weaponry:bow": {
+	"part count": 3,
+	"part1": [{"name": "dynamic_weaponry:lower_bow_limb"}],
+	"part2": [{"name": "dynamic_weaponry:upper_bow_limb"}],
+	"part3": [{"name": "dynamic_weaponry:bow_string"}]
+  }
+}

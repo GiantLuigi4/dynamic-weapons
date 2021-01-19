@@ -3,8 +3,10 @@ buildscript {
         maven { url = 'https://files.minecraftforge.net/maven' }
         jcenter()
         mavenCentral()
+        maven { url 'https://dist.creeper.host/Sponge/maven' }
     }
     dependencies {
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
     }
 }
@@ -40,6 +42,8 @@ minecraft {
             // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
 
+            arg "-mixin.config=dynamicweaponry.mixins.json"
+
             property 'mixin.env.disableRefMap', 'true'
 
             mods {
@@ -57,6 +61,8 @@ minecraft {
 
             // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
+
+            arg "-mixin.config=dynamicweaponry.mixins.json"
 
             property 'mixin.env.disableRefMap', 'true'
 
@@ -88,6 +94,7 @@ minecraft {
 }
 
 repositories {
+    maven {url='https://dist.creeper.host/Sponge/maven'}
     maven { url 'https://jitpack.io' }
     maven {url "https://www.cursemaven.com"}
 }
@@ -97,6 +104,8 @@ dependencies {
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.16.4-35.1.36'
+
+    compile 'org.spongepowered:mixin:0.8'
 
     implementation fg.deobf('com.github.GiantLuigi4:AssortedUtils:bdc6b5a3ea')
     implementation fg.deobf('curse.maven:reauth-237701:3105779')
@@ -122,4 +131,23 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 }
 
+apply plugin: 'org.spongepowered.mixin'
+
 jar.finalizedBy('reobfJar')
+
+mixin {
+    add sourceSets.main, "dynamicweaponry.refmap.json"
+}
+
+jar {
+    manifest {
+        attributes([
+                // Existing properties here
+                "MixinConfigs": "dynamicweaponry.mixins.json"
+        ])
+    }
+}
+
+minecraft {
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+}

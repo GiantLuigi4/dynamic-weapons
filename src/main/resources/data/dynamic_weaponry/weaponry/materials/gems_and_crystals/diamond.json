@@ -4,5 +4,6 @@
   "efficiency": 2.5,
   "attack": 7,
   "item": "minecraft:diamond",
-  "harvestLevel": 3
+  "harvestLevel": 3,
+  "drawSpeed": 1.5
 }

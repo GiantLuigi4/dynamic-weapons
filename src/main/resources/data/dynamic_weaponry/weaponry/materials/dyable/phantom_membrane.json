@@ -5,5 +5,7 @@
   "attack": 0.01,
   "dyable": true,
   "item": "minecraft:phantom_membrane",
-  "harvestLevel": -1
+  "harvestLevel": -1,
+  "drawSpeed": 2.6,
+  "isString": true
 }

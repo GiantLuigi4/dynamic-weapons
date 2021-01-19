@@ -14,10 +14,11 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.item.*;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -72,6 +73,83 @@ public class DynamicTool extends Item {
 		}
 		
 		return super.getAttributeModifiers(slot, stack);
+	}
+	
+	@Override
+	public void onUse(World worldIn, LivingEntity livingEntityIn, ItemStack stack, int count) {
+		super.onUse(worldIn, livingEntityIn, stack, count);
+	}
+	
+	@Override
+	public ActionResultType onItemUse(ItemUseContext context) {
+//		return super.onItemUse(context);
+//		return ActionResultType.SUCCESS;
+		return super.onItemUse(context);
+	}
+	
+	@Override
+	public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
+//		onUsingTick(playerIn.getHeldItem(handIn),playerIn,0);
+		Tool tool = new Tool(playerIn.getHeldItem(handIn));
+		if (tool.isBow()) {
+			playerIn.setActiveHand(handIn);
+			return ActionResult.resultConsume(playerIn.getHeldItem(handIn));
+		}
+		return super.onItemRightClick(worldIn, playerIn, handIn);
+	}
+	
+	@Override
+	public void onUsingTick(ItemStack stack, LivingEntity player, int count) {
+		Tool tool = new Tool(stack);
+		if (tool.isBow() || true) {
+			if (stack.getTag().contains("pull_time")) {
+				float time = stack.getOrCreateTag().getFloat("pull_time");
+				stack.getOrCreateTag().putFloat("pull_time", Math.min(1, time + (tool.getDrawSpeed() / 2f)));
+			} else {
+				stack.getOrCreateTag().putFloat("pull_time", tool.getDrawSpeed() / 2f);
+			}
+		}
+		super.onUsingTick(stack, player, count);
+	}
+	
+	@Override
+	public void onPlayerStoppedUsing(ItemStack stack, World worldIn, LivingEntity entityLiving, int timeLeft) {
+		stack.getOrCreateTag().remove("pull_time");
+		super.onPlayerStoppedUsing(stack, worldIn, entityLiving, timeLeft);
+	}
+	
+	@Override
+	public ItemStack onItemUseFinish(ItemStack stack, World worldIn, LivingEntity entityLiving) {
+		return super.onItemUseFinish(stack, worldIn, entityLiving);
+	}
+	
+	@Override
+	public UseAction getUseAction(ItemStack stack) {
+		Tool tool = new Tool(stack);
+		if (tool.isBow()) return UseAction.BOW;
+		else return UseAction.NONE;
+	}
+	
+	@Override
+	public int getUseDuration(ItemStack stack) {
+		Tool tool = new Tool(stack);
+		if (tool.isBow()) {
+			return (int) (72000 * (1f / tool.getDrawSpeed()));
+		} else {
+			return 0;
+		}
+	}
+	
+	@Override
+	public ActionResultType onItemUseFirst(ItemStack stack, ItemUseContext context) {
+//		onUsingTick(stack, context.getPlayer(), 0);
+		PlayerEntity playerIn = context.getPlayer();
+		Tool tool = new Tool(playerIn.getHeldItem(context.getHand()));
+		if (tool.isBow()) {
+			if (!playerIn.isHandActive()) playerIn.setActiveHand(context.getHand());
+			return ActionResultType.CONSUME;
+		}
+		return super.onItemUseFirst(stack, context);
 	}
 	
 	@Override
@@ -145,8 +223,7 @@ public class DynamicTool extends Item {
 		}
 		
 		list.add(new StringTextComponent(""));
-		list.add(new StringTextComponent("When in Main Hand:").mergeStyle(TextFormatting.GRAY));
-//		list.add(new StringTextComponent("Combat Stats:").mergeStyle(TextFormatting.GRAY));
+		list.add(new StringTextComponent("Combat Stats:").mergeStyle(TextFormatting.GRAY));
 		list.add(new StringTextComponent(" " + Math.abs(Math.round((tool.getDamage()) * 100) / 100f) + " Attack Damage").mergeStyle(TextFormatting.DARK_GREEN));
 		list.add(new StringTextComponent(" " + Math.abs(Math.round((4 - tool.getAttackSpeed()) * 100) / 100f) + " Attack Speed").mergeStyle(TextFormatting.DARK_GREEN));
 	}
@@ -154,6 +231,8 @@ public class DynamicTool extends Item {
 	@Override
 	public void inventoryTick(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
 		if (!stack.getOrCreateTag().contains("HideFlags")) stack.getOrCreateTag().putInt("HideFlags", 2);
+		if (!isSelected && (entityIn instanceof PlayerEntity && ((PlayerEntity) entityIn).getHeldItem(Hand.OFF_HAND) != stack))
+			stack.getOrCreateTag().remove("pull_time");
 		super.inventoryTick(stack, worldIn, entityIn, itemSlot, isSelected);
 	}
 	

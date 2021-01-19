@@ -8,6 +8,12 @@ import java.util.Objects;
 public class ToolType {
 	private final ArrayList<ToolPart> parts = new ArrayList<>();
 	
+	protected boolean isBow = false;
+	
+	public boolean isBow() {
+		return isBow;
+	}
+	
 	private boolean isLocked = false;
 	
 	public ToolType() {

@@ -226,7 +226,6 @@ public class ToolComponent implements Comparable<ToolComponent> {
 			}
 		}
 		
-		System.out.println(numHit);
 		return numHit >= (this.type.getRequiredPoints().length) - 1;
 	}
 	

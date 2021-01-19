@@ -122,6 +122,9 @@ public class DataLoader implements IResourceManagerReloadListener {
 		if (material.has("harvestLevel"))
 			mat.harvestLevel = (material.getAsJsonPrimitive("harvestLevel").getAsFloat());
 		
+		if (material.has("drawSpeed"))
+			mat.drawSpeed = (material.getAsJsonPrimitive("drawSpeed").getAsFloat());
+		
 		mat.lock();
 		
 		ResourceLocation location = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().substring("weaponry/materials/".length()).replace(".json", ""));
@@ -144,6 +147,9 @@ public class DataLoader implements IResourceManagerReloadListener {
 			JsonObject object1 = stringJsonElementEntry.getValue().getAsJsonObject();
 			int count = object1.getAsJsonPrimitive("part count").getAsInt();
 			ToolType toolType = new ToolType();
+
+//			if (object1.has("isBow"))
+//				toolType.isBow = object1.getAsJsonPrimitive("isBow").getAsBoolean();
 			
 			for (int i = 0; i < count; i++) {
 				JsonArray array = object1.getAsJsonArray("part" + (i + 1));
@@ -232,6 +238,9 @@ public class DataLoader implements IResourceManagerReloadListener {
 		} else {
 			type.contributesTo = new String[0];
 		}
+		
+		if (properties.getEntries().contains("allowAngles"))
+			type.allowAngles = Boolean.parseBoolean(properties.getValue("allowAngles"));
 		
 		for (int i = 0; i < reqPoints; i++) {
 			int pointX = Integer.parseInt(properties.getValue("requiredPoint" + (i + 1) + "_X"));

@@ -3,5 +3,6 @@
   "weight": 1.5,
   "efficiency": 1.0,
   "attack": 2.5,
-  "item": "minecraft:warped_planks"
+  "item": "minecraft:warped_planks",
+  "drawSpeed": 2
 }

@@ -4,5 +4,6 @@
   "efficiency": 0.5,
   "attack": 2,
   "item": "minecraft:netherrack",
-  "harvestLevel": 1
+  "harvestLevel": 1,
+  "drawSpeed": 0.4
 }

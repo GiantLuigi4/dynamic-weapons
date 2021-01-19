@@ -226,6 +226,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 //					this::cyclePart
 					(button1) -> {
 						ToolType type = DataLoader.INSTANCE.toolTypes.get(new ResourceLocation(tool.name));
+						if (type == null) return;
 						ToolPart[] parts = type.getParts();
 						
 						ArrayList<ResourceLocation> locations1 = new ArrayList<>();

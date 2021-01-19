@@ -4,5 +4,6 @@
   "efficiency": 3.3,
   "attack": 8,
   "item": "minecraft:netherite_ingot",
-  "harvestLevel": 3.5
+  "harvestLevel": 3.5,
+  "drawSpeed": 2
 }

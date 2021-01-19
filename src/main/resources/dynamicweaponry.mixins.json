@@ -1,0 +1,15 @@
+{
+  "required": false,
+  "package": "com.tfc.dynamicweaponry.mixins",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "dynamicweaponry.refmap.json",
+  "client": [
+	"LivingEntityMixin"
+  ],
+  "mixins": [
+  ],
+  "injectors": {
+	"defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}

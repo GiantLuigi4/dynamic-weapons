@@ -4,5 +4,6 @@
   "efficiency": 3,
   "attack": 4,
   "item": "minecraft:gold_ingot",
-  "harvestLevel": 0.3
+  "harvestLevel": 0.3,
+  "drawSpeed": 3
 }
