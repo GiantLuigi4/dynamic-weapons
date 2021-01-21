@@ -151,21 +151,21 @@ public class ToolForge extends Block implements ITileEntityProvider {
 							}
 						}
 						
-						if (!worldIn.isRemote) return ActionResultType.SUCCESS;
-						
-						for (Material material1 : materials) {
-							int amtRemoved = 0;
-							int cost = (int) Math.ceil(costs.get(material1));
-							
-							for (int index = 0; index < player.inventory.getSizeInventory(); index++) {
-								ItemStack stack2 = player.inventory.getStackInSlot(index);
+						if (!worldIn.isRemote) {
+							for (Material material1 : materials) {
+								int amtRemoved = 0;
+								int cost = (int) Math.ceil(costs.get(material1));
 								
-								if (stack2.getItem().getRegistryName().equals(material1.item)) {
-									int consumed = Math.min(cost, stack2.getCount());
-									player.inventory.decrStackSize(index, consumed);
-									amtRemoved -= consumed;
+								for (int index = 0; index < player.inventory.getSizeInventory(); index++) {
+									ItemStack stack2 = player.inventory.getStackInSlot(index);
 									
-									if (consumed >= amtRemoved) break;
+									if (stack2.getItem().getRegistryName().equals(material1.item)) {
+										int consumed = Math.min(cost, stack2.getCount());
+										player.inventory.decrStackSize(index, consumed);
+										amtRemoved -= consumed;
+										
+										if (consumed >= amtRemoved) break;
+									}
 								}
 							}
 						}

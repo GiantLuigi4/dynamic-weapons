@@ -6,6 +6,7 @@ import com.tfc.dynamicweaponry.block.ToolForgeTileEntity;
 import com.tfc.dynamicweaponry.client.AssetLoader;
 import com.tfc.dynamicweaponry.client.Setup;
 import com.tfc.dynamicweaponry.data.DataLoader;
+import com.tfc.dynamicweaponry.item.tool.DynamicTool;
 import com.tfc.dynamicweaponry.item.tool.ToolComponent;
 import com.tfc.dynamicweaponry.network.DataPacket;
 import com.tfc.dynamicweaponry.network.PaintPixelPacket;
@@ -16,10 +17,13 @@ import com.tfc.dynamicweaponry.registry.RegistryClient;
 import com.tfc.dynamicweaponry.utils.Point;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.container.Container;
+import net.minecraft.item.ItemStack;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AnvilUpdateEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -210,8 +214,8 @@ public class DynamicWeaponry {
 			ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.clientSpec);
 //			MinecraftForge.EVENT_BUS.addListener(AssetLoader::clientSetup);
 		}
-
-//		MinecraftForge.EVENT_BUS.addListener(DynamicWeaponry::tick);
+		
+		MinecraftForge.EVENT_BUS.addListener(DynamicWeaponry::onAnvilUpdate);
 	}
 
 //	public static void sendPackets() {
@@ -231,4 +235,36 @@ public class DynamicWeaponry {
 //			packets.clear();
 //		}
 //	}
+	
+	public static void onAnvilUpdate(AnvilUpdateEvent event) {
+		if (!event.getPlayer().world.isRemote) return;
+		if (event.getLeft().getItem() instanceof DynamicTool) {
+			boolean repairable = event.getLeft().getItem().getIsRepairable(event.getLeft(), event.getRight());
+			if (repairable) {
+				int i = 0;
+				
+				ItemStack itemstack1 = event.getLeft().copy();
+				ItemStack itemstack2 = event.getRight();
+				int l2 = Math.min(itemstack1.getDamage(), itemstack1.getMaxDamage() / 4);
+				
+				int i3;
+				for (i3 = 0; l2 > 0 && i3 < itemstack2.getCount(); ++i3) {
+					int j3 = itemstack1.getDamage() - l2;
+					itemstack1.setDamage(j3);
+					++i;
+					l2 = Math.min(itemstack1.getDamage(), itemstack1.getMaxDamage() / 4);
+				}
+				
+				int j = itemstack1.getRepairCost() + (itemstack2.isEmpty() ? 0 : itemstack2.getRepairCost());
+				
+				event.setResult(Event.Result.ALLOW);
+				
+				if (i3 >= 1) {
+					event.setMaterialCost(i3);
+					event.setCost(j);
+					event.setOutput(itemstack1);
+				}
+			}
+		}
+	}
 }

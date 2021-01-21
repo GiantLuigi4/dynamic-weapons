@@ -19,6 +19,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -32,6 +33,8 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DynamicTool extends Item {
 	public DynamicTool() {
@@ -85,6 +88,39 @@ public class DynamicTool extends Item {
 //		return super.onItemUse(context);
 //		return ActionResultType.SUCCESS;
 		return super.onItemUse(context);
+	}
+	
+	/**
+	 * Return whether this item is repairable in an anvil.
+	 *
+	 * @param toRepair
+	 * @param repair
+	 */
+	@Override
+	public boolean getIsRepairable(ItemStack toRepair, ItemStack repair) {
+		Tool tool = new Tool(toRepair);
+		HashMap<ResourceLocation, Integer> counts = new HashMap<>();
+		for (ToolComponent component : tool.components) {
+			for (MaterialPoint point : component.points) {
+				int amt = counts.getOrDefault(point.material, 0).intValue() + 1;
+				if (counts.containsKey(point.material)) counts.replace(point.material, amt);
+				else counts.put(point.material, amt);
+			}
+		}
+		AtomicReference<ResourceLocation> material1 = new AtomicReference<>(new ResourceLocation("minecraft:bedrock"));
+		AtomicInteger maxCount = new AtomicInteger(-1);
+		counts.forEach((material, amt) -> {
+			if (maxCount.get() < amt) {
+				maxCount.set(amt);
+				material1.set(material);
+			}
+		});
+		return (material1.get().equals(repair.getItem().getRegistryName())) || super.getIsRepairable(toRepair, repair);
+	}
+	
+	@Override
+	public boolean isRepairable(ItemStack stack) {
+		return super.isRepairable(stack);
 	}
 	
 	@Override

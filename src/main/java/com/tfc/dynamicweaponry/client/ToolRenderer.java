@@ -25,21 +25,20 @@ import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector4f;
 
+import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
-import java.util.HashMap;
-//import org.codehaus.plexus.util.FastMap;
-//import net.minecraft.client.renderer.texture.OverlayTexture;
 
 public class ToolRenderer extends ItemStackTileEntityRenderer {
 	public static final ToolRenderer render = new ToolRenderer();
 	
 	private static final Object2ObjectLinkedOpenHashMap<CompoundNBT, CustomBuffer> bufferCache = new Object2ObjectLinkedOpenHashMap<>();
-//	private static final Object2ObjectLinkedOpenHashMap<CompoundNBT, Tool> toolCache = new Object2ObjectLinkedOpenHashMap<>();
 	
-	private static final HashMap<ResourceLocation, Point> pointsOfInterest = new HashMap<>();
+	private static final Object2ObjectLinkedOpenHashMap<ResourceLocation, ArrayList<Point>> pointsOfInterest = new Object2ObjectLinkedOpenHashMap<>();
 	
 	static {
-		pointsOfInterest.put(new ResourceLocation("dynamic_weaponry:bow_string"), new Point(12, 11));
+		ArrayList<Point> points = new ArrayList<>();
+		points.add(new Point(12, 11));
+		pointsOfInterest.put(new ResourceLocation("dynamic_weaponry:bow_string"), points);
 	}
 	
 	public void resetCaches() {
@@ -54,14 +53,8 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 	public void func_239207_a_(ItemStack stack, ItemCameraTransforms.TransformType p_239207_2_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
 		if (Config.CLIENT.cacheBuffers.get() && !(buffer instanceof CustomBuffer)) {
 			CustomBuffer builder;
-
-//			bufferCache.clear();
 			
 			matrixStack.push();
-			if (p_239207_2_.isFirstPerson() && stack.getOrCreateTag().contains("pull_time")) {
-//				Minecraft.getInstance().getFirstPersonRenderer().prevEquippedProgressMainHand = Minecraft.getInstance().getFirstPersonRenderer().equippedProgressMainHand;
-//				Minecraft.getInstance().getFirstPersonRenderer().equippedProgressMainHand = (stack.getOrCreateTag().getFloat("pull_time")+((Minecraft.getInstance().getRenderPartialTicks()*new Tool(stack).getDrawSpeed())/10f));
-			}
 			
 			matrixStack.translate(0, 0, 0.45);
 			matrixStack.scale(1f / 4, 1f / 4, 1f / 4);
@@ -119,7 +112,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 			
 			return;
 		}
-
+		
 		matrixStack.push();
 		if (!Config.CLIENT.cacheBuffers.get()) {
 			matrixStack.translate(0, 0, 0.45);
@@ -133,13 +126,8 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 		}
 		
 		Tool tool;
-
-//		if (
-//				!toolCache.containsKey(stack.getOrCreateTag())
-//		) {
+		
 		tool = new Tool(stack);
-//			toolCache.put(stack.getOrCreateTag(), tool);
-//		} else tool = toolCache.get(stack.getOrCreateTag());
 		
 		tool.sort();
 		boolean hasRenderedAnything = false;
@@ -160,25 +148,19 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 						float g = color.getGreen() / 255f;
 						float b = color.getBlue() / 255f;
 						
+						if (pointsOfInterest.containsKey(component.type.name)) {
+							ArrayList<Point> points = pointsOfInterest.get(component.type.name);
+							float minDist = Float.POSITIVE_INFINITY;
+							for (Point point1 : points) {
+							}
+						}
+						
 						matrixStack.translate(0, 0, 0.125f / 2);
-
-//						if (component.type != null) {
-//							matrixStack.scale(1,1,1+component.type.renderLayer/10f);
-//						}
+						
 						renderCube(r, g, b, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, p_239207_2_ != ItemCameraTransforms.TransformType.GUI, point.x, point.y, tool);
 						
 						matrixStack.pop();
-
-//						matrixStack.push();
-//						matrixStack.translate(point.x / 4f, point.y / 4f, 0);
-//						cube.render(
-//								matrixStack,
-//								buffer.getBuffer(RenderType.getEntitySolid(new ResourceLocation("dynamic_weaponry:textures/item/white_square.png"))),
-//								combinedLight,
-//								combinedOverlay,
-//								color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, 1
-//						);
-//						matrixStack.pop();
+						
 						hasRenderedAnything = true;
 					}
 				}
