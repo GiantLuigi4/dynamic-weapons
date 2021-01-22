@@ -6,6 +6,8 @@ import com.tfc.dynamicweaponry.DynamicWeaponry;
 import com.tfc.dynamicweaponry.block.ToolForgeTileEntity;
 import com.tfc.dynamicweaponry.client.AssetLoader;
 import com.tfc.dynamicweaponry.client.ToolRenderer;
+import com.tfc.dynamicweaponry.material_effects.condtions.EffectCondition;
+import com.tfc.dynamicweaponry.material_effects.effects.EffectInstance;
 import com.tfc.dynamicweaponry.network.DataPacket;
 import com.tfc.dynamicweaponry.utils.Point;
 import net.minecraft.client.Minecraft;
@@ -124,6 +126,22 @@ public class DataLoader implements IResourceManagerReloadListener {
 		
 		if (material.has("drawSpeed"))
 			mat.drawSpeed = (material.getAsJsonPrimitive("drawSpeed").getAsFloat());
+		
+		if (material.has("effects")) {
+			ArrayList<EffectInstance> instances = new ArrayList<>();
+			for (JsonElement effects : material.getAsJsonArray("effects")) {
+				JsonObject effect = effects.getAsJsonObject();
+				String key = effect.getAsJsonPrimitive("name").getAsString();
+				ArrayList<EffectCondition> conditions = new ArrayList<>();
+				for (Map.Entry<String, JsonElement> stringJsonElementEntry : effect.getAsJsonObject("conditions").entrySet()) {
+					EffectCondition condition = EffectCondition.get(new ResourceLocation(stringJsonElementEntry.getKey())).create(stringJsonElementEntry.getValue().getAsJsonObject());
+					conditions.add(condition);
+				}
+				EffectInstance instance = new EffectInstance(key, effect.getAsJsonObject("info"), conditions.toArray(new EffectCondition[0]), mat);
+				instances.add(instance);
+			}
+			mat.effectInstances = instances.toArray(new EffectInstance[0]);
+		}
 		
 		mat.lock();
 		

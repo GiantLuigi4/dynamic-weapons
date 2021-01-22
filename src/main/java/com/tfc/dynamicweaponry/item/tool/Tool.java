@@ -4,6 +4,7 @@ import com.tfc.dynamicweaponry.data.DataLoader;
 import com.tfc.dynamicweaponry.data.Material;
 import com.tfc.dynamicweaponry.data.ToolPart;
 import com.tfc.dynamicweaponry.data.ToolType;
+import com.tfc.dynamicweaponry.material_effects.effects.EffectInstance;
 import com.tfc.dynamicweaponry.registry.Registry;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
@@ -318,7 +319,7 @@ public class Tool {
 	public float calcHarvestLevel(@Nonnull String type, @Nullable BlockState state) {
 		int toolCount = 0;
 		
-		float harvestLevel = 0;
+		float harvestLevel = -1;
 		
 		for (ToolComponent component : this.components) {
 			if (component.type != null && component.type.getContributesTo() != null && component.type.getContributesTo().length >= 1) {
@@ -368,5 +369,37 @@ public class Tool {
 		}
 		amt /= count;
 		return amt / 25f;
+	}
+	
+	public float calcPercent(Material material) {
+		int count = 0;
+		int totalCount = 0;
+		for (ToolComponent component : components) {
+			for (MaterialPoint point : component.points) {
+				if (point.material != null) {
+					if (material.item.equals(point.material)) {
+						count++;
+					}
+					totalCount++;
+				}
+			}
+		}
+		return (float) count / (float) totalCount;
+	}
+	
+	public ArrayList<EffectInstance> collectEffects() {
+		ArrayList<ResourceLocation> materialsFound = new ArrayList<>();
+		for (ToolComponent component : components) {
+			for (MaterialPoint point : component.points) {
+				if (point.material != null && !materialsFound.contains(point.material)) {
+					materialsFound.add(point.material);
+				}
+			}
+		}
+		ArrayList<EffectInstance> effectInstances = new ArrayList<>();
+		for (ResourceLocation location : materialsFound) {
+			effectInstances.addAll(Arrays.asList(DataLoader.INSTANCE.getMaterial(location).getEffectInstances()));
+		}
+		return effectInstances;
 	}
 }

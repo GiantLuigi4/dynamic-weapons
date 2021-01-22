@@ -8,10 +8,13 @@ import com.tfc.dynamicweaponry.client.Setup;
 import com.tfc.dynamicweaponry.data.DataLoader;
 import com.tfc.dynamicweaponry.item.tool.DynamicTool;
 import com.tfc.dynamicweaponry.item.tool.ToolComponent;
+import com.tfc.dynamicweaponry.material_effects.condtions.ConditionRegistryBuilder;
+import com.tfc.dynamicweaponry.material_effects.effects.ToolEffectRegistryBuilder;
 import com.tfc.dynamicweaponry.network.DataPacket;
 import com.tfc.dynamicweaponry.network.PaintPixelPacket;
 import com.tfc.dynamicweaponry.network.PaintToolPacket;
 import com.tfc.dynamicweaponry.network.ToolPacket;
+import com.tfc.dynamicweaponry.registry.DynamicWeaponryRegistries;
 import com.tfc.dynamicweaponry.registry.Registry;
 import com.tfc.dynamicweaponry.registry.RegistryClient;
 import com.tfc.dynamicweaponry.utils.Point;
@@ -23,6 +26,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AnvilUpdateEvent;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -56,6 +60,11 @@ public class DynamicWeaponry {
 		Registry.BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
 		Registry.TILE_ENTITIES.register(FMLJavaModLoadingContext.get().getModEventBus());
 		Registry.CONTAINERS.register(FMLJavaModLoadingContext.get().getModEventBus());
+		
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(DynamicWeaponry::createRegistries);
+		
+		DynamicWeaponryRegistries.EFFECTS.register(FMLJavaModLoadingContext.get().getModEventBus());
+		DynamicWeaponryRegistries.CONDITIONS.register(FMLJavaModLoadingContext.get().getModEventBus());
 		
 		MinecraftForge.EVENT_BUS.addListener(DataLoader::serverStartup);
 		MinecraftForge.EVENT_BUS.addListener(DataLoader::onPlayerJoin);
@@ -266,5 +275,10 @@ public class DynamicWeaponry {
 				}
 			}
 		}
+	}
+	
+	public static void createRegistries(RegistryEvent.NewRegistry event) {
+		(new ToolEffectRegistryBuilder()).create();
+		(new ConditionRegistryBuilder()).create();
 	}
 }

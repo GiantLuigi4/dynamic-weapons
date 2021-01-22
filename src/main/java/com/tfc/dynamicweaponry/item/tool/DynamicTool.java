@@ -3,6 +3,7 @@ package com.tfc.dynamicweaponry.item.tool;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.tfc.dynamicweaponry.client.ToolRenderer;
+import com.tfc.dynamicweaponry.material_effects.effects.EffectInstance;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
@@ -125,12 +126,13 @@ public class DynamicTool extends Item {
 	
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
-//		onUsingTick(playerIn.getHeldItem(handIn),playerIn,0);
 		Tool tool = new Tool(playerIn.getHeldItem(handIn));
+		
 		if (tool.isBow()) {
 			playerIn.setActiveHand(handIn);
 			return ActionResult.resultConsume(playerIn.getHeldItem(handIn));
 		}
+		
 		return super.onItemRightClick(worldIn, playerIn, handIn);
 	}
 	
@@ -162,6 +164,7 @@ public class DynamicTool extends Item {
 	@Override
 	public UseAction getUseAction(ItemStack stack) {
 		Tool tool = new Tool(stack);
+		
 		if (tool.isBow()) return UseAction.BOW;
 		else return UseAction.NONE;
 	}
@@ -270,6 +273,15 @@ public class DynamicTool extends Item {
 		if (!isSelected && (entityIn instanceof PlayerEntity && ((PlayerEntity) entityIn).getHeldItem(Hand.OFF_HAND) != stack))
 			stack.getOrCreateTag().remove("pull_time");
 		super.inventoryTick(stack, worldIn, entityIn, itemSlot, isSelected);
+		
+		Tool tool = new Tool(stack);
+		
+		if (entityIn instanceof LivingEntity)
+			for (EffectInstance instance : tool.collectEffects()) {
+				if (instance.test((LivingEntity) entityIn, worldIn, null, null, tool, instance.owner)) {
+					instance.toolEffect.onInventoryTick(stack, tool, tool.calcPercent(instance.owner), instance, isSelected, (LivingEntity) entityIn);
+				}
+			}
 	}
 	
 	@Override
@@ -391,6 +403,13 @@ public class DynamicTool extends Item {
 			}
 		}
 		
+		Tool tool = new Tool(stack);
+		for (EffectInstance instance : tool.collectEffects()) {
+			if (instance.test(attacker, attacker.world, null, null, tool, instance.owner)) {
+				instance.toolEffect.onStrike(stack, tool, tool.calcPercent(instance.owner), instance, attacker, target);
+			}
+		}
+		
 		return super.hitEntity(stack, target, attacker);
 	}
 	
@@ -426,6 +445,13 @@ public class DynamicTool extends Item {
 			}
 		}
 		
+		Tool tool = new Tool(stack);
+		for (EffectInstance instance : tool.collectEffects()) {
+			if (instance.test(entityLiving, worldIn, state, pos, tool, instance.owner)) {
+				instance.toolEffect.onBlockBreak(stack, tool, tool.calcPercent(instance.owner), instance, state, pos, worldIn, entityLiving);
+			}
+		}
+		
 		return super.onBlockDestroyed(stack, worldIn, state, pos, entityLiving);
 	}
 	
@@ -456,6 +482,8 @@ public class DynamicTool extends Item {
 		String type = tool.getName();
 		
 		Tool tool1 = new Tool(stack);
+		
+		if (stack.getMaxDamage() <= stack.getDamage()) return -1;
 		
 		return (int) tool1.calcHarvestLevel(type, state);
 	}

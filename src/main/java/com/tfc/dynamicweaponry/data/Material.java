@@ -1,5 +1,6 @@
 package com.tfc.dynamicweaponry.data;
 
+import com.tfc.dynamicweaponry.material_effects.effects.EffectInstance;
 import net.minecraft.util.ResourceLocation;
 
 public class Material {
@@ -13,6 +14,12 @@ public class Material {
 	protected float drawSpeed = 0;
 	
 	private boolean isLocked = false;
+	
+	protected EffectInstance[] effectInstances = new EffectInstance[]{};
+	
+	public EffectInstance[] getEffectInstances() {
+		return effectInstances;
+	}
 	
 	public float getHarvestLevel() {
 		return harvestLevel;
