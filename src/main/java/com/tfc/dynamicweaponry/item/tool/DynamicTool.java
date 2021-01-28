@@ -16,6 +16,7 @@ import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.*;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
@@ -347,11 +348,11 @@ public class DynamicTool extends Item {
 					if (
 							s.equals(type) ||
 									state.isToolEffective(ToolType.get(s)) ||
-									(s.equals("pickaxe") && Items.NETHERITE_PICKAXE.canHarvestBlock(stack, state)) ||
-									(s.equals("axe") && Items.NETHERITE_AXE.canHarvestBlock(stack, state)) ||
-									(s.equals("shovel") && Items.NETHERITE_SHOVEL.canHarvestBlock(stack, state)) ||
-									(s.equals("hoe") && Items.NETHERITE_HOE.canHarvestBlock(stack, state)) ||
-									(s.equals("sword") && Items.NETHERITE_SWORD.canHarvestBlock(stack, state))
+									(s.equals("pickaxe") && Tool.checkCanHarvest(Items.NETHERITE_PICKAXE, state, true)) ||
+									(s.equals("axe") && Tool.checkCanHarvest(Items.NETHERITE_AXE, state, true)) ||
+									(s.equals("shovel") && Tool.checkCanHarvest(Items.NETHERITE_SHOVEL, state, true)) ||
+									(s.equals("hoe") && Tool.checkCanHarvest(Items.NETHERITE_HOE, state, true)) ||
+									(s.equals("sword") && Tool.checkCanHarvest(Items.NETHERITE_SWORD, state, true))
 					) {
 						toolCount++;
 					} else if (s.equals("sword")) {
@@ -374,6 +375,9 @@ public class DynamicTool extends Item {
 			if (getDestroySpeedMultiplierSword(state) != 1.0F)
 				return (float) (swordPercent * (tool.getEfficiency() * getDestroySpeedMultiplierSword(state))) * efficiency;
 			
+			if (harvestLvl != 0) {
+				return (float) (toolPercent * (tool.getEfficiency() * 3)) * efficiency;
+			}
 			return super.getDestroySpeed(stack, state) * efficiency;
 		}
 		
@@ -457,12 +461,36 @@ public class DynamicTool extends Item {
 	
 	@Override
 	public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
-		return slotChanged;
+		if (oldStack.hasTag()) {
+			CompoundNBT nbtOld = oldStack.getOrCreateTag().copy();
+			nbtOld.remove("Durability");
+			if (newStack.hasTag()) {
+				CompoundNBT nbtNew = newStack.getOrCreateTag().copy();
+				nbtNew.remove("Durability");
+				return !nbtOld.equals(nbtNew);
+			} else {
+				return true;
+			}
+		} else {
+			return !oldStack.equals(newStack);
+		}
 	}
 	
 	@Override
 	public boolean shouldCauseBlockBreakReset(ItemStack oldStack, ItemStack newStack) {
-		return !oldStack.equals(newStack);
+		if (oldStack.hasTag()) {
+			CompoundNBT nbtOld = oldStack.getOrCreateTag().copy();
+			nbtOld.remove("Durability");
+			if (newStack.hasTag()) {
+				CompoundNBT nbtNew = newStack.getOrCreateTag().copy();
+				nbtNew.remove("Durability");
+				return !nbtOld.equals(nbtNew);
+			} else {
+				return true;
+			}
+		} else {
+			return !oldStack.equals(newStack);
+		}
 	}
 	
 	@Override

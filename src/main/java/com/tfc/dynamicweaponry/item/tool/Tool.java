@@ -7,6 +7,7 @@ import com.tfc.dynamicweaponry.data.ToolType;
 import com.tfc.dynamicweaponry.material_effects.effects.EffectInstance;
 import com.tfc.dynamicweaponry.registry.Registry;
 import net.minecraft.block.BlockState;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
@@ -316,6 +317,14 @@ public class Tool {
 		return amt;
 	}
 	
+	public static boolean checkCanHarvest(Item item, BlockState state, boolean speed) {
+		return (state != null && (item.canHarvestBlock(new ItemStack(item), state) || item.canHarvestBlock(state) || (speed && item.getDestroySpeed(new ItemStack(item), state) != 1.0F)));
+	}
+	
+	public static boolean checkCanHarvest(Item item, BlockState state) {
+		return checkCanHarvest(item, state, true);
+	}
+	
 	public float calcHarvestLevel(@Nonnull String type, @Nullable BlockState state) {
 		int toolCount = 0;
 		
@@ -328,12 +337,13 @@ public class Tool {
 					if (
 							s.equals(type) || (state != null && (
 									state.isToolEffective(net.minecraftforge.common.ToolType.get(s)) ||
-											(s.equals("pickaxe") && Items.NETHERITE_PICKAXE.canHarvestBlock(new ItemStack(Items.NETHERITE_PICKAXE), state)) ||
-											(s.equals("axe") && Items.NETHERITE_AXE.canHarvestBlock(new ItemStack(Items.NETHERITE_AXE), state)) ||
-											(s.equals("shovel") && Items.NETHERITE_SHOVEL.canHarvestBlock(new ItemStack(Items.NETHERITE_SHOVEL), state)) ||
-											(s.equals("hoe") && Items.NETHERITE_HOE.canHarvestBlock(new ItemStack(Items.NETHERITE_HOE), state)) ||
-											(s.equals("sword") && Items.NETHERITE_SWORD.canHarvestBlock(new ItemStack(Items.NETHERITE_SWORD), state))))
-					) {
+											(s.equals("pickaxe") && checkCanHarvest(Items.NETHERITE_PICKAXE, state)) ||
+											(s.equals("axe") && checkCanHarvest(Items.NETHERITE_AXE, state)) ||
+											(s.equals("shovel") && checkCanHarvest(Items.NETHERITE_SHOVEL, state)) ||
+											(s.equals("hoe") && checkCanHarvest(Items.NETHERITE_HOE, state)) ||
+											(s.equals("sword") && checkCanHarvest(Items.NETHERITE_SWORD, state))
+							))) {
+						harvestLevel = Math.max(harvestLevel, 0);
 						toolCount++;
 						harvestLevel += component.getHarvestLevel();
 					}

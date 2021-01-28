@@ -24,6 +24,7 @@ public class EffectInstance {
 	}
 	
 	public boolean test(LivingEntity entity, World world, BlockState state, BlockPos pos, Tool tool, Material mat) {
+		if (conditions.length == 0) return true;
 		boolean val = false;
 		for (EffectCondition condition : conditions) {
 			val = condition.test(entity, world, state, pos, tool, mat, val);
