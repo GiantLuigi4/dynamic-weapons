@@ -81,7 +81,7 @@ public class DynamicWeaponry {
 					ToolForgeTileEntity tileEntity = (ToolForgeTileEntity) te;
 					tileEntity.container.tool = packet.tool;
 					tileEntity.tool = packet.tool;
-
+					
 					tileEntity.container.resync();
 					
 					tileEntity.markDirty();
@@ -212,7 +212,7 @@ public class DynamicWeaponry {
 				context.get().setPacketHandled(true);
 			}
 		});
-
+		
 		if (FMLEnvironment.dist.isClient()) {
 			IReloadableResourceManager reloadableResourceManager = (IReloadableResourceManager) Minecraft.getInstance().getResourceManager();
 			reloadableResourceManager.addReloadListener(AssetLoader.INSTANCE);

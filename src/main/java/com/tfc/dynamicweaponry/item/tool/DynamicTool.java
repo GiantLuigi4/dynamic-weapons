@@ -18,6 +18,7 @@ import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.potion.PotionUtils;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
@@ -55,7 +56,7 @@ public class DynamicTool extends Item {
 	private static final UUID ATTACK_MODIFIER_UUID = new UUID(92389120L, 4379323L);
 	private static final UUID COOLDOWN_MODIFIER_UUID = new UUID(743827923L, 347823123L);
 	
-	private static ItemStack findAmmo(PlayerEntity playerEntity) {
+	public ItemStack findAmmo(PlayerEntity playerEntity) {
 		Predicate<ItemStack> predicate = ShootableItem.ARROWS;
 		ItemStack itemstack = ShootableItem.getHeldAmmo(playerEntity, predicate);
 		
@@ -175,6 +176,19 @@ public class DynamicTool extends Item {
 			} else {
 				stack.getOrCreateTag().putFloat("pull_time", tool.getDrawSpeed() / 2f);
 			}
+			
+			ItemStack itemstack = ItemStack.EMPTY;
+			
+			if (player instanceof PlayerEntity) {
+				itemstack = findAmmo(((PlayerEntity) player));
+			}
+			
+			System.out.println(itemstack);
+			
+			stack.getOrCreateTag().putString("selected_ammo", itemstack.getItem().getRegistryName().toString());
+			if (itemstack.getItem() instanceof TippedArrowItem) {
+				stack.getOrCreateTag().putInt("ammo_color", PotionUtils.getColor(itemstack));
+			}
 		}
 		
 		super.onUsingTick(stack, player, count);
@@ -184,6 +198,9 @@ public class DynamicTool extends Item {
 	public void onPlayerStoppedUsing(ItemStack stack, World worldIn, LivingEntity entityLiving, int timeLeft) {
 		if ((stack.getOrCreateTag().getFloat("pull_time") >= 0.1f && (this.getDamage(stack) != this.getMaxDamage(stack))) && !worldIn.isRemote) {
 			ItemStack itemstack = ItemStack.EMPTY.copy();
+			
+			stack.getOrCreateTag().remove("selected_ammo");
+			stack.getOrCreateTag().remove("ammo_color");
 			
 			if (entityLiving instanceof PlayerEntity) {
 				itemstack = findAmmo(((PlayerEntity) entityLiving));
@@ -552,10 +569,14 @@ public class DynamicTool extends Item {
 			CompoundNBT nbtOld = oldStack.getOrCreateTag().copy();
 			nbtOld.remove("Durability");
 			nbtOld.remove("pull_time");
+			nbtOld.remove("selected_ammo");
+			nbtOld.remove("ammo_color");
 			if (newStack.hasTag()) {
 				CompoundNBT nbtNew = newStack.getOrCreateTag().copy();
 				nbtNew.remove("Durability");
 				nbtNew.remove("pull_time");
+				nbtNew.remove("selected_ammo");
+				nbtNew.remove("ammo_color");
 				return !nbtOld.equals(nbtNew);
 			} else {
 				return true;

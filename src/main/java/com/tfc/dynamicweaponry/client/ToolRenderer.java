@@ -17,11 +17,12 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.*;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
@@ -65,6 +66,9 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 				matrixStack.translate(0.35f, 0.35f, 0);
 				combinedLight = LightTexture.packLight(15, 0);
 			}
+			
+			CompoundNBT cacheEntry = stack.getOrCreateTag();
+			cacheEntry.remove("Durability");
 			
 			if (!bufferCache.containsKey(stack.getOrCreateTag())) {
 				builder = new CustomBuffer();
@@ -307,58 +311,89 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 			
 			boolean useNormals = p_239207_2_ != ItemCameraTransforms.TransformType.GUI;
 			int arrowLen = 4;
+			
+			Item item = (ForgeRegistries.ITEMS.getValue(new ResourceLocation(stack.getOrCreateTag().getString("selected_ammo"))));
+			ArrowItem arrowItem = null;
+			if (item instanceof ArrowItem) arrowItem = (ArrowItem) item;
+			
+			Color shaftA = new Color(40, 30, 11);
+			Color shaftB = new Color(137, 103, 39);
+			
+			Color featherA = new Color(255, 255, 255);
+			Color featherB = new Color(224, 224, 224);
+			Color featherC = new Color(216, 216, 216);
+			Color featherD = new Color(198, 198, 198);
+			Color featherE = new Color(150, 150, 150);
+			
+			if (arrowItem instanceof SpectralArrowItem) {
+				shaftA = new Color(123, 63, 5);
+				shaftB = new Color(207, 140, 39);
+				featherC = new Color(255, 255, 119);
+				featherB = featherC;
+				featherD = new Color(218, 185, 48);
+				featherE = featherD;
+			} else if (arrowItem instanceof TippedArrowItem) {
+				Color potionColor = new Color(stack.getOrCreateTag().getInt("ammo_color"));
+				
+				featherA = new Color(potionColor.getHue(), potionColor.getSaturation(), featherA.getValue() * (potionColor.getValue()), false);
+				featherB = new Color(potionColor.getHue(), potionColor.getSaturation(), featherB.getValue() * (potionColor.getValue()), false);
+				featherC = new Color(potionColor.getHue(), potionColor.getSaturation(), featherC.getValue() * (potionColor.getValue()), false);
+				featherD = new Color(potionColor.getHue(), potionColor.getSaturation(), featherD.getValue() * (potionColor.getValue()), false);
+				featherE = new Color(potionColor.getHue(), potionColor.getSaturation(), featherE.getValue() * (potionColor.getValue()), false);
+			}
+			
 			//Shaft
 			for (int i = -1; i < arrowLen; i++) {
 				matrixStack.push();
 				matrixStack.translate(-0.25f * i, 0.25f * i, 0);
-				renderCube(40 / 255f, 30 / 255f, 11 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+				renderCube(shaftA.getRed() / 255f, shaftA.getGreen() / 255f, shaftA.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
 				matrixStack.translate(0, 0, 0.25f);
-				renderCube(137 / 255f, 103 / 255f, 39 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+				renderCube(shaftB.getRed() / 255f, shaftB.getGreen() / 255f, shaftB.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
 				matrixStack.pop();
 			}
 			//Head
 			matrixStack.push();
 			matrixStack.translate(-0.25f * (arrowLen + 1), 0.25f * (arrowLen + 1), 0);
-			renderCube(150 / 255f, 150 / 255f, 150 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			renderCube(featherE.getRed() / 255f, featherE.getGreen() / 255f, featherE.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
 			matrixStack.translate(0, 0.25f, 0.25f);
-			renderCube(150 / 255f, 150 / 255f, 150 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			renderCube(featherE.getRed() / 255f, featherE.getGreen() / 255f, featherE.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
 			matrixStack.push();
 			matrixStack.translate(-0.25f, 0, 0);
-			renderCube(216 / 255f, 216 / 255f, 216 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			renderCube(featherC.getRed() / 255f, featherC.getGreen() / 255f, featherC.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
 			matrixStack.pop();
 			matrixStack.push();
 			matrixStack.translate(-0.25f, 0, 0.25f);
-			renderCube(216 / 255f, 216 / 255f, 216 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			renderCube(featherC.getRed() / 255f, featherC.getGreen() / 255f, featherC.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
 			matrixStack.pop();
 			matrixStack.translate(-0.5f, 0, 0);
-			renderCube(216 / 255f, 216 / 255f, 216 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			renderCube(featherC.getRed() / 255f, featherC.getGreen() / 255f, featherC.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
 			matrixStack.pop();
 			matrixStack.push();
 			matrixStack.translate(-0.25f * (arrowLen + 1), 0.25f * (arrowLen + 2), 0);
-			renderCube(1, 1, 1, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			renderCube(featherA.getRed() / 255f, featherA.getGreen() / 255f, featherA.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
 			matrixStack.pop();
 			//Tail
 			matrixStack.translate(0, 0.25f, 0);
 			matrixStack.push();
 			matrixStack.translate(-0.25f * -2, 0.25f * -2, 0);
-			renderCube(198 / 255f, 198 / 255f, 198 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			renderCube(featherD.getRed() / 255f, featherD.getGreen() / 255f, featherD.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
 			matrixStack.translate(0, 0.25f, -0.25f);
-			renderCube(198 / 255f, 198 / 255f, 198 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			renderCube(featherD.getRed() / 255f, featherD.getGreen() / 255f, featherD.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
 			matrixStack.push();
 			matrixStack.translate(0, 0, -0.25f);
-			renderCube(224 / 255f, 224 / 255f, 224 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			renderCube(featherB.getRed() / 255f, featherB.getGreen() / 255f, featherB.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
 			matrixStack.pop();
 			matrixStack.push();
 			matrixStack.translate(0, 0, 0.25f);
-			renderCube(224 / 255f, 224 / 255f, 224 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			renderCube(featherB.getRed() / 255f, featherB.getGreen() / 255f, featherB.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
 			matrixStack.pop();
 			matrixStack.push();
 			matrixStack.translate(-0.25f, 0, 0);
-			renderCube(224 / 255f, 224 / 255f, 224 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			renderCube(featherB.getRed() / 255f, featherB.getGreen() / 255f, featherB.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
 			matrixStack.pop();
 			matrixStack.push();
 			matrixStack.translate(0.25f, 0, 0);
-			renderCube(224 / 255f, 224 / 255f, 224 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			renderCube(featherB.getRed() / 255f, featherB.getGreen() / 255f, featherB.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
 			matrixStack.pop();
 			matrixStack.pop();
 		}
