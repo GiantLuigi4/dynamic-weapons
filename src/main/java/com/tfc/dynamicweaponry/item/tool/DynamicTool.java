@@ -183,8 +183,6 @@ public class DynamicTool extends Item {
 				itemstack = findAmmo(((PlayerEntity) player));
 			}
 			
-			System.out.println(itemstack);
-			
 			stack.getOrCreateTag().putString("selected_ammo", itemstack.getItem().getRegistryName().toString());
 			if (itemstack.getItem() instanceof TippedArrowItem) {
 				stack.getOrCreateTag().putInt("ammo_color", PotionUtils.getColor(itemstack));
