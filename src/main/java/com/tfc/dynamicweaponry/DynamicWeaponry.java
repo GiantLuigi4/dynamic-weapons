@@ -221,7 +221,6 @@ public class DynamicWeaponry {
 			RegistryClient.CONTAINERS_SCREENS.register(FMLJavaModLoadingContext.get().getModEventBus());
 			
 			ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.clientSpec);
-//			MinecraftForge.EVENT_BUS.addListener(AssetLoader::clientSetup);
 		}
 		
 		MinecraftForge.EVENT_BUS.addListener(DynamicWeaponry::onAnvilUpdate);
@@ -246,7 +245,11 @@ public class DynamicWeaponry {
 //	}
 	
 	public static void onAnvilUpdate(AnvilUpdateEvent event) {
-		if (!event.getPlayer().world.isRemote) return;
+		if (event.getRight().getItem() instanceof DynamicTool) {
+			event.setCanceled(event.isCancelable());
+		}
+		
+		if (event.getPlayer() != null && !event.getPlayer().world.isRemote) return;
 		if (event.getLeft().getItem() instanceof DynamicTool) {
 			boolean repairable = event.getLeft().getItem().getIsRepairable(event.getLeft(), event.getRight());
 			if (repairable) {
@@ -269,7 +272,7 @@ public class DynamicWeaponry {
 				event.setResult(Event.Result.ALLOW);
 				
 				if (i3 >= 1) {
-					event.setMaterialCost(i3);
+					event.setMaterialCost(Math.max(3, i3));
 					event.setCost(j);
 					event.setOutput(itemstack1);
 				}

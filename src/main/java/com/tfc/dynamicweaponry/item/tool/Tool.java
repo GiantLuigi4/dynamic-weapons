@@ -91,9 +91,19 @@ public class Tool {
 		amt += (getWeight() / 40f) - 1;
 		if (getAttackSpeed() >= 3.99) {
 			double speed = MathHelper.lerp(0.25, ((getWeight()) * (0.1 / getEfficiency())), 1.6) / 2f;
-			amt *= (3f / (speed - 3.99));
+			double overflow = (3f / (speed - 3.99));
+			if (overflow > 3) overflow = 3f / overflow;
+			if (overflow > 2) overflow = 2f / overflow;
+			if (overflow > 1) overflow = 1f / overflow;
+			amt *= overflow;
 		}
-		
+		if (isBow()) {
+			float f = (1f / (getDrawSpeed()));
+			f /= 4;
+			f = Math.min(f, 3);
+			f *= amt / 3f;
+			return f;
+		}
 		return amt;
 	}
 	
@@ -144,7 +154,7 @@ public class Tool {
 		if (divisor != 0)
 			amt /= (divisor);
 		
-		return amt;
+		return Math.max(amt, 1);
 	}
 	
 	public double getAttackSpeed() {
@@ -176,7 +186,7 @@ public class Tool {
 //			amt += matPercent * mat.efficiency;
 //		}
 		
-		return amt;
+		return Math.max(amt, 1);
 	}
 	
 	public Tool(String name) {
@@ -353,7 +363,7 @@ public class Tool {
 		
 		harvestLevel /= toolCount;
 		
-		return harvestLevel;
+		return Math.max(-1, harvestLevel);
 	}
 	
 	public boolean isBow() {
@@ -378,7 +388,7 @@ public class Tool {
 			}
 		}
 		amt /= count;
-		return amt / 25f;
+		return (float) (amt / Math.max(1, getEfficiency() / 2f)) / 25f;
 	}
 	
 	public float calcPercent(Material material) {
@@ -407,8 +417,11 @@ public class Tool {
 			}
 		}
 		ArrayList<EffectInstance> effectInstances = new ArrayList<>();
-		for (ResourceLocation location : materialsFound) {
-			effectInstances.addAll(Arrays.asList(DataLoader.INSTANCE.getMaterial(location).getEffectInstances()));
+		try {
+			for (ResourceLocation location : materialsFound) {
+				effectInstances.addAll(Arrays.asList(DataLoader.INSTANCE.getMaterial(location).getEffectInstances()));
+			}
+		} catch (Throwable ignored) {
 		}
 		return effectInstances;
 	}

@@ -14,14 +14,12 @@ import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -37,6 +35,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 public class DynamicTool extends Item {
 	public DynamicTool() {
@@ -56,28 +55,25 @@ public class DynamicTool extends Item {
 	private static final UUID ATTACK_MODIFIER_UUID = new UUID(92389120L, 4379323L);
 	private static final UUID COOLDOWN_MODIFIER_UUID = new UUID(743827923L, 347823123L);
 	
-	@Override
-	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot, ItemStack stack) {
-		if (slot.equals(EquipmentSlotType.MAINHAND)) {
-			Multimap<Attribute, AttributeModifier> modifiers = HashMultimap.create();
-			Tool tool = new Tool(stack);
+	private static ItemStack findAmmo(PlayerEntity playerEntity) {
+		Predicate<ItemStack> predicate = ShootableItem.ARROWS;
+		ItemStack itemstack = ShootableItem.getHeldAmmo(playerEntity, predicate);
+		
+		if (!itemstack.isEmpty()) {
+			return itemstack;
+		} else {
+			predicate = ShootableItem.ARROWS;
 			
-			if (!(stack.getMaxDamage() <= stack.getDamage())) {
-				modifiers.put(
-						Attributes.ATTACK_DAMAGE,
-						new AttributeModifier(ATTACK_MODIFIER_UUID, "dynamic_weaponry:attack", tool.getDamage(), AttributeModifier.Operation.ADDITION)
-				);
+			for (int i = 0; i < playerEntity.inventory.getSizeInventory(); ++i) {
+				ItemStack itemstack1 = playerEntity.inventory.getStackInSlot(i);
 				
-				modifiers.put(
-						Attributes.ATTACK_SPEED,
-						new AttributeModifier(COOLDOWN_MODIFIER_UUID, "dynamic_weaponry:cooldown", -tool.getAttackSpeed(), AttributeModifier.Operation.ADDITION)
-				);
+				if (predicate.test(itemstack1)) {
+					return itemstack1;
+				}
 			}
 			
-			return modifiers;
+			return playerEntity.abilities.isCreativeMode ? new ItemStack(Items.ARROW) : ItemStack.EMPTY;
 		}
-		
-		return super.getAttributeModifiers(slot, stack);
 	}
 	
 	@Override
@@ -92,6 +88,37 @@ public class DynamicTool extends Item {
 		return super.onItemUse(context);
 	}
 	
+	@Override
+	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot, ItemStack stack) {
+		if (slot.equals(EquipmentSlotType.MAINHAND)) {
+			Multimap<Attribute, AttributeModifier> modifiers = HashMultimap.create();
+			Tool tool = new Tool(stack);
+			
+			if (!tool.isBow()) {
+				if (!(stack.getMaxDamage() <= stack.getDamage())) {
+					modifiers.put(
+							Attributes.ATTACK_DAMAGE,
+							new AttributeModifier(ATTACK_MODIFIER_UUID, "dynamic_weaponry:attack", tool.getDamage(), AttributeModifier.Operation.ADDITION)
+					);
+					
+					modifiers.put(
+							Attributes.ATTACK_SPEED,
+							new AttributeModifier(COOLDOWN_MODIFIER_UUID, "dynamic_weaponry:cooldown", -tool.getAttackSpeed(), AttributeModifier.Operation.ADDITION)
+					);
+				}
+			}
+			
+			return modifiers;
+		}
+		
+		return super.getAttributeModifiers(slot, stack);
+	}
+	
+	@Override
+	public boolean isRepairable(ItemStack stack) {
+		return super.isRepairable(stack);
+	}
+	
 	/**
 	 * Return whether this item is repairable in an anvil.
 	 *
@@ -102,6 +129,7 @@ public class DynamicTool extends Item {
 	public boolean getIsRepairable(ItemStack toRepair, ItemStack repair) {
 		Tool tool = new Tool(toRepair);
 		HashMap<ResourceLocation, Integer> counts = new HashMap<>();
+		
 		for (ToolComponent component : tool.components) {
 			for (MaterialPoint point : component.points) {
 				int amt = counts.getOrDefault(point.material, 0).intValue() + 1;
@@ -109,27 +137,26 @@ public class DynamicTool extends Item {
 				else counts.put(point.material, amt);
 			}
 		}
+		
 		AtomicReference<ResourceLocation> material1 = new AtomicReference<>(new ResourceLocation("minecraft:bedrock"));
 		AtomicInteger maxCount = new AtomicInteger(-1);
+		
 		counts.forEach((material, amt) -> {
 			if (maxCount.get() < amt) {
 				maxCount.set(amt);
 				material1.set(material);
 			}
 		});
+		
 		return (material1.get().equals(repair.getItem().getRegistryName())) || super.getIsRepairable(toRepair, repair);
 	}
 	
 	@Override
-	public boolean isRepairable(ItemStack stack) {
-		return super.isRepairable(stack);
-	}
-	
-	@Override
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
-		Tool tool = new Tool(playerIn.getHeldItem(handIn));
+		ItemStack stack = playerIn.getHeldItem(handIn);
+		Tool tool = new Tool(stack);
 		
-		if (tool.isBow()) {
+		if (tool.isBow() && (this.getDamage(stack) != this.getMaxDamage(stack))) {
 			playerIn.setActiveHand(handIn);
 			return ActionResult.resultConsume(playerIn.getHeldItem(handIn));
 		}
@@ -140,7 +167,8 @@ public class DynamicTool extends Item {
 	@Override
 	public void onUsingTick(ItemStack stack, LivingEntity player, int count) {
 		Tool tool = new Tool(stack);
-		if (tool.isBow() || true) {
+		
+		if (tool.isBow() && (this.getDamage(stack) != this.getMaxDamage(stack))) {
 			if (stack.getTag().contains("pull_time")) {
 				float time = stack.getOrCreateTag().getFloat("pull_time");
 				stack.getOrCreateTag().putFloat("pull_time", Math.min(1, time + (tool.getDrawSpeed() / 2f)));
@@ -148,11 +176,55 @@ public class DynamicTool extends Item {
 				stack.getOrCreateTag().putFloat("pull_time", tool.getDrawSpeed() / 2f);
 			}
 		}
+		
 		super.onUsingTick(stack, player, count);
 	}
 	
 	@Override
 	public void onPlayerStoppedUsing(ItemStack stack, World worldIn, LivingEntity entityLiving, int timeLeft) {
+		if ((stack.getOrCreateTag().getFloat("pull_time") >= 0.1f && (this.getDamage(stack) != this.getMaxDamage(stack))) && !worldIn.isRemote) {
+			ItemStack itemstack = ItemStack.EMPTY.copy();
+			
+			if (entityLiving instanceof PlayerEntity) {
+				itemstack = findAmmo(((PlayerEntity) entityLiving));
+			}
+			
+			Tool bow = new Tool(stack);
+			
+			float pct = stack.getOrCreateTag().getFloat("pull_time");
+			float f = pct * (1f / (bow.getDrawSpeed()));
+			f /= 4;
+			f = Math.min(f, 3);
+			
+			ArrowItem arrowitem = (ArrowItem) (itemstack.getItem() instanceof ArrowItem ? itemstack.getItem() : Items.ARROW);
+			AbstractArrowEntity abstractarrowentity = arrowitem.createArrow(worldIn, itemstack, entityLiving);
+			abstractarrowentity.func_234612_a_(entityLiving, entityLiving.rotationPitch, entityLiving.rotationYaw, 0.0F, f * 0.8f, 1.0F);
+			
+			if (pct >= 1.0F) {
+				abstractarrowentity.setIsCritical(true);
+			}
+			
+			abstractarrowentity.setDamage(f * 1);
+			doDamage(1, stack, entityLiving);
+			boolean flag1 = !(entityLiving instanceof PlayerEntity);
+			
+			if (flag1 || ((PlayerEntity) entityLiving).abilities.isCreativeMode) {
+				abstractarrowentity.pickupStatus = AbstractArrowEntity.PickupStatus.CREATIVE_ONLY;
+			}
+			
+			worldIn.playSound(null, entityLiving.getPosX(), entityLiving.getPosY(), entityLiving.getPosZ(), SoundEvents.ENTITY_ARROW_SHOOT, SoundCategory.PLAYERS, 1.0F, 1.0F / (random.nextFloat() * 0.4F + 1.2F) + (f * 0.1f));
+			
+			if (!flag1 && !((PlayerEntity) entityLiving).abilities.isCreativeMode) {
+				itemstack.shrink(1);
+				
+				if (itemstack.isEmpty()) {
+					((PlayerEntity) entityLiving).inventory.deleteStack(itemstack);
+				}
+			}
+			
+			worldIn.addEntity(abstractarrowentity);
+		}
+		
 		stack.getOrCreateTag().remove("pull_time");
 		super.onPlayerStoppedUsing(stack, worldIn, entityLiving, timeLeft);
 	}
@@ -166,13 +238,30 @@ public class DynamicTool extends Item {
 	public UseAction getUseAction(ItemStack stack) {
 		Tool tool = new Tool(stack);
 		
-		if (tool.isBow()) return UseAction.BOW;
+		if (tool.isBow() && (this.getDamage(stack) != this.getMaxDamage(stack))) return UseAction.BOW;
 		else return UseAction.NONE;
+	}
+	
+	public void doDamage(int amt, ItemStack stack, LivingEntity entityLiving) {
+		if (!entityLiving.world.isRemote && !((entityLiving instanceof PlayerEntity) && ((PlayerEntity) entityLiving).isCreative())) {
+			if (stack.getDamage() >= stack.getMaxDamage()) {
+				stack.setDamage(stack.getMaxDamage());
+			} else {
+				if (stack.getOrCreateTag().contains("Damage"))
+					stack.getOrCreateTag().putInt("Damage", stack.getOrCreateTag().getInt("Damage") + amt);
+				else stack.getOrCreateTag().putInt("Damage", amt);
+				
+				if (stack.getDamage() >= stack.getMaxDamage()) {
+					entityLiving.world.playSound(null, entityLiving.getPosX(), entityLiving.getPosY(), entityLiving.getPosZ(), SoundEvents.ENTITY_ITEM_BREAK, (entityLiving instanceof PlayerEntity) ? SoundCategory.PLAYERS : SoundCategory.HOSTILE, 1, 1 + ((random.nextFloat() - random.nextFloat()) / 64f));
+				}
+			}
+		}
 	}
 	
 	@Override
 	public int getUseDuration(ItemStack stack) {
 		Tool tool = new Tool(stack);
+		
 		if (tool.isBow()) {
 			return (int) (72000 * (1f / tool.getDrawSpeed()));
 		} else {
@@ -185,10 +274,12 @@ public class DynamicTool extends Item {
 //		onUsingTick(stack, context.getPlayer(), 0);
 		PlayerEntity playerIn = context.getPlayer();
 		Tool tool = new Tool(playerIn.getHeldItem(context.getHand()));
-		if (tool.isBow()) {
+		
+		if (tool.isBow() && (this.getDamage(stack) != this.getMaxDamage(stack))) {
 			if (!playerIn.isHandActive()) playerIn.setActiveHand(context.getHand());
 			return ActionResultType.CONSUME;
 		}
+		
 		return super.onItemUseFirst(stack, context);
 	}
 	
@@ -216,10 +307,10 @@ public class DynamicTool extends Item {
 				String.valueOf(Math.round(tool.getDurability() * 100) / 100f)).mergeStyle(TextFormatting.RED))
 		);
 		
-		list.add(new StringTextComponent(""));
-		list.add(new StringTextComponent("Mining Stats:").mergeStyle(TextFormatting.GRAY));
 		
-		{
+		list.add(new StringTextComponent(""));
+		if (!tool.isBow()) {
+			list.add(new StringTextComponent("Mining Stats:").mergeStyle(TextFormatting.GRAY));
 			int count = 0;
 			HashMap<String, Integer> toolCounts = new HashMap<>();
 			
@@ -260,12 +351,24 @@ public class DynamicTool extends Item {
 						String.valueOf(Math.round(lvl * 100) / 100f)).mergeStyle(TextFormatting.RED))
 				);
 			});
+			
+			list.add(new StringTextComponent(""));
+			list.add(new StringTextComponent("Melee Stats:").mergeStyle(TextFormatting.GRAY));
+		} else {
+			list.add(new StringTextComponent("Ranged Stats:").mergeStyle(TextFormatting.GRAY));
 		}
 		
-		list.add(new StringTextComponent(""));
-		list.add(new StringTextComponent("Combat Stats:").mergeStyle(TextFormatting.GRAY));
 		list.add(new StringTextComponent(" " + Math.abs(Math.round((tool.getDamage()) * 100) / 100f) + " Attack Damage").mergeStyle(TextFormatting.DARK_GREEN));
-		list.add(new StringTextComponent(" " + Math.abs(Math.round((4 - tool.getAttackSpeed()) * 100) / 100f) + " Attack Speed").mergeStyle(TextFormatting.DARK_GREEN));
+		
+		if (tool.isBow()) {
+			list.add(new StringTextComponent(" " + Math.abs(Math.round(((1 - tool.getDrawSpeed()) * 4) * 100) / 100f) + " Draw Speed").mergeStyle(TextFormatting.DARK_GREEN));
+			float f = (1f / (tool.getDrawSpeed()));
+			f /= 4;
+			f = Math.min(f, 3);
+			list.add(new StringTextComponent(" " + Math.abs(Math.round(((f)) * 100) / 100f) + " Shoot Force").mergeStyle(TextFormatting.DARK_GREEN));
+		} else {
+			list.add(new StringTextComponent(" " + Math.abs(Math.round((4 - tool.getAttackSpeed()) * 100) / 100f) + " Attack Speed").mergeStyle(TextFormatting.DARK_GREEN));
+		}
 	}
 	
 	@Override
@@ -373,15 +476,15 @@ public class DynamicTool extends Item {
 			float swordPercent = swordCount / (float) count;
 			
 			if (getDestroySpeedMultiplierSword(state) != 1.0F)
-				return (float) (swordPercent * (tool.getEfficiency() * getDestroySpeedMultiplierSword(state))) * efficiency;
+				return Math.max(super.getDestroySpeed(stack, state), (float) (swordPercent * (tool.getEfficiency() * getDestroySpeedMultiplierSword(state))) * efficiency);
 			
 			if (harvestLvl != 0) {
-				return (float) (toolPercent * (tool.getEfficiency() * 3)) * efficiency;
+				return Math.max(super.getDestroySpeed(stack, state), (float) (toolPercent * (tool.getEfficiency() * 3)) * efficiency);
 			}
-			return super.getDestroySpeed(stack, state) * efficiency;
+			return Math.max(super.getDestroySpeed(stack, state), super.getDestroySpeed(stack, state) * efficiency);
 		}
 		
-		return (float) (toolPercent * (tool.getEfficiency() * 3)) * efficiency;
+		return Math.max(super.getDestroySpeed(stack, state), (float) (toolPercent * (tool.getEfficiency() * 3)) * efficiency);
 	}
 	
 	private float getDestroySpeedMultiplierSword(BlockState state) {
@@ -397,15 +500,7 @@ public class DynamicTool extends Item {
 	
 	@Override
 	public boolean hitEntity(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-		if (!attacker.world.isRemote && !((attacker instanceof PlayerEntity) && ((PlayerEntity) attacker).isCreative())) {
-			if (stack.getDamage() >= stack.getMaxDamage()) {
-				stack.setDamage(stack.getMaxDamage());
-			} else {
-				if (stack.getOrCreateTag().contains("Damage"))
-					stack.getOrCreateTag().putInt("Damage", stack.getOrCreateTag().getInt("Damage") + 1);
-				else stack.getOrCreateTag().putInt("Damage", 1);
-			}
-		}
+		doDamage(1, stack, attacker);
 		
 		Tool tool = new Tool(stack);
 		for (EffectInstance instance : tool.collectEffects()) {
@@ -439,15 +534,7 @@ public class DynamicTool extends Item {
 	
 	@Override
 	public boolean onBlockDestroyed(ItemStack stack, World worldIn, BlockState state, BlockPos pos, LivingEntity entityLiving) {
-		if (!entityLiving.world.isRemote && !((entityLiving instanceof PlayerEntity) && ((PlayerEntity) entityLiving).isCreative())) {
-			if (stack.getDamage() >= stack.getMaxDamage()) {
-				stack.setDamage(stack.getMaxDamage());
-			} else {
-				if (stack.getOrCreateTag().contains("Damage"))
-					stack.getOrCreateTag().putInt("Damage", stack.getOrCreateTag().getInt("Damage") + 1);
-				else stack.getOrCreateTag().putInt("Damage", 1);
-			}
-		}
+		doDamage(1, stack, entityLiving);
 		
 		Tool tool = new Tool(stack);
 		for (EffectInstance instance : tool.collectEffects()) {
@@ -464,9 +551,11 @@ public class DynamicTool extends Item {
 		if (oldStack.hasTag()) {
 			CompoundNBT nbtOld = oldStack.getOrCreateTag().copy();
 			nbtOld.remove("Durability");
+			nbtOld.remove("pull_time");
 			if (newStack.hasTag()) {
 				CompoundNBT nbtNew = newStack.getOrCreateTag().copy();
 				nbtNew.remove("Durability");
+				nbtNew.remove("pull_time");
 				return !nbtOld.equals(nbtNew);
 			} else {
 				return true;
@@ -481,9 +570,11 @@ public class DynamicTool extends Item {
 		if (oldStack.hasTag()) {
 			CompoundNBT nbtOld = oldStack.getOrCreateTag().copy();
 			nbtOld.remove("Durability");
+			nbtOld.remove("pull_time");
 			if (newStack.hasTag()) {
 				CompoundNBT nbtNew = newStack.getOrCreateTag().copy();
 				nbtNew.remove("Durability");
+				nbtNew.remove("pull_time");
 				return !nbtOld.equals(nbtNew);
 			} else {
 				return true;

@@ -1,0 +1,3 @@
+//TODO: shader compatible tool texture
+//TODO: runtime stitched tool textures (for a true shader compatibility mode)
+//TODO: figure out how to switch arrows to using models (as the current method of rendering the arrow in the bow is super cursed)

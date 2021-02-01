@@ -31,6 +31,20 @@ public class AssetLoader implements IResourceManagerReloadListener {
 		}
 	}
 	
+	//TODO: learn this
+//	public static void bakeModelEvent(ModelBakeEvent event) {
+//		{
+//			IUnbakedModel model = event.getModelLoader().getModelOrMissing(new ResourceLocation("dynamic_weaponry:arrows/arrow"));
+//			IBakedModel model1 = model.bakeModel(event.getModelLoader(), ModelLoader.defaultTextureGetter(), SimpleModelTransform.IDENTITY, new ResourceLocation("dynamic_weaponry:arrows/arrow"));
+//			event.getModelRegistry().put(new ModelResourceLocation("dynamic_weaponry:arrows/arrow", "normal"), model1);
+//		}
+//		{
+//			IUnbakedModel model = event.getModelLoader().getModelOrMissing(new ResourceLocation("dynamic_weaponry:arrows/spectral_arrow"));
+//			IBakedModel model1 = model.bakeModel(event.getModelLoader(), ModelLoader.defaultTextureGetter(), SimpleModelTransform.IDENTITY, new ResourceLocation("dynamic_weaponry:arrows/arrow"));
+//			event.getModelRegistry().put(new ModelResourceLocation("dynamic_weaponry:arrows/arrow", "spectral"), model1);
+//		}
+//	}
+	
 	@Override
 	public void onResourceManagerReload(IResourceManager resourceManager) {
 		Collection<ResourceLocation> resourceList = resourceManager.getAllResourceLocations("weaponry/materials", (file) -> file.endsWith(".json"));

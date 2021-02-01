@@ -1,8 +1,10 @@
 package com.tfc.dynamicweaponry.material_effects.effects;
 
 import com.tfc.dynamicweaponry.item.tool.Tool;
+import com.tfc.dynamicweaponry.utils.EnumStat;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -44,5 +46,9 @@ public class ToolEffect implements IForgeRegistryEntry<ToolEffect> {
 	}
 	
 	public void onBlockBreak(ItemStack stack, Tool tool, float materialPercent, EffectInstance instance, BlockState broken, BlockPos pos, World world, LivingEntity miner) {
+	}
+	
+	public float calcMaterialStats(ItemStack stack, Tool tool, float materialPercetn, EffectInstance instance, @Nullable Entity wielder, EnumStat stat) {
+		return -1;
 	}
 }

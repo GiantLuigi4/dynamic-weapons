@@ -190,7 +190,7 @@ public class ToolComponent implements Comparable<ToolComponent> {
 				for (Point p1 : checkingPoints) {
 					for (int xOff = -1; xOff <= 1; xOff++) {
 						for (int yOff = -1; yOff <= 1; yOff++) {
-							if (Math.abs(xOff) == Math.abs(yOff)) continue;
+							if (!type.isAllowAngles()) if (Math.abs(xOff) == Math.abs(yOff)) continue;
 							
 							Point p = new Point(p1.x + xOff, p1.y + yOff);
 							

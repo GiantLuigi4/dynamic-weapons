@@ -160,30 +160,42 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 						i + 180, j + 80, new Color(r, g, b).getRGB());
 				drawString(matrixStack, font, "Efficiency: " + Math.round(tool.getEfficiency() * 10) / 10f,
 						i + 180, j + 90, new Color(r, g, b).getRGB());
-				drawString(matrixStack, font, "Cooldown: " + Math.round(tool.getAttackSpeed() * 100) / 100f,
-						i + 180, j + 100, new Color(r, g, b).getRGB());
-				drawString(matrixStack, font, "Speed: " + Math.round(Math.abs(4 - tool.getAttackSpeed()) * 100) / 100f,
-						i + 180, j + 110, new Color(r, g, b).getRGB());
+				if (!tool.isBow()) {
+					drawString(matrixStack, font, "Cooldown: " + Math.round(tool.getAttackSpeed() * 100) / 100f,
+							i + 180, j + 100, new Color(r, g, b).getRGB());
+					drawString(matrixStack, font, "Speed: " + Math.round(Math.abs(4 - tool.getAttackSpeed()) * 100) / 100f,
+							i + 180, j + 110, new Color(r, g, b).getRGB());
+				}
 				drawString(matrixStack, font, "Durability: " + Math.round(tool.getDurability()),
 						i + 180, j + 120, new Color(r, g, b).getRGB());
 				
-				String[] types = new String[]{
-						net.minecraftforge.common.ToolType.PICKAXE.getName(),
-						net.minecraftforge.common.ToolType.AXE.getName(),
-						net.minecraftforge.common.ToolType.SHOVEL.getName(),
-						net.minecraftforge.common.ToolType.HOE.getName(),
-						"sword"
-				};
-				int index = 0;
-				for (String type : types) {
-					BlockState state = type.equals("pickaxe") ? Blocks.STONE.getDefaultState() : type.equals("axe") ? Blocks.OAK_PLANKS.getDefaultState() : type.equals("shovel") ? Blocks.DIRT.getDefaultState() : type.equals("hoe") ? Blocks.OAK_LEAVES.getDefaultState() : type.equals("sword") ? Blocks.COBWEB.getDefaultState() : Blocks.BEDROCK.getDefaultState();
-					String typeName = type.substring(0, 1).toUpperCase() + type.substring(1);
-					float lvl = Math.round(tool.calcHarvestLevel(type, state) * 100f) / 100f;
-					if (lvl != 0) {
-						drawString(matrixStack, font, typeName + " Level: " + lvl,
-								i + 180, j + 130 + (index++ * 10), new Color(r, g, b).getRGB());
+				if (tool.isBow()) {
+					drawString(matrixStack, font, "Draw Speed: " + Math.abs(Math.round(((1 - tool.getDrawSpeed()) * 4) * 100) / 100f),
+							i + 180, j + 100, new Color(r, g, b).getRGB());
+					float f = (1f / (tool.getDrawSpeed()));
+					f /= 4;
+					f = Math.min(f, 3);
+					drawString(matrixStack, font, "Shoot Force: " + Math.abs(Math.round(((f)) * 100) / 100f),
+							i + 180, j + 110, new Color(r, g, b).getRGB());
+				} else {
+					String[] types = new String[]{
+							net.minecraftforge.common.ToolType.PICKAXE.getName(),
+							net.minecraftforge.common.ToolType.AXE.getName(),
+							net.minecraftforge.common.ToolType.SHOVEL.getName(),
+							net.minecraftforge.common.ToolType.HOE.getName(),
+							"sword"
+					};
+					int index = 0;
+					for (String type : types) {
+						BlockState state = type.equals("pickaxe") ? Blocks.STONE.getDefaultState() : type.equals("axe") ? Blocks.OAK_PLANKS.getDefaultState() : type.equals("shovel") ? Blocks.DIRT.getDefaultState() : type.equals("hoe") ? Blocks.OAK_LEAVES.getDefaultState() : type.equals("sword") ? Blocks.COBWEB.getDefaultState() : Blocks.BEDROCK.getDefaultState();
+						String typeName = type.substring(0, 1).toUpperCase() + type.substring(1);
+						float lvl = Math.round(tool.calcHarvestLevel(type, state) * 100f) / 100f;
+						if (lvl >= 0.01f) {
+							drawString(matrixStack, font, typeName + " Level: " + lvl,
+									i + 180, j + 130 + (index++ * 10), new Color(r, g, b).getRGB());
 //						drawString(matrixStack, font, typeName + " Speed: " + lvl,
 //								i + 180, j + 130 + (index++ * 10), new Color(r, g, b).getRGB());
+						}
 					}
 				}
 			} catch (Throwable ignored) {
@@ -672,7 +684,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 						(rgb) / (inBounds ? 2 : 4)
 				);
 				
-				if (selectedComponent != null) {
+				if (selectedComponent != null && selectedComponent.type != null) {
 					for (Point requiredPoint : selectedComponent.type.getRequiredPoints()) {
 						if (requiredPoint.x == x && requiredPoint.y == y) {
 							if (checkPoint(selectedComponent, requiredPoint)) {

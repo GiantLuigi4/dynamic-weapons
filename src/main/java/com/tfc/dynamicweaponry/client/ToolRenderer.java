@@ -20,13 +20,12 @@ import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix3f;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.math.vector.Vector4f;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.*;
 
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
+import java.util.Deque;
 
 public class ToolRenderer extends ItemStackTileEntityRenderer {
 	public static final ToolRenderer render = new ToolRenderer();
@@ -37,7 +36,9 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 	
 	static {
 		ArrayList<Point> points = new ArrayList<>();
-		points.add(new Point(12, 11));
+		points.add(new Point(15, 11));
+		points.add(new Point(5, 1));
+		points.add(new Point(10, 4));
 		pointsOfInterest.put(new ResourceLocation("dynamic_weaponry:bow_string"), points);
 	}
 	
@@ -51,6 +52,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 	
 	@Override
 	public void func_239207_a_(ItemStack stack, ItemCameraTransforms.TransformType p_239207_2_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
+		
 		if (Config.CLIENT.cacheBuffers.get() && !(buffer instanceof CustomBuffer)) {
 			CustomBuffer builder;
 			
@@ -113,11 +115,17 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 			return;
 		}
 		
+		{
+			Deque<MatrixStack.Entry> stackDeque = matrixStack.stack;
+			matrixStack = new MatrixStack();
+			matrixStack.stack.addAll(stackDeque);
+		}
+		
 		matrixStack.push();
 		if (!Config.CLIENT.cacheBuffers.get()) {
 			matrixStack.translate(0, 0, 0.45);
 			matrixStack.scale(1f / 4, 1f / 4, 1f / 4);
-
+			
 			if (p_239207_2_.equals(ItemCameraTransforms.TransformType.GUI)) {
 				matrixStack.scale(0.86f, 0.86f, 1);
 				matrixStack.translate(0.35f, 0.35f, 0);
@@ -140,24 +148,97 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 					Material material = DataLoader.INSTANCE.getMaterial(point.material);
 					
 					if (material != null) {
-						Color color = Shading.shade(point, tool, component);
 						matrixStack.push();
-						matrixStack.translate(point.x / 4f, point.y / 4f, 0);
+						Color color = Shading.shade(point, tool, component);
 						
 						float r = color.getRed() / 255f;
 						float g = color.getGreen() / 255f;
 						float b = color.getBlue() / 255f;
 						
+						boolean isLerpedPoint = false;
+						MaterialPoint src = point;
+						
 						if (pointsOfInterest.containsKey(component.type.name)) {
+							float pct = stack.getOrCreateTag().getFloat("pull_time");
 							ArrayList<Point> points = pointsOfInterest.get(component.type.name);
-							float minDist = Float.POSITIVE_INFINITY;
-							for (Point point1 : points) {
-							}
+							point = lerpToInterest(pct, point, points);
+							isLerpedPoint = true;
 						}
 						
 						matrixStack.translate(0, 0, 0.125f / 2);
 						
-						renderCube(r, g, b, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, p_239207_2_ != ItemCameraTransforms.TransformType.GUI, point.x, point.y, tool);
+						if (isLerpedPoint) {
+							float pct = stack.getOrCreateTag().getFloat("pull_time");
+							ArrayList<Point> points = pointsOfInterest.get(component.type.name);
+							
+							for (int x = -1; x <= 1; x++) {
+								for (int y = -1; y <= 1; y++) {
+									if (x != 0 && y != 0) {
+										MaterialPoint otherPoint = tool.getPoint(src.x + x, src.y + y);
+										if (otherPoint != null) {
+											otherPoint = lerpToInterest(pct, otherPoint, points);
+											MaterialPoint last = null;
+											if (otherPoint != null) {
+												src = otherPoint;
+												boolean isVertical =
+														(Math.abs(otherPoint.y - point.y) <
+																Math.abs(otherPoint.x - point.x));
+												
+												for (int i = 0; i < 16; i++) {
+													MaterialPoint point1 = point.lerp(i / 16f, otherPoint);
+													
+													if (
+															!point1.equals(last) &&
+																	(
+																			last == null ||
+																					(isVertical ? point1.x != last.x :
+																							point1.y != last.y)
+																	)
+													) {
+														matrixStack.push();
+														
+														matrixStack.translate(point1.x / 4f, point1.y / 4f, 0);
+														
+														renderCube(r, g, b, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, p_239207_2_ != ItemCameraTransforms.TransformType.GUI);
+//														renderCube(r, g, b, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, p_239207_2_ != ItemCameraTransforms.TransformType.GUI, point.x, point.y, tool);
+														
+														matrixStack.pop();
+														
+														last = point1;
+													} else if (last == null) {
+														last = point1;
+													}
+												}
+												break;
+											}
+										}
+									}
+								}
+							}
+						} else {
+							if (component.name.contains("lower") && point.y < 8) {
+								float pct = stack.getOrCreateTag().getFloat("pull_time");
+								if (point.y < 5) {
+									point = new MaterialPoint((int) MathHelper.lerp(pct / 3f, point.x, 9), point.y, point.material);
+								} else {
+									point = new MaterialPoint((int) MathHelper.lerp(pct / 3f, point.x, 7), point.y, point.material);
+								}
+								matrixStack.translate(point.x / 4f, point.y / 4f, 0);
+								renderCube(r, g, b, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, p_239207_2_ != ItemCameraTransforms.TransformType.GUI);
+							} else if (component.name.contains("upper") && point.x > 7) {
+								float pct = stack.getOrCreateTag().getFloat("pull_time");
+								if (point.x > 10) {
+									point = new MaterialPoint(point.x, (int) MathHelper.lerp(pct / 3f, point.y, 8), point.material);
+								} else {
+									point = new MaterialPoint(point.x, (int) MathHelper.lerp(pct / 3f, point.y, 10), point.material);
+								}
+								matrixStack.translate(point.x / 4f, point.y / 4f, 0);
+								renderCube(r, g, b, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, p_239207_2_ != ItemCameraTransforms.TransformType.GUI);
+							} else {
+								matrixStack.translate(point.x / 4f, point.y / 4f, 0);
+								renderCube(r, g, b, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, p_239207_2_ != ItemCameraTransforms.TransformType.GUI, point.x, point.y, tool);
+							}
+						}
 						
 						matrixStack.pop();
 						
@@ -186,7 +267,122 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 			}
 		}
 		
+		float pct = stack.getOrCreateTag().getFloat("pull_time");
+		//IDK WHY THIS WORKS, IT SHOULDN'T, SEND HELP
+		//THIS IS NOT HOW MATRIX STACK IS MEANT TO WORK
+		//THE STACK SHOULD NOT ROTATE EVERY TIME I TRANSLATE
+		if (tool.isBow() && pct != 0) {
+//			IBakedModel model = Minecraft.getInstance().getItemRenderer().getItemModelMesher().getModelManager().getModel(new ModelResourceLocation("dynamic_weaponry:arrows/arrow"));
+//			IBakedModel model = Minecraft.getInstance().getModelManager().getModel(new ResourceLocation("dynamic_weaponry:arrows/arrow"));
+//			Minecraft.getInstance().getItemRenderer().renderItem();
+//			IVertexBuilder builder1 = buffer.getBuffer(RenderType.getSolid());
+//			for (Direction value : Direction.values()) {
+//				List<BakedQuad> quads = model.getQuads(null,value,new Random(0));
+//				for (BakedQuad quad : quads) {
+//					builder1.addQuad(
+//							matrixStack.getLast(),
+//							quad,1,1,1,
+//							combinedLight,combinedOverlay
+//					);
+//				}
+//			}
+//			List<BakedQuad> quads = model.getQuads(null,null,new Random(0));
+//			for (BakedQuad quad : quads) {
+//				builder1.addQuad(
+//						matrixStack.getLast(),
+//						quad,1,1,1,
+//						combinedLight,combinedOverlay
+//				);
+//			}
+			MaterialPoint point = new MaterialPoint(8, 8, new ResourceLocation("minecraft:string"));
+			ArrayList<Point> points = pointsOfInterest.get(new ResourceLocation("dynamic_weaponry:bow_string"));
+			point = lerpToInterest(pct, point, points);
+			
+			matrixStack.translate(point.x / 4f, point.y / 4f, 0);
+			matrixStack.translate(-0.75f, 0.5f, 0.075f);
+			if (pct >= 0.925f) {
+				matrixStack.translate(0.25f, 0.25f, 0);
+			}
+			matrixStack.scale(1, 1, 0.9f);
+			
+			boolean useNormals = p_239207_2_ != ItemCameraTransforms.TransformType.GUI;
+			int arrowLen = 4;
+			//Shaft
+			for (int i = -1; i < arrowLen; i++) {
+				matrixStack.push();
+				matrixStack.translate(-0.25f * i, 0.25f * i, 0);
+				renderCube(40 / 255f, 30 / 255f, 11 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+				matrixStack.translate(0, 0, 0.25f);
+				renderCube(137 / 255f, 103 / 255f, 39 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+				matrixStack.pop();
+			}
+			//Head
+			matrixStack.push();
+			matrixStack.translate(-0.25f * (arrowLen + 1), 0.25f * (arrowLen + 1), 0);
+			renderCube(150 / 255f, 150 / 255f, 150 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			matrixStack.translate(0, 0.25f, 0.25f);
+			renderCube(150 / 255f, 150 / 255f, 150 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			matrixStack.push();
+			matrixStack.translate(-0.25f, 0, 0);
+			renderCube(216 / 255f, 216 / 255f, 216 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			matrixStack.pop();
+			matrixStack.push();
+			matrixStack.translate(-0.25f, 0, 0.25f);
+			renderCube(216 / 255f, 216 / 255f, 216 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			matrixStack.pop();
+			matrixStack.translate(-0.5f, 0, 0);
+			renderCube(216 / 255f, 216 / 255f, 216 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			matrixStack.pop();
+			matrixStack.push();
+			matrixStack.translate(-0.25f * (arrowLen + 1), 0.25f * (arrowLen + 2), 0);
+			renderCube(1, 1, 1, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			matrixStack.pop();
+			//Tail
+			matrixStack.translate(0, 0.25f, 0);
+			matrixStack.push();
+			matrixStack.translate(-0.25f * -2, 0.25f * -2, 0);
+			renderCube(198 / 255f, 198 / 255f, 198 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			matrixStack.translate(0, 0.25f, -0.25f);
+			renderCube(198 / 255f, 198 / 255f, 198 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			matrixStack.push();
+			matrixStack.translate(0, 0, -0.25f);
+			renderCube(224 / 255f, 224 / 255f, 224 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			matrixStack.pop();
+			matrixStack.push();
+			matrixStack.translate(0, 0, 0.25f);
+			renderCube(224 / 255f, 224 / 255f, 224 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			matrixStack.pop();
+			matrixStack.push();
+			matrixStack.translate(-0.25f, 0, 0);
+			renderCube(224 / 255f, 224 / 255f, 224 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			matrixStack.pop();
+			matrixStack.push();
+			matrixStack.translate(0.25f, 0, 0);
+			renderCube(224 / 255f, 224 / 255f, 224 / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+			matrixStack.pop();
+			matrixStack.pop();
+		}
 		matrixStack.pop();
+	}
+	
+	public MaterialPoint lerpToInterest(float pct, MaterialPoint point, ArrayList<Point> interests) {
+		double minDist = Float.POSITIVE_INFINITY;
+		Point point2 = null;
+		
+		for (Point point1 : interests) {
+			double dist = new Vector3d(point1.x, point1.y, 0).distanceTo(new Vector3d(point.x, point.y, 0));
+			if (dist < minDist) {
+				minDist = dist;
+				point2 = point1;
+			}
+		}
+		
+		if (point2 != null) {
+			Point point1 = point2.lerp((1 - (pct / 1.25f)), point);
+			point = new MaterialPoint(point1.x, point1.y, point.material);
+		}
+		
+		return point;
 	}
 	
 	public void renderCube(float r, float g, float b, float x, float y, float z, IVertexBuilder builder, int combinedOverlay, int combinedLight, MatrixStack matrixStack, boolean useNormals, int pixelX, int pixelZ, Tool tool) {
