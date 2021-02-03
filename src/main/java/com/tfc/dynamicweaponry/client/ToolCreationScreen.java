@@ -102,11 +102,51 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				slots.add(slot);
 			}
 		}
+
+//		int x = -32;
+//		int y = 0;
+		int index = 0;
+		for (ResourceLocation location : DataLoader.INSTANCE.toolTypes.keySet()) {
+			ResourceLocation typeImage = new ResourceLocation(
+					location.getNamespace(),
+					"textures/gui/tool_types/" + location.getPath() + ".png"
+			);
+			minecraft.getTextureManager().bindTexture(typeImage);
+			slots.add(
+					new ToolComponentSlot(index++, 0, typeImage, location, true)
+			);
+		}
 		
 		ItemStack stack = new ItemStack(Registry.DYNAMIC_TOOL.get());
 		CompoundNBT nbt1 = stack.getOrCreateTag();
 		nbt1.put("tool_info", nbt.getCompound("tool"));
 		tool = new Tool(stack);
+		
+		index = 0;
+		{
+			ToolType type = DataLoader.INSTANCE.toolTypes.get(new ResourceLocation(tool.name));
+			ToolPart[] parts = type.getParts();
+			
+			ArrayList<ResourceLocation> locations1 = new ArrayList<>();
+			
+			for (ToolPart part : parts) {
+				if (part.type != null) {
+					locations1.add(part.type.name);
+				}
+			}
+			
+			for (ResourceLocation location : locations1) {
+				ResourceLocation typeImage = new ResourceLocation(
+						location.getNamespace(),
+						"textures/gui/part_types/" + location.getPath() + ".png"
+				);
+				
+				minecraft.getTextureManager().bindTexture(typeImage);
+				slots.add(
+						new ToolComponentSlot(index++, 128, typeImage, location, false)
+				);
+			}
+		}
 	}
 	
 	public boolean isSwitcherOpen = false;
@@ -128,8 +168,18 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		super.renderBackground(matrixStack);
 		matrixStack.translate(0, -40, 0);
 		int i = (this.width - 248) / 2;
+//		int i1 = i;
+//		i += (i-Math.max(9, i - 128)) / 2;
 		int j = (this.height - 166) / 2;
 		
+		drawBackground(matrixStack,
+				Math.max(9, i - 128) - 9, j,
+				i - Math.max(9, i - 128) + 9, 246
+		);
+//		drawBackground(matrixStack,
+//				Math.max(9, i1 - 128) - 9 + i-i1, j,
+//				i1-Math.max(9, i1 - 128) + 9, 246
+//		);
 		drawBackground(matrixStack,
 				i, j,
 				(248 - 72), 166
@@ -172,8 +222,9 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				if (tool.isBow()) {
 					drawString(matrixStack, font, "Draw Speed: " + Math.abs(Math.round(((1 - tool.getDrawSpeed()) * 4) * 100) / 100f),
 							i + 180, j + 100, new Color(r, g, b).getRGB());
-					float f = (1f / (tool.getDrawSpeed()));
-					f /= 4;
+					float f = (1f / (1 - (tool.getDrawSpeed())));
+					f *= Math.max(0.1, 1 - (1f / tool.getEfficiency()));
+					f *= 4;
 					f = Math.min(f, 3);
 					drawString(matrixStack, font, "Shoot Force: " + Math.abs(Math.round(((f)) * 100) / 100f),
 							i + 180, j + 110, new Color(r, g, b).getRGB());
@@ -212,61 +263,61 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 //							this::cycleTool
 //					)
 //			);
+
+//			this.buttons.add(
+//					new Button(
+//							this.width / 2 + 63, j - 30,
+//							60, 20,
+//							(new TranslationTextComponent("button.dynamic_weaponry.toggle_tool_switcher")),
+//							(button) -> {
+//								isSwitcherOpen = !isSwitcherOpen;
+//								isToolSwitcher = true;
+//								ResourceLocation[] locations = DataLoader.INSTANCE.toolTypes.keySet().toArray(new ResourceLocation[0]);
+//								for (int i1 = 0; i1 < locations.length; i1++) {
+//									if (locations[i1].toString().equals(tool.name)) {
+//										switcherIndex = i1;
+//									}
+//								}
+//							}
+//					)
+//			);
+//
+//			Button button = new Button(
+//					this.width / 2 + 63, j - 10,
+//					60, 20,
+//					(new TranslationTextComponent("button.dynamic_weaponry.toggle_part_switcher")),
+////					this::cyclePart
+//					(button1) -> {
+//						ToolType type = DataLoader.INSTANCE.toolTypes.get(new ResourceLocation(tool.name));
+//						if (type == null) return;
+//						ToolPart[] parts = type.getParts();
+//
+//						ArrayList<ResourceLocation> locations1 = new ArrayList<>();
+//
+//						for (ToolPart part : parts) {
+//							if (part.type != null) {
+//								locations1.add(part.type.name);
+//							}
+//						}
+//
+//						isSwitcherOpen = !isSwitcherOpen;
+//						isToolSwitcher = false;
+//						switcherIndex = locations1.indexOf(new ResourceLocation(currentPart));
+////						ResourceLocation[] locations = Loader.INSTANCE.toolTypes.keySet().toArray(new ResourceLocation[0]);
+////						for (int i1 = 0; i1 < locations.length; i1++) {
+////							if (locations[i1].toString().equals(tool.name)) {
+////								switcherIndex = i1;
+////							}
+////						}
+//					}
+//			);
+
+//			cyclePart(button);
+//			this.buttons.add(button);
 			
 			this.buttons.add(
 					new Button(
 							this.width / 2 + 63, j - 30,
-							60, 20,
-							(new TranslationTextComponent("button.dynamic_weaponry.toggle_tool_switcher")),
-							(button) -> {
-								isSwitcherOpen = !isSwitcherOpen;
-								isToolSwitcher = true;
-								ResourceLocation[] locations = DataLoader.INSTANCE.toolTypes.keySet().toArray(new ResourceLocation[0]);
-								for (int i1 = 0; i1 < locations.length; i1++) {
-									if (locations[i1].toString().equals(tool.name)) {
-										switcherIndex = i1;
-									}
-								}
-							}
-					)
-			);
-			
-			Button button = new Button(
-					this.width / 2 + 63, j - 10,
-					60, 20,
-					(new TranslationTextComponent("button.dynamic_weaponry.toggle_part_switcher")),
-//					this::cyclePart
-					(button1) -> {
-						ToolType type = DataLoader.INSTANCE.toolTypes.get(new ResourceLocation(tool.name));
-						if (type == null) return;
-						ToolPart[] parts = type.getParts();
-						
-						ArrayList<ResourceLocation> locations1 = new ArrayList<>();
-						
-						for (ToolPart part : parts) {
-							if (part.type != null) {
-								locations1.add(part.type.name);
-							}
-						}
-						
-						isSwitcherOpen = !isSwitcherOpen;
-						isToolSwitcher = false;
-						switcherIndex = locations1.indexOf(new ResourceLocation(currentPart));
-//						ResourceLocation[] locations = Loader.INSTANCE.toolTypes.keySet().toArray(new ResourceLocation[0]);
-//						for (int i1 = 0; i1 < locations.length; i1++) {
-//							if (locations[i1].toString().equals(tool.name)) {
-//								switcherIndex = i1;
-//							}
-//						}
-					}
-			);
-			
-			cyclePart(button);
-			this.buttons.add(button);
-			
-			this.buttons.add(
-					new Button(
-							this.width / 2 + 63, j - 50,
 							60, 20,
 							(new TranslationTextComponent("button.dynamic_weaponry.cycle_draw_tool")),
 							(button1) -> {
@@ -379,7 +430,6 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 					ItemStack newStack = new ItemStack(Registry.DYNAMIC_TOOL.get());
 					CompoundNBT nbt = newStack.getOrCreateTag();
 					CompoundNBT tool_info = new CompoundNBT();
-//					cyclePart((Button) (buttons.get(1)));
 					tool_info.putString("tool_type", currentTool);
 					nbt.put("tool_info", tool_info);
 					this.tool = new Tool(newStack);

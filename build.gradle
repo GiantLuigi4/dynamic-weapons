@@ -107,7 +107,7 @@ dependencies {
 
     compile 'org.spongepowered:mixin:0.8'
 
-    implementation fg.deobf('com.github.GiantLuigi4:AssortedUtils:bdc6b5a3ea')
+    implementation fg.deobf('com.github.GiantLuigi4:AssortedUtils:778fb38151')
     implementation fg.deobf('curse.maven:reauth-237701:3105779')
     implementation fg.deobf('curse.maven:jei-238222:3157864')
 //    implementation fg.deobf(files('run/shulkered-0.1.0.jar'))

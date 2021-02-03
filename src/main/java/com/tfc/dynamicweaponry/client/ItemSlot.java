@@ -26,15 +26,16 @@ public class ItemSlot {
 	}
 	
 	public void set(ItemStack stack) {
+		if (inventory == null) return;
 		inventory.setInventorySlotContents(index, stack);
 	}
 	
 	public ItemStack get() {
-		return inventory.getStackInSlot(index);
+		return inventory == null ? ItemStack.EMPTY : inventory.getStackInSlot(index);
 	}
 	
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, int guiLeft, int guiTop, Screen screen) {
-		ItemStack stack = screen.getMinecraft().player.inventory.getStackInSlot(index);
+		ItemStack stack = inventory.getStackInSlot(index);
 		
 		screen.getMinecraft().getTextureManager().bindTexture(new ResourceLocation("textures/gui/container/inventory.png"));
 		RenderSystem.enableTexture();
@@ -63,9 +64,7 @@ public class ItemSlot {
 							mouseY < guiTop + y + 17
 			) {
 				RenderSystem.disableTexture();
-				RenderSystem.color4f(
-						1, 1, 1, 0.5f
-				);
+				RenderSystem.color4f(1, 1, 1, 0.5f);
 				matrixStack.push();
 				matrixStack.translate(0, 0, 128);
 				RenderSystem.enableAlphaTest();
@@ -88,7 +87,7 @@ public class ItemSlot {
 	}
 	
 	public void renderTooltip(MatrixStack matrixStack, int mouseX, int mouseY, int guiLeft, int guiTop, Screen screen) {
-		ItemStack stack = screen.getMinecraft().player.inventory.getStackInSlot(index);
+		ItemStack stack = inventory.getStackInSlot(index);
 		
 		if (
 				mouseX >= guiLeft + x - 1 &&

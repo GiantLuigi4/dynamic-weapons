@@ -107,6 +107,25 @@ public class ToolForge extends Block implements ITileEntityProvider {
 					
 					if (!player.isCreative()) {
 						for (ToolComponent component : tool.components) {
+							if (component.points.isEmpty()) {
+								continue;
+							}
+							
+							if (component.type == null) {
+								player.sendStatusMessage(new StringTextComponent("Invalid part type found :thonk4:"), true);
+								return ActionResultType.FAIL;
+							}
+							
+							if (!tool.isPartCompatible(component.type.name)) {
+								player.sendStatusMessage(new StringTextComponent("Part " + component.type.name + " is incompatible with one or more of the other part types on the tool"), true);
+								return ActionResultType.FAIL;
+							}
+							
+							if (!tool.areDepsFilled(component.type.name)) {
+								player.sendStatusMessage(new StringTextComponent("Part " + component.type.name + " is missing one or more dependencies"), true);
+								return ActionResultType.FAIL;
+							}
+							
 							for (MaterialPoint point : component.points.toArray(new MaterialPoint[0])) {
 								if (
 										point.x < component.type.min.x ||
@@ -120,6 +139,7 @@ public class ToolForge extends Block implements ITileEntityProvider {
 							
 							for (Point requiredPoint : component.type.getRequiredPoints()) {
 								if (!component.checkPoint(requiredPoint)) {
+									player.sendStatusMessage(new StringTextComponent("Not all required points are met"), true);
 									return ActionResultType.FAIL;
 								}
 							}

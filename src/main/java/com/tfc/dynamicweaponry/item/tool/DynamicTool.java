@@ -158,8 +158,11 @@ public class DynamicTool extends Item {
 		Tool tool = new Tool(stack);
 		
 		if (tool.isBow() && (this.getDamage(stack) != this.getMaxDamage(stack))) {
-			playerIn.setActiveHand(handIn);
-			return ActionResult.resultConsume(playerIn.getHeldItem(handIn));
+			ItemStack itemstack = findAmmo(playerIn);
+			if ((playerIn).isCreative() || (!(playerIn).isCreative()) && !itemstack.isEmpty()) {
+				playerIn.setActiveHand(handIn);
+				return ActionResult.resultConsume(playerIn.getHeldItem(handIn));
+			}
 		}
 		
 		return super.onItemRightClick(worldIn, playerIn, handIn);
@@ -195,11 +198,10 @@ public class DynamicTool extends Item {
 	@Override
 	public void onPlayerStoppedUsing(ItemStack stack, World worldIn, LivingEntity entityLiving, int timeLeft) {
 		if ((stack.getOrCreateTag().getFloat("pull_time") >= 0.1f && (this.getDamage(stack) != this.getMaxDamage(stack))) && !worldIn.isRemote) {
-			ItemStack itemstack = ItemStack.EMPTY.copy();
-			
 			stack.getOrCreateTag().remove("selected_ammo");
 			stack.getOrCreateTag().remove("ammo_color");
 			
+			ItemStack itemstack = ItemStack.EMPTY.copy();
 			if (entityLiving instanceof PlayerEntity) {
 				itemstack = findAmmo(((PlayerEntity) entityLiving));
 			}
@@ -207,37 +209,40 @@ public class DynamicTool extends Item {
 			Tool bow = new Tool(stack);
 			
 			float pct = stack.getOrCreateTag().getFloat("pull_time");
-			float f = pct * (1f / (bow.getDrawSpeed()));
-			f /= 4;
+			float f = pct * (1f / (1 - (bow.getDrawSpeed())));
+			f *= Math.max(0.1, 1 - (1f / bow.getEfficiency()));
+			f *= 4;
 			f = Math.min(f, 3);
 			
-			ArrowItem arrowitem = (ArrowItem) (itemstack.getItem() instanceof ArrowItem ? itemstack.getItem() : Items.ARROW);
-			AbstractArrowEntity abstractarrowentity = arrowitem.createArrow(worldIn, itemstack, entityLiving);
-			abstractarrowentity.func_234612_a_(entityLiving, entityLiving.rotationPitch, entityLiving.rotationYaw, 0.0F, f * 0.8f, 1.0F);
-			
-			if (pct >= 1.0F) {
-				abstractarrowentity.setIsCritical(true);
-			}
-			
-			abstractarrowentity.setDamage(f * 1);
-			doDamage(1, stack, entityLiving);
 			boolean flag1 = !(entityLiving instanceof PlayerEntity);
-			
-			if (flag1 || ((PlayerEntity) entityLiving).abilities.isCreativeMode) {
-				abstractarrowentity.pickupStatus = AbstractArrowEntity.PickupStatus.CREATIVE_ONLY;
-			}
-			
-			worldIn.playSound(null, entityLiving.getPosX(), entityLiving.getPosY(), entityLiving.getPosZ(), SoundEvents.ENTITY_ARROW_SHOOT, SoundCategory.PLAYERS, 1.0F, 1.0F / (random.nextFloat() * 0.4F + 1.2F) + (f * 0.1f));
-			
-			if (!flag1 && !((PlayerEntity) entityLiving).abilities.isCreativeMode) {
-				itemstack.shrink(1);
+			if (flag1 || ((PlayerEntity) entityLiving).isCreative() || (!((PlayerEntity) entityLiving).isCreative()) && !itemstack.isEmpty()) {
+				ArrowItem arrowitem = (ArrowItem) (itemstack.getItem() instanceof ArrowItem ? itemstack.getItem() : Items.ARROW);
+				AbstractArrowEntity abstractarrowentity = arrowitem.createArrow(worldIn, itemstack, entityLiving);
+				abstractarrowentity.func_234612_a_(entityLiving, entityLiving.rotationPitch, entityLiving.rotationYaw, 0.0F, f * 4f * 0.8f, 1.0F);
 				
-				if (itemstack.isEmpty()) {
-					((PlayerEntity) entityLiving).inventory.deleteStack(itemstack);
+				if (pct >= 1.0F) {
+					abstractarrowentity.setIsCritical(true);
 				}
+				
+				abstractarrowentity.setDamage(f * 1);
+				doDamage(1, stack, entityLiving);
+				
+				if (flag1 || ((PlayerEntity) entityLiving).abilities.isCreativeMode) {
+					abstractarrowentity.pickupStatus = AbstractArrowEntity.PickupStatus.CREATIVE_ONLY;
+				}
+				
+				worldIn.playSound(null, entityLiving.getPosX(), entityLiving.getPosY(), entityLiving.getPosZ(), SoundEvents.ENTITY_ARROW_SHOOT, SoundCategory.PLAYERS, 1.0F, 1.0F / (random.nextFloat() * 0.4F + 1.2F) + (f * 0.1f));
+				
+				if (!flag1 && !((PlayerEntity) entityLiving).abilities.isCreativeMode) {
+					itemstack.shrink(1);
+					
+					if (itemstack.isEmpty()) {
+						((PlayerEntity) entityLiving).inventory.deleteStack(itemstack);
+					}
+				}
+				
+				worldIn.addEntity(abstractarrowentity);
 			}
-			
-			worldIn.addEntity(abstractarrowentity);
 		}
 		
 		stack.getOrCreateTag().remove("pull_time");
@@ -377,8 +382,9 @@ public class DynamicTool extends Item {
 		
 		if (tool.isBow()) {
 			list.add(new StringTextComponent(" " + Math.abs(Math.round(((1 - tool.getDrawSpeed()) * 4) * 100) / 100f) + " Draw Speed").mergeStyle(TextFormatting.DARK_GREEN));
-			float f = (1f / (tool.getDrawSpeed()));
-			f /= 4;
+			float f = (1f / (1 - (tool.getDrawSpeed())));
+			f *= Math.max(0.1, 1 - (1f / tool.getEfficiency()));
+			f *= 4;
 			f = Math.min(f, 3);
 			list.add(new StringTextComponent(" " + Math.abs(Math.round(((f)) * 100) / 100f) + " Shoot Force").mergeStyle(TextFormatting.DARK_GREEN));
 		} else {

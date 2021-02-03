@@ -179,7 +179,7 @@ public class DataLoader implements IResourceManagerReloadListener {
 					ToolPart part = toolType.getPart(location);
 					if (part == null) part = new ToolPart(INSTANCE.partTypes.get(location), i, toolType);
 					
-					if (object2.has("dependencies ")) {
+					if (object2.has("dependencies")) {
 						JsonArray dependencies = object2.getAsJsonArray("dependencies");
 						ArrayList<ToolPart> deps = new ArrayList<>();
 						

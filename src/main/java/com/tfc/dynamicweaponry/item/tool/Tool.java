@@ -265,7 +265,8 @@ public class Tool {
 		if (toolPart == null) return true;
 		
 		if (hasIncompatibility(toolPart)) return false;
-		for (ToolPart dependency : toolPart.getDependencies()) if (hasIncompatibility(dependency)) return false;
+		for (ToolPart dependency : toolPart.getDependencies())
+			if (dependency.type != null && !isPartCompatible(dependency.type.name)) return false;
 		
 		return true;
 	}
@@ -283,8 +284,19 @@ public class Tool {
 										componentPart.listIndex &&
 								!component.points.isEmpty() &&
 								!toolPart.type.name.equals(component.type.name)
+//								(toolPart.listIndex == componentPart.listIndex && !toolPart.type.name.equals(componentPart.type.name))
 				) {
 					return true;
+				} else if (
+						toolPart.type != null &&
+								component.type != null &&
+								componentPart != null &&
+								!component.points.isEmpty()
+				) {
+					for (ToolPart incompat : componentPart.getIncompatibilities()) {
+						if (incompat.type != null && incompat.type.name.equals(toolPart.type.name))
+							return true;
+					}
 				}
 			} catch (Throwable err) {
 				err.printStackTrace();
@@ -388,6 +400,8 @@ public class Tool {
 			}
 		}
 		amt /= count;
+		System.out.println(amt);
+		System.out.println((float) (amt / Math.max(1, getEfficiency() / 2f)) / 25f);
 		return (float) (amt / Math.max(1, getEfficiency() / 2f)) / 25f;
 	}
 	
@@ -424,5 +438,26 @@ public class Tool {
 		} catch (Throwable ignored) {
 		}
 		return effectInstances;
+	}
+	
+	public boolean areDepsFilled(ResourceLocation type) {
+		ToolType toolType = DataLoader.INSTANCE.toolTypes.get(new ResourceLocation(name));
+		
+		if (toolType == null) return true;
+		
+		ToolPart toolPart = toolType.getPart(type);
+		
+		if (toolPart == null) return true;
+		
+		int numFilled = 0;
+		for (ToolPart dependency : toolPart.getDependencies()) {
+			for (ToolComponent component : this.components) {
+				if (component.type != null && dependency.type != null && !component.points.isEmpty() && component.name.equals(dependency.type.name.toString())) {
+					numFilled++;
+				}
+			}
+		}
+		
+		return numFilled == toolPart.getDependencies().length;
 	}
 }
