@@ -5,6 +5,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.tfc.dynamicweaponry.DynamicWeaponry;
 import com.tfc.dynamicweaponry.data.DataLoader;
 import com.tfc.dynamicweaponry.data.PartType;
+import com.tfc.dynamicweaponry.data.ToolPart;
+import com.tfc.dynamicweaponry.data.ToolType;
 import com.tfc.dynamicweaponry.item.tool.Tool;
 import com.tfc.dynamicweaponry.network.ToolPacket;
 import com.tfc.dynamicweaponry.registry.Registry;
@@ -12,6 +14,9 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.*;
+
+import java.util.ArrayList;
 
 public class ToolComponentSlot extends ItemSlot {
 	public final ResourceLocation location;
@@ -27,6 +32,89 @@ public class ToolComponentSlot extends ItemSlot {
 	
 	@Override
 	public void renderTooltip(MatrixStack matrixStack, int mouseX, int mouseY, int guiLeft, int guiTop, Screen screen) {
+		if (!(screen instanceof ToolCreationScreen)) return;
+		
+		int x = guiLeft - 128;
+		int y = 0;
+		x = Math.max(9, x);
+		
+		int num = 0;
+		while (num < this.x) {
+			x += 18;
+			if (x >= guiLeft - 18) {
+				x = guiLeft - 128;
+				x = Math.max(9, x);
+				y += 18;
+			}
+			num++;
+		}
+		
+		boolean hovered =
+				mouseX >= x - 1 &&
+						mouseX < x + 17 &&
+						mouseY >= guiTop + y + this.y - 34 - 1 &&
+						mouseY < guiTop + y + this.y - 34 + 17;
+		if (!hovered) return;
+		
+		ArrayList<ITextComponent> components = new ArrayList<>();
+		String prefix = (isTool ? "tool_type" : "part_type") + ".";
+		String name = prefix + this.name.getNamespace() + "." + this.name.getPath().replace("/", ".");
+		components.add(new TranslationTextComponent(name));
+		
+		if (!isTool) {
+			ToolType toolType = DataLoader.INSTANCE.toolTypes.get(new ResourceLocation(((ToolCreationScreen) screen).currentTool));
+			
+			if (toolType != null) {
+				ToolPart toolPart = toolType.getPart(this.name);
+				
+				if (toolPart != null) {
+					if (toolPart.getIncompatibilities().length != 0) {
+						IFormattableTextComponent incompats = new StringTextComponent("Incompatible with: ").mergeStyle(TextFormatting.DARK_RED);
+						
+						components.add(incompats);
+						
+						for (ToolPart incompatibility : toolPart.getIncompatibilities()) {
+							if (incompatibility.type == null) continue;
+							String name1 = prefix + incompatibility.type.name.getNamespace() + "." + incompatibility.type.name.getPath().replace("/", ".");
+							components.add(new StringTextComponent(" -").append(new TranslationTextComponent(name1).mergeStyle(TextFormatting.RED)));
+						}
+					}
+					
+					if (toolPart.getDependencies().length != 0) {
+						if (toolPart.getIncompatibilities().length != 0) {
+							components.add(new StringTextComponent(""));
+						}
+						
+						IFormattableTextComponent incompats = new StringTextComponent("Depends on: ").mergeStyle(TextFormatting.GREEN);
+						
+						components.add(incompats);
+						
+						for (ToolPart incompatibility : toolPart.getDependencies()) {
+							if (incompatibility.type == null) continue;
+							String name1 = prefix + incompatibility.type.name.getNamespace() + "." + incompatibility.type.name.getPath().replace("/", ".");
+							components.add(new StringTextComponent(" -").append(new TranslationTextComponent(name1).mergeStyle(TextFormatting.RED)));
+						}
+					}
+					
+					if (toolPart.type.getContributesTo().length != 0) {
+						if (toolPart.getIncompatibilities().length != 0 || toolPart.getDependencies().length != 0) {
+							components.add(new StringTextComponent(""));
+						}
+						
+						IFormattableTextComponent incompats = new StringTextComponent("Tool Types: ").mergeStyle(TextFormatting.DARK_GREEN);
+						
+						components.add(incompats);
+						
+						for (String incompatibility : toolPart.type.getContributesTo()) {
+							incompatibility = incompatibility.substring(0, 1).toUpperCase() + incompatibility.substring(1);
+							components.add(new StringTextComponent(" -").append(new StringTextComponent(incompatibility).mergeStyle(TextFormatting.RED)));
+						}
+					}
+				}
+			}
+		}
+		
+		net.minecraftforge.fml.client.gui.GuiUtils.drawHoveringText(matrixStack, components, mouseX, mouseY, screen.width, screen.height, -1, screen.getMinecraft().fontRenderer);
 	}
 	
 	@Override

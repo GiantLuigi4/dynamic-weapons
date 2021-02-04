@@ -266,7 +266,7 @@ public class Tool {
 		
 		if (hasIncompatibility(toolPart)) return false;
 		for (ToolPart dependency : toolPart.getDependencies())
-			if (dependency.type != null && !isPartCompatible(dependency.type.name)) return false;
+			if (dependency.type != null && !hasIncompatibility(dependency)) return true;
 		
 		return true;
 	}
@@ -303,12 +303,14 @@ public class Tool {
 				return false;
 			}
 		}
-		for (ToolPart incompatibility : toolPart.getIncompatibilities()) {
-			for (ToolComponent component : components) {
-				if (component.type != null &&
-						component.name.equals(incompatibility.type.name.toString()) &&
-						!component.points.isEmpty()
-				) return true;
+		if (toolPart.getIncompatibilities() != null) {
+			for (ToolPart incompatibility : toolPart.getIncompatibilities()) {
+				for (ToolComponent component : components) {
+					if (component.type != null &&
+							component.name.equals(incompatibility.type.name.toString()) &&
+							!component.points.isEmpty()
+					) return true;
+				}
 			}
 		}
 		return false;
@@ -400,8 +402,6 @@ public class Tool {
 			}
 		}
 		amt /= count;
-		System.out.println(amt);
-		System.out.println((float) (amt / Math.max(1, getEfficiency() / 2f)) / 25f);
 		return (float) (amt / Math.max(1, getEfficiency() / 2f)) / 25f;
 	}
 	
