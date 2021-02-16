@@ -121,6 +121,7 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 		CompoundNBT nbt1 = stack.getOrCreateTag();
 		nbt1.put("tool_info", nbt.getCompound("tool"));
 		tool = new Tool(stack);
+		currentTool = tool.name;
 		
 		index = 0;
 		{

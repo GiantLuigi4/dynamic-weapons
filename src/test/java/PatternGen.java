@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class PatternGen {
 	public static void main(String[] args) throws IOException {
-		BufferedImage image = ImageIO.read(PatternGen.class.getClassLoader().getResourceAsStream("patterns/shulkered/shulkered_ingotB.png"));
+		BufferedImage image = ImageIO.read(PatternGen.class.getClassLoader().getResourceAsStream("patterns/create/Chromatic.png"));
 		StringBuilder pattern = new StringBuilder("  \"pattern\": [\n");
 		for (int x = 0; x < image.getWidth(); x++) {
 			pattern.append("    [");

@@ -51,4 +51,7 @@ public class ToolEffect implements IForgeRegistryEntry<ToolEffect> {
 	public float calcMaterialStats(ItemStack stack, Tool tool, float materialPercetn, EffectInstance instance, @Nullable Entity wielder, EnumStat stat) {
 		return -1;
 	}
+	
+	public void onLeftClick(ItemStack stack, Tool tool, float materialPercetn, EffectInstance instance, @Nullable Entity wielder) {
+	}
 }
