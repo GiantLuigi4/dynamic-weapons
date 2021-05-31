@@ -42,6 +42,10 @@ import tfc.dynamicweaponry.utils.Point;
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod("dynamic_weaponry")
 public class DynamicWeaponry {
+	// previously, this was hardcoded to 3.99 with no variable for easy change, as I thought 3.99 was infinite attack speed
+	// apparently, 3.99 is infact not infinite attack speed, but 16 is
+	// 15 is seemingly the lowest number before it recharges in the same frame
+	public static final float maxAttackSpeed = 15;
 	
 	public static final AutomatedSimpleChannel NETWORK_INSTANCE = AutomatedSimpleChannel.create(
 			new ResourceLocation("dynamic_weaponry", "main"),

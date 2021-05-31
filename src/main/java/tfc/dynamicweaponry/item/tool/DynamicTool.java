@@ -102,9 +102,10 @@ public class DynamicTool extends Item {
 							new AttributeModifier(ATTACK_MODIFIER_UUID, "dynamic_weaponry:attack", tool.getDamage(), AttributeModifier.Operation.ADDITION)
 					);
 					
+					System.out.println(tool.getAttackSpeed());
 					modifiers.put(
 							Attributes.ATTACK_SPEED,
-							new AttributeModifier(COOLDOWN_MODIFIER_UUID, "dynamic_weaponry:cooldown", -tool.getAttackSpeed(), AttributeModifier.Operation.ADDITION)
+							new AttributeModifier(COOLDOWN_MODIFIER_UUID, "dynamic_weaponry:cooldown", (tool.getAttackSpeed() - 3.99), AttributeModifier.Operation.ADDITION)
 					);
 				}
 			}
@@ -381,14 +382,14 @@ public class DynamicTool extends Item {
 		list.add(new StringTextComponent(" " + Math.abs(Math.round((tool.getDamage()) * 100) / 100f) + " Attack Damage").mergeStyle(TextFormatting.DARK_GREEN));
 		
 		if (tool.isBow()) {
-			list.add(new StringTextComponent(" " + Math.abs(Math.round(((1 - tool.getDrawSpeed()) * 4) * 100) / 100f) + " Draw Speed").mergeStyle(TextFormatting.DARK_GREEN));
+			list.add(new StringTextComponent(" " + (Math.round(((1 - tool.getDrawSpeed()) * 4) * 100) / 100f) + " Draw Speed").mergeStyle(TextFormatting.DARK_GREEN));
 			float f = (1f / (1 - (tool.getDrawSpeed())));
 			f *= Math.max(0.1, 1 - (1f / tool.getEfficiency()));
 			f *= 4;
 			f = Math.min(f, 3);
 			list.add(new StringTextComponent(" " + Math.abs(Math.round(((f)) * 100) / 100f) + " Shoot Force").mergeStyle(TextFormatting.DARK_GREEN));
 		} else {
-			list.add(new StringTextComponent(" " + Math.abs(Math.round((4 - tool.getAttackSpeed()) * 100) / 100f) + " Attack Speed").mergeStyle(TextFormatting.DARK_GREEN));
+			list.add(new StringTextComponent(" " + (Math.round((tool.getAttackSpeed()) * 100) / 100f) + " Attack Speed").mergeStyle(TextFormatting.DARK_GREEN));
 		}
 	}
 	

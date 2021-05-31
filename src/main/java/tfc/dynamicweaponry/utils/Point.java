@@ -39,4 +39,8 @@ public class Point {
 				", y=" + y +
 				'}';
 	}
+	
+	public double distance(Point point) {
+		return Math.sqrt(Math.pow(x - point.x, 2) + Math.pow(y - point.y, 2));
+	}
 }

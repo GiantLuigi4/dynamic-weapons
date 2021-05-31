@@ -108,7 +108,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 						);
 					}
 				}
-			} catch (ConcurrentModificationException err) {
+			} catch (ConcurrentModificationException | NullPointerException err) {
 				err.printStackTrace();
 			}
 			matrixStack.pop();

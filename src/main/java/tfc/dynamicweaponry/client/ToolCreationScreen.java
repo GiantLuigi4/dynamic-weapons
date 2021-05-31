@@ -26,6 +26,7 @@ import tfc.dynamicweaponry.network.PaintPixelPacket;
 import tfc.dynamicweaponry.network.PaintToolPacket;
 import tfc.dynamicweaponry.network.ToolPacket;
 import tfc.dynamicweaponry.registry.Registry;
+import tfc.dynamicweaponry.utils.Line;
 import tfc.dynamicweaponry.utils.Point;
 
 import java.util.ArrayList;
@@ -212,10 +213,17 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				drawString(matrixStack, font, "Efficiency: " + Math.round(tool.getEfficiency() * 10) / 10f,
 						i + 180, j + 90, new Color(r, g, b).getRGB());
 				if (!tool.isBow()) {
-					drawString(matrixStack, font, "Cooldown: " + Math.round(tool.getAttackSpeed() * 100) / 100f,
-							i + 180, j + 100, new Color(r, g, b).getRGB());
-					drawString(matrixStack, font, "Speed: " + Math.round(Math.abs(4 - tool.getAttackSpeed()) * 100) / 100f,
-							i + 180, j + 110, new Color(r, g, b).getRGB());
+					if (tool.getAttackSpeed() < 0) {
+						drawString(matrixStack, font, "Cooldown: Infinite",
+								i + 180, j + 100, new Color(r, g, b).getRGB());
+						drawString(matrixStack, font, "Speed: None",
+								i + 180, j + 110, new Color(r, g, b).getRGB());
+					} else {
+						drawString(matrixStack, font, "Cooldown: " + (DynamicWeaponry.maxAttackSpeed - (Math.round(tool.getAttackSpeed() * 100) / 100f)),
+								i + 180, j + 100, new Color(r, g, b).getRGB());
+						drawString(matrixStack, font, "Speed: " + Math.round((tool.getAttackSpeed()) * 100) / 100f,
+								i + 180, j + 110, new Color(r, g, b).getRGB());
+					}
 				}
 				drawString(matrixStack, font, "Durability: " + Math.round(tool.getDurability()),
 						i + 180, j + 120, new Color(r, g, b).getRGB());
@@ -748,6 +756,31 @@ public class ToolCreationScreen extends SimpleContainerScreen<ToolForgeContainer
 				}
 				
 				blit(matrixStack, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0);
+				
+				Point vec = new Point(x, y);
+				Line l = new Line(
+						new Point(-6, 8 + 6),
+						new Point(8 + 6, -6)
+				);
+				float r = 0, g = 0;
+				boolean isR = false;
+				for (int iter = 0; iter < 32; iter++) {
+					Point p = l.getInterp(iter / 32f);
+					if (vec.x <= p.x && vec.y <= p.y) isR = true;
+				}
+				if (isR) {
+					r = 0;
+					g = ((float) l.dist(vec) / 16f) * 2;
+				} else {
+					r = (float) l.dist(vec) / 16f;
+					g = 0;
+				}
+//				RenderSystem.color4f(
+//						r, g, 0,
+//						0.2f
+//				);
+//				blit(matrixStack, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0);
+				
 				matrixStack.pop();
 				alternator = !alternator;
 			}

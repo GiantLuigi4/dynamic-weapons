@@ -9,12 +9,15 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.util.Constants;
+import tfc.dynamicweaponry.DynamicWeaponry;
 import tfc.dynamicweaponry.data.DataLoader;
 import tfc.dynamicweaponry.data.Material;
 import tfc.dynamicweaponry.data.ToolPart;
 import tfc.dynamicweaponry.data.ToolType;
 import tfc.dynamicweaponry.material_effects.effects.EffectInstance;
 import tfc.dynamicweaponry.registry.Registry;
+import tfc.dynamicweaponry.utils.Line;
+import tfc.dynamicweaponry.utils.Point;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -88,14 +91,14 @@ public class Tool {
 		if (divisor != 0)
 			amt /= (divisor);
 		
-		amt += (getWeight() / 40f) - 1;
-		if (getAttackSpeed() >= 3.99) {
-			double speed = MathHelper.lerp(0.25, ((getWeight()) * (0.1 / getEfficiency())), 1.6) / 2f;
-			double overflow = (3f / (speed - 3.99));
+		amt += (getBludgeoningWeight() / 30f) - 1;
+		if (getAttackSpeed() >= DynamicWeaponry.maxAttackSpeed) {
+			double speed = MathHelper.lerp(0.25, ((getBludgeoningWeight()) * (0.1 / getEfficiency())), 1.6) / 2f;
+			double overflow = (3f / (speed - DynamicWeaponry.maxAttackSpeed));
 			if (overflow > 3) overflow = 3f / overflow;
 			if (overflow > 2) overflow = 2f / overflow;
 			if (overflow > 1) overflow = 1f / overflow;
-			amt *= overflow;
+			amt *= Math.abs(overflow);
 		}
 		if (isBow()) {
 			float f = (1f / (getDrawSpeed()));
@@ -114,6 +117,38 @@ public class Tool {
 				Material mat = DataLoader.INSTANCE.getMaterial(point.material);
 				if (mat != null)
 					amt += mat.weight;
+			}
+		}
+		return amt;
+	}
+	
+	public double getBludgeoningWeight() {
+		double amt = 0;
+		Line l = new Line(
+				new Point(-6, 8 + 6),
+				new Point(8 + 6, -6)
+		);
+		for (ToolComponent component : this.components) {
+			for (MaterialPoint point : component.points) {
+				Material mat = DataLoader.INSTANCE.getMaterial(point.material);
+				if (mat != null) {
+					float r = 0, g = 0;
+					boolean isR = false;
+					for (int iter = 0; iter < 32; iter++) {
+						Point p = l.getInterp(iter / 32f);
+						if (point.x <= p.x && point.y <= p.y) isR = true;
+					}
+					if (isR) {
+						r = 0;
+						g = ((float) l.dist(point) / 16f) * 2;
+					} else {
+						r = (float) l.dist(point) / 16f;
+						g = 0;
+					}
+					if (mat.weight > 0 || true) {
+						amt += r * mat.weight + g * (mat.weight / 2);
+					}
+				}
 			}
 		}
 		return amt;
@@ -158,7 +193,38 @@ public class Tool {
 	}
 	
 	public double getAttackSpeed() {
-		return Math.min(MathHelper.lerp(0.25, ((getWeight()) * (0.1 / getEfficiency())), 1.6) / 2, 3.99);
+//		double val = Math.min(MathHelper.lerp(0.25, ((getWeight()) * (0.1 / getEfficiency())), 1.6) / 2, DynamicWeaponry.maxAttackSpeed);
+		Line l = new Line(
+				new Point(-6, 8 + 6),
+				new Point(8 + 6, -6)
+		);
+		double v1 = 0;
+		for (ToolComponent component : components) {
+			for (MaterialPoint point : component.points) {
+				Material mat = DataLoader.INSTANCE.getMaterial(point.material);
+				if (mat == null) continue;
+				float r = 0, g = 0;
+				boolean isR = false;
+				for (int iter = 0; iter < 32; iter++) {
+					Point p = l.getInterp(iter / 32f);
+					if (point.x <= p.x && point.y <= p.y) isR = true;
+				}
+				if (isR) {
+					r = 0;
+					g = ((float) l.dist(point) / 16f) * 2;
+				} else {
+					r = (float) l.dist(point) / 16f;
+					g = 0;
+				}
+				if (mat.weight >= 0) {
+					v1 += ((mat.weight * g - mat.weight * (r / 8)) * 1);
+				} else {
+					v1 += ((mat.weight * g - mat.weight * (r / 8)) * 1);
+				}
+			}
+		}
+		double val = Math.min(MathHelper.lerp(0.25, ((v1 / 3) * (getEfficiency())), 1.6) / 2, DynamicWeaponry.maxAttackSpeed);
+		return val;
 	}
 	
 	public double getDurability() {

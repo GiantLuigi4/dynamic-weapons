@@ -2,7 +2,7 @@
   "durability": 1023,
   "weight": 3,
   "efficiency": 0.3,
-  "attack": 7,
+  "attack": 3,
   "item": "minecraft:brick",
   "harvestLevel": 0.1,
   "drawSpeed": 0.1
