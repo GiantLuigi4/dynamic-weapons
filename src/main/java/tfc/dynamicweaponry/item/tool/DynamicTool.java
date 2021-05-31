@@ -27,7 +27,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import tfc.dynamicweaponry.client.ToolRenderer;
+import tfc.dynamicweaponry.client.renderer.ToolRenderer;
 import tfc.dynamicweaponry.material_effects.effects.EffectInstance;
 
 import javax.annotation.Nullable;

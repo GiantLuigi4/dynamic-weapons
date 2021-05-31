@@ -20,7 +20,7 @@ import net.minecraftforge.fml.network.PacketDistributor;
 import tfc.dynamicweaponry.DynamicWeaponry;
 import tfc.dynamicweaponry.block.ToolForgeTileEntity;
 import tfc.dynamicweaponry.client.AssetLoader;
-import tfc.dynamicweaponry.client.ToolRenderer;
+import tfc.dynamicweaponry.client.renderer.ToolRenderer;
 import tfc.dynamicweaponry.material_effects.condtions.EffectCondition;
 import tfc.dynamicweaponry.material_effects.effects.EffectInstance;
 import tfc.dynamicweaponry.network.DataPacket;

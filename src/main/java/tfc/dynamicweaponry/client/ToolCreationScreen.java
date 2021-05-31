@@ -17,6 +17,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.*;
 import tfc.dynamicweaponry.DynamicWeaponry;
 import tfc.dynamicweaponry.block.ToolForgeContainer;
+import tfc.dynamicweaponry.client.renderer.Shading;
 import tfc.dynamicweaponry.data.*;
 import tfc.dynamicweaponry.item.tool.DynamicTool;
 import tfc.dynamicweaponry.item.tool.MaterialPoint;

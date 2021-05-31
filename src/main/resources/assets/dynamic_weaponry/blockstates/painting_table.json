@@ -1,0 +1,7 @@
+{
+  "variants": {
+	"": {
+	  "model": "dynamic_weaponry:block/painting_table"
+	}
+  }
+}

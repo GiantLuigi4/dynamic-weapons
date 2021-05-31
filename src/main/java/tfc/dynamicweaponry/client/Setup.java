@@ -4,6 +4,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import tfc.dynamicweaponry.client.renderer.ToolForgeRenderer;
 import tfc.dynamicweaponry.registry.Registry;
 
 public class Setup {

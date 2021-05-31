@@ -1,7 +1,9 @@
-package tfc.dynamicweaponry.client;
+package tfc.dynamicweaponry.client.renderer;
 
 import com.tfc.assortedutils.utils.Color;
 import tfc.dynamicweaponry.Config;
+import tfc.dynamicweaponry.client.AssetLoader;
+import tfc.dynamicweaponry.client.ClientMaterialInfo;
 import tfc.dynamicweaponry.data.DataLoader;
 import tfc.dynamicweaponry.data.Material;
 import tfc.dynamicweaponry.item.tool.MaterialPoint;
@@ -84,7 +86,7 @@ public class Shading {
 		
 		Material material = DataLoader.INSTANCE.getMaterial(point.material);
 		ClientMaterialInfo materialInfo = AssetLoader.INSTANCE.getMaterial(material.item);
-		Color c = new Color(isBorder ? materialInfo.colorBorder : materialInfo.color);
+		Color c = new Color(isBorder ? materialInfo.getColorBorder() : materialInfo.getColor());
 
 //		return new Color(
 //				(int) (c.getRed() * shades[(int) dist]),
@@ -103,7 +105,7 @@ public class Shading {
 		float distMin = Math.min(dist, dist1);
 		float distMax = Math.max(dist, dist1);
 		
-		if (Config.CLIENT.useMaterialPatterns.get() && materialInfo.pattern != null) {
+		if (Config.CLIENT.useMaterialPatterns.get() && materialInfo.getPattern() != null) {
 			int sizeLeft = 0;
 			int sizeRight = 0;
 			boolean hitLeft = false;

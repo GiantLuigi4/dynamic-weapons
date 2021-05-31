@@ -1,4 +1,4 @@
-package tfc.dynamicweaponry.client;
+package tfc.dynamicweaponry.client.renderer;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;

@@ -14,6 +14,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.vector.Quaternion;
 import tfc.dynamicweaponry.block.ToolForgeTileEntity;
+import tfc.dynamicweaponry.client.renderer.ToolRenderer;
 import tfc.dynamicweaponry.registry.Registry;
 
 import java.util.List;

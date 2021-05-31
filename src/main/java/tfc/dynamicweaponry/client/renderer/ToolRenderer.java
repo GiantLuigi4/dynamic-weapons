@@ -1,4 +1,4 @@
-package tfc.dynamicweaponry.client;
+package tfc.dynamicweaponry.client.renderer;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -10,13 +10,14 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
-import net.minecraft.item.*;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.*;
-import net.minecraftforge.registries.ForgeRegistries;
 import tfc.dynamicweaponry.Config;
+import tfc.dynamicweaponry.client.renderer.texture.TextureMap;
+import tfc.dynamicweaponry.client.renderer.texture.ToolTexture;
 import tfc.dynamicweaponry.data.DataLoader;
 import tfc.dynamicweaponry.data.Material;
 import tfc.dynamicweaponry.item.tool.MaterialPoint;
@@ -53,7 +54,65 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 	
 	@Override
 	public void func_239207_a_(ItemStack stack, ItemCameraTransforms.TransformType p_239207_2_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
+		if (false) {
+			String name = stack.getOrCreateTag().toString()
+					.replace("{", "_v")
+					.replace("}", "v_")
+					.replace("[", "_c")
+					.replace("]", "c_")
+					.replace("(", "_e")
+					.replace(")", "e_")
+					.toLowerCase();
+			if (!TextureMap.has(name)) {
+				ToolTexture texture = TextureMap.get(name);
+				Tool tool = new Tool(stack);
+				for (ToolComponent component : tool.components) {
+					for (MaterialPoint point : component.points) {
+						if (point.material == null) continue;
+						Color c = Shading.shade(point, tool, component);
+						texture.setPixel(point, c);
+					}
+				}
+			}
+			
+			matrixStack.push();
+			{
+				matrixStack.translate(0, 0, 0.45);
+				matrixStack.scale(1f / 4, 1f / 4, 1f / 4);
+				if (p_239207_2_.equals(ItemCameraTransforms.TransformType.GUI)) {
+					matrixStack.scale(0.86f, 0.86f, 1);
+					matrixStack.translate(0.35f, 0.35f, 0);
+					combinedLight = LightTexture.packLight(15, 0);
+				}
+				IVertexBuilder builder = buffer.getBuffer(RenderType.getEntityCutout(TextureMap.load(name)));
+				matrixStack.scale(16, 16, 16);
+				matrixStack.rotate(quat180X);
+				matrixStack.translate(0, -4f / 16, -0.062f / 16);
+				
+				matrixStack.push();
+				{
+					matrixStack.translate(0, 0, -0.0005f / 16);
+					renderSquare(1, 1, 1, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, true);
+				}
+				matrixStack.pop();
+				
+				matrixStack.rotate(quat180X);
+				matrixStack.translate(4f / 16, -4f / 16, 0.250501f / 16);
+				matrixStack.translate(-4f / 16, 0, 0);
+				matrixStack.rotate(new Quaternion(0, 0, 90, true));
+				renderSquare(1, 1, 1, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, true, true);
+			}
+			matrixStack.pop();
+			
+			matrixStack.push();
+			{
+			}
+			matrixStack.pop();
+			
+			return;
+		}
 		
+		//TODO: move everything below here to LegacyRenderer
 		if (Config.CLIENT.cacheBuffers.get() && !(buffer instanceof CustomBuffer)) {
 			CustomBuffer builder;
 			
@@ -67,7 +126,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 				combinedLight = LightTexture.packLight(15, 0);
 			}
 			
-			CompoundNBT cacheEntry = stack.getOrCreateTag();
+			CompoundNBT cacheEntry = stack.getOrCreateTag().copy();
 			cacheEntry.remove("Durability");
 			
 			if (!bufferCache.containsKey(stack.getOrCreateTag())) {
@@ -271,133 +330,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 			}
 		}
 		
-		float pct = stack.getOrCreateTag().getFloat("pull_time");
-		//IDK WHY THIS WORKS, IT SHOULDN'T, SEND HELP
-		//THIS IS NOT HOW MATRIX STACK IS MEANT TO WORK
-		//THE STACK SHOULD NOT ROTATE EVERY TIME I TRANSLATE
-		if (tool.isBow() && pct != 0) {
-//			IBakedModel model = Minecraft.getInstance().getItemRenderer().getItemModelMesher().getModelManager().getModel(new ModelResourceLocation("dynamic_weaponry:arrows/arrow"));
-//			IBakedModel model = Minecraft.getInstance().getModelManager().getModel(new ResourceLocation("dynamic_weaponry:arrows/arrow"));
-//			Minecraft.getInstance().getItemRenderer().renderItem();
-//			IVertexBuilder builder1 = buffer.getBuffer(RenderType.getSolid());
-//			for (Direction value : Direction.values()) {
-//				List<BakedQuad> quads = model.getQuads(null,value,new Random(0));
-//				for (BakedQuad quad : quads) {
-//					builder1.addQuad(
-//							matrixStack.getLast(),
-//							quad,1,1,1,
-//							combinedLight,combinedOverlay
-//					);
-//				}
-//			}
-//			List<BakedQuad> quads = model.getQuads(null,null,new Random(0));
-//			for (BakedQuad quad : quads) {
-//				builder1.addQuad(
-//						matrixStack.getLast(),
-//						quad,1,1,1,
-//						combinedLight,combinedOverlay
-//				);
-//			}
-			MaterialPoint point = new MaterialPoint(8, 8, new ResourceLocation("minecraft:string"));
-			ArrayList<Point> points = pointsOfInterest.get(new ResourceLocation("dynamic_weaponry:bow_string"));
-			point = lerpToInterest(pct, point, points);
-			
-			matrixStack.translate(point.x / 4f, point.y / 4f, 0);
-			matrixStack.translate(-0.75f, 0.5f, 0.075f);
-			if (pct >= 0.925f) {
-				matrixStack.translate(0.25f, 0.25f, 0);
-			}
-			matrixStack.scale(1, 1, 0.9f);
-			
-			boolean useNormals = p_239207_2_ != ItemCameraTransforms.TransformType.GUI;
-			int arrowLen = 4;
-			
-			Item item = (ForgeRegistries.ITEMS.getValue(new ResourceLocation(stack.getOrCreateTag().getString("selected_ammo"))));
-			ArrowItem arrowItem = null;
-			if (item instanceof ArrowItem) arrowItem = (ArrowItem) item;
-			
-			Color shaftA = new Color(40, 30, 11);
-			Color shaftB = new Color(137, 103, 39);
-			
-			Color featherA = new Color(255, 255, 255);
-			Color featherB = new Color(224, 224, 224);
-			Color featherC = new Color(216, 216, 216);
-			Color featherD = new Color(198, 198, 198);
-			Color featherE = new Color(150, 150, 150);
-			
-			if (arrowItem instanceof SpectralArrowItem) {
-				shaftA = new Color(123, 63, 5);
-				shaftB = new Color(207, 140, 39);
-				featherC = new Color(255, 255, 119);
-				featherB = featherC;
-				featherD = new Color(218, 185, 48);
-				featherE = featherD;
-			} else if (arrowItem instanceof TippedArrowItem) {
-				Color potionColor = new Color(stack.getOrCreateTag().getInt("ammo_color"));
-				
-				featherA = new Color(potionColor.getHue(), potionColor.getSaturation(), featherA.getValue() * (potionColor.getValue()), false);
-				featherB = new Color(potionColor.getHue(), potionColor.getSaturation(), featherB.getValue() * (potionColor.getValue()), false);
-				featherC = new Color(potionColor.getHue(), potionColor.getSaturation(), featherC.getValue() * (potionColor.getValue()), false);
-				featherD = new Color(potionColor.getHue(), potionColor.getSaturation(), featherD.getValue() * (potionColor.getValue()), false);
-				featherE = new Color(potionColor.getHue(), potionColor.getSaturation(), featherE.getValue() * (potionColor.getValue()), false);
-			}
-			
-			//Shaft
-			for (int i = -1; i < arrowLen; i++) {
-				matrixStack.push();
-				matrixStack.translate(-0.25f * i, 0.25f * i, 0);
-				renderCube(shaftA.getRed() / 255f, shaftA.getGreen() / 255f, shaftA.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
-				matrixStack.translate(0, 0, 0.25f);
-				renderCube(shaftB.getRed() / 255f, shaftB.getGreen() / 255f, shaftB.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
-				matrixStack.pop();
-			}
-			//Head
-			matrixStack.push();
-			matrixStack.translate(-0.25f * (arrowLen + 1), 0.25f * (arrowLen + 1), 0);
-			renderCube(featherE.getRed() / 255f, featherE.getGreen() / 255f, featherE.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
-			matrixStack.translate(0, 0.25f, 0.25f);
-			renderCube(featherE.getRed() / 255f, featherE.getGreen() / 255f, featherE.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
-			matrixStack.push();
-			matrixStack.translate(-0.25f, 0, 0);
-			renderCube(featherC.getRed() / 255f, featherC.getGreen() / 255f, featherC.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
-			matrixStack.pop();
-			matrixStack.push();
-			matrixStack.translate(-0.25f, 0, 0.25f);
-			renderCube(featherC.getRed() / 255f, featherC.getGreen() / 255f, featherC.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
-			matrixStack.pop();
-			matrixStack.translate(-0.5f, 0, 0);
-			renderCube(featherC.getRed() / 255f, featherC.getGreen() / 255f, featherC.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
-			matrixStack.pop();
-			matrixStack.push();
-			matrixStack.translate(-0.25f * (arrowLen + 1), 0.25f * (arrowLen + 2), 0);
-			renderCube(featherA.getRed() / 255f, featherA.getGreen() / 255f, featherA.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
-			matrixStack.pop();
-			//Tail
-			matrixStack.translate(0, 0.25f, 0);
-			matrixStack.push();
-			matrixStack.translate(-0.25f * -2, 0.25f * -2, 0);
-			renderCube(featherD.getRed() / 255f, featherD.getGreen() / 255f, featherD.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
-			matrixStack.translate(0, 0.25f, -0.25f);
-			renderCube(featherD.getRed() / 255f, featherD.getGreen() / 255f, featherD.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
-			matrixStack.push();
-			matrixStack.translate(0, 0, -0.25f);
-			renderCube(featherB.getRed() / 255f, featherB.getGreen() / 255f, featherB.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
-			matrixStack.pop();
-			matrixStack.push();
-			matrixStack.translate(0, 0, 0.25f);
-			renderCube(featherB.getRed() / 255f, featherB.getGreen() / 255f, featherB.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
-			matrixStack.pop();
-			matrixStack.push();
-			matrixStack.translate(-0.25f, 0, 0);
-			renderCube(featherB.getRed() / 255f, featherB.getGreen() / 255f, featherB.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
-			matrixStack.pop();
-			matrixStack.push();
-			matrixStack.translate(0.25f, 0, 0);
-			renderCube(featherB.getRed() / 255f, featherB.getGreen() / 255f, featherB.getBlue() / 255f, 0, 0, 0, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
-			matrixStack.pop();
-			matrixStack.pop();
-		}
-		matrixStack.pop();
+		LegacyRenderer.renderArrow(stack, matrixStack, pointsOfInterest, tool, p_239207_2_, builder, combinedOverlay, combinedLight);
 	}
 	
 	public MaterialPoint lerpToInterest(float pct, MaterialPoint point, ArrayList<Point> interests) {
@@ -453,6 +386,92 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 	}
 	
 	public void renderSquare(float r, float g, float b, float x, float y, float z, IVertexBuilder builder, int combinedOverlay, int combinedLight, MatrixStack matrixStack, boolean useNormals) {
+		renderSquare(r, g, b, x, y, z, builder, combinedOverlay, combinedLight, matrixStack, useNormals, 0, 1, 0, 1);
+	}
+	
+	public void renderSquare(float r, float g, float b, float x, float y, float z, IVertexBuilder builder, int combinedOverlay, int combinedLight, MatrixStack matrixStack, boolean useNormals, boolean mirror) {
+		if (mirror)
+			renderSquareMirrored(r, g, b, x, y, z, builder, combinedOverlay, combinedLight, matrixStack, useNormals, 0, 1, 0, 1);
+		else renderSquare(r, g, b, x, y, z, builder, combinedOverlay, combinedLight, matrixStack, useNormals);
+	}
+	
+	public void renderSquareMirrored(float r, float g, float b, float x, float y, float z, IVertexBuilder builder, int combinedOverlay, int combinedLight, MatrixStack matrixStack, boolean useNormals, float minU, float maxU, float minV, float maxV) {
+		matrixStack.push();
+		matrixStack.rotate(new Quaternion(0, 0, -90, true));
+		Vector3f corner1 = translate(matrixStack, x, y, z);
+		Vector3f corner2 = translate(matrixStack, x + 0.25f, y, z);
+		Vector3f corner3 = translate(matrixStack, x + 0.25f, y + 0.25f, z);
+		Vector3f corner4 = translate(matrixStack, x, y + 0.25f, z);
+		matrixStack.pop();
+		
+		Vector3f normal;
+		
+		if (useNormals) {
+			//https://www.khronos.org/opengl/wiki/Calculating_a_Surface_Normal
+			Vector3f normalU = new Vector3f(x, y, z);
+			Vector3f normalV = normalU.copy();
+			normalU.sub(new Vector3f(x + 0.25f, y, z));
+			normalV.sub(new Vector3f(x + 0.25f, y + 0.25f, z));
+			
+			normal = new Vector3f(
+					(normalU.getY() * normalV.getZ()) - (normalU.getZ() * normalV.getY()),
+					(normalU.getZ() * normalV.getX()) - (normalU.getX() * normalV.getZ()),
+					(normalU.getX() * normalV.getY()) - (normalU.getY() * normalV.getX())
+			);
+
+//			normal.mul(0.5f);
+
+//			if (!Config.CLIENT.cacheBuffers.get()) {
+			Matrix3f matrix3f = matrixStack.getLast().getNormal();
+			normal.transform(matrix3f);
+//			}
+			
+			normal.normalize();
+		} else {
+			normal = new Vector3f(0, 1, 0);
+		}
+
+//		float a = minU;
+//		minU = maxU;
+//		maxU = a;
+//		float a = minV;
+//		minV = maxV;
+//		maxV = a;
+		
+		builder.addVertex(
+				corner1.getX(), corner1.getY(), corner1.getZ(),
+				r, g, b, 1,
+				0, 0,
+				combinedOverlay, combinedLight,
+				normal.getX(), normal.getY(), normal.getZ()
+		);
+		
+		builder.addVertex(
+				corner2.getX(), corner2.getY(), corner2.getZ(),
+				r, g, b, 1,
+				1, 0,
+				combinedOverlay, combinedLight,
+				normal.getX(), normal.getY(), normal.getZ()
+		);
+		
+		builder.addVertex(
+				corner3.getX(), corner3.getY(), corner3.getZ(),
+				r, g, b, 1,
+				1, 1,
+				combinedOverlay, combinedLight,
+				normal.getX(), normal.getY(), normal.getZ()
+		);
+		
+		builder.addVertex(
+				corner4.getX(), corner4.getY(), corner4.getZ(),
+				r, g, b, 1,
+				0, 1,
+				combinedOverlay, combinedLight,
+				normal.getX(), normal.getY(), normal.getZ()
+		);
+	}
+	
+	public void renderSquare(float r, float g, float b, float x, float y, float z, IVertexBuilder builder, int combinedOverlay, int combinedLight, MatrixStack matrixStack, boolean useNormals, float minU, float maxU, float minV, float maxV) {
 		Vector3f corner1 = translate(matrixStack, x, y, z);
 		Vector3f corner2 = translate(matrixStack, x + 0.25f, y, z);
 		Vector3f corner3 = translate(matrixStack, x + 0.25f, y + 0.25f, z);
@@ -488,7 +507,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 		builder.addVertex(
 				corner1.getX(), corner1.getY(), corner1.getZ(),
 				r, g, b, 1,
-				0, 0,
+				minU, maxV,
 				combinedOverlay, combinedLight,
 				normal.getX(), normal.getY(), normal.getZ()
 		);
@@ -496,7 +515,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 		builder.addVertex(
 				corner2.getX(), corner2.getY(), corner2.getZ(),
 				r, g, b, 1,
-				0, 0,
+				maxU, maxV,
 				combinedOverlay, combinedLight,
 				normal.getX(), normal.getY(), normal.getZ()
 		);
@@ -504,7 +523,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 		builder.addVertex(
 				corner3.getX(), corner3.getY(), corner3.getZ(),
 				r, g, b, 1,
-				0, 0,
+				maxU, minV,
 				combinedOverlay, combinedLight,
 				normal.getX(), normal.getY(), normal.getZ()
 		);
@@ -512,7 +531,7 @@ public class ToolRenderer extends ItemStackTileEntityRenderer {
 		builder.addVertex(
 				corner4.getX(), corner4.getY(), corner4.getZ(),
 				r, g, b, 1,
-				0, 0,
+				minU, minV,
 				combinedOverlay, combinedLight,
 				normal.getX(), normal.getY(), normal.getZ()
 		);

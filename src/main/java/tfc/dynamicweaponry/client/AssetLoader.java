@@ -6,6 +6,7 @@ import net.minecraft.resources.IResourceManager;
 import net.minecraft.resources.IResourceManagerReloadListener;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import tfc.dynamicweaponry.client.renderer.ToolRenderer;
 
 import java.io.InputStream;
 import java.util.Collection;

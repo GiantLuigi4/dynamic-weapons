@@ -145,9 +145,9 @@ public class Tool {
 						r = (float) l.dist(point) / 16f;
 						g = 0;
 					}
-					if (mat.weight > 0 || true) {
+//					if (mat.weight > 0 || true) {
 						amt += r * mat.weight + g * (mat.weight / 2);
-					}
+//					}
 				}
 			}
 		}
@@ -216,11 +216,11 @@ public class Tool {
 					r = (float) l.dist(point) / 16f;
 					g = 0;
 				}
-				if (mat.weight >= 0) {
-					v1 += ((mat.weight * g - mat.weight * (r / 8)) * 1);
-				} else {
-					v1 += ((mat.weight * g - mat.weight * (r / 8)) * 1);
-				}
+//				if (mat.weight >= 0) {
+				v1 += ((mat.weight * g - mat.weight * (r / 8)) * 1);
+//				} else {
+//					v1 += ((mat.weight * g - mat.weight * (r / 8)) * 1);
+//				}
 			}
 		}
 		double val = Math.min(MathHelper.lerp(0.25, ((v1 / 3) * (getEfficiency())), 1.6) / 2, DynamicWeaponry.maxAttackSpeed);
