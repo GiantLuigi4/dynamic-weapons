@@ -1,7 +1,7 @@
 package tfc.dynamicweaponry.network;
 
-import com.tfc.assortedutils.API.networking.SimplePacket;
 import net.minecraft.network.PacketBuffer;
+import tfc.assortedutils.API.networking.SimplePacket;
 
 public class PaintPixelPacket extends SimplePacket {
 	public int x, y;

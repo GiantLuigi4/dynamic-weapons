@@ -1,10 +1,10 @@
 package tfc.dynamicweaponry.network;
 
-import com.tfc.assortedutils.API.networking.SimplePacket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.PacketBuffer;
+import tfc.assortedutils.API.networking.SimplePacket;
 import tfc.dynamicweaponry.item.tool.Tool;
 import tfc.dynamicweaponry.registry.Registry;
 

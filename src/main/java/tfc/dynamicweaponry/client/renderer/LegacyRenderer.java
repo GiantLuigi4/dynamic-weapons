@@ -2,12 +2,12 @@ package tfc.dynamicweaponry.client.renderer;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import com.tfc.assortedutils.utils.Color;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.item.*;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
+import tfc.assortedutils.utils.Color;
 import tfc.dynamicweaponry.item.tool.MaterialPoint;
 import tfc.dynamicweaponry.item.tool.Tool;
 import tfc.dynamicweaponry.utils.Point;

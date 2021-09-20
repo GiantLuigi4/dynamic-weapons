@@ -1,6 +1,6 @@
 package tfc.dynamicweaponry.client.renderer;
 
-import com.tfc.assortedutils.utils.Color;
+import tfc.assortedutils.utils.Color;
 import tfc.dynamicweaponry.Config;
 import tfc.dynamicweaponry.client.AssetLoader;
 import tfc.dynamicweaponry.client.ClientMaterialInfo;

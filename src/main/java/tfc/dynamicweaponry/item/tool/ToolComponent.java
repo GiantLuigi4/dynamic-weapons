@@ -1,11 +1,11 @@
 package tfc.dynamicweaponry.item.tool;
 
-import com.tfc.assortedutils.API.nbt.ExtendedCompoundNBT;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants;
+import tfc.assortedutils.API.nbt.ExtendedCompoundNBT;
 import tfc.dynamicweaponry.data.DataLoader;
 import tfc.dynamicweaponry.data.Material;
 import tfc.dynamicweaponry.data.PartType;

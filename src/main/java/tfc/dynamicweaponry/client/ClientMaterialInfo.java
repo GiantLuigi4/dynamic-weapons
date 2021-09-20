@@ -1,7 +1,7 @@
 package tfc.dynamicweaponry.client;
 
-import com.tfc.assortedutils.utils.Color;
 import net.minecraft.util.ResourceLocation;
+import tfc.assortedutils.utils.Color;
 
 public class ClientMaterialInfo {
 	public final ResourceLocation item;

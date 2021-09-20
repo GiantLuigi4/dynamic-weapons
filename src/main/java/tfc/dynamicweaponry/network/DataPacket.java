@@ -1,9 +1,9 @@
 package tfc.dynamicweaponry.network;
 
-import com.tfc.assortedutils.API.networking.SimplePacket;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import tfc.assortedutils.API.networking.SimplePacket;
 import tfc.dynamicweaponry.data.DataLoader;
 
 import java.util.ArrayList;

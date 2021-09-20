@@ -2,8 +2,6 @@ package tfc.dynamicweaponry.client.renderer;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import com.tfc.assortedutils.utils.Color;
-import com.tfc.assortedutils.utils.CustomBuffer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.LightTexture;
@@ -15,6 +13,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.*;
+import tfc.assortedutils.utils.Color;
+import tfc.assortedutils.utils.CustomBuffer;
 import tfc.dynamicweaponry.Config;
 import tfc.dynamicweaponry.client.renderer.texture.TextureMap;
 import tfc.dynamicweaponry.client.renderer.texture.ToolTexture;

@@ -1,7 +1,7 @@
 package tfc.dynamicweaponry.client.renderer.texture;
 
-import com.tfc.assortedutils.utils.Color;
 import net.minecraft.client.renderer.texture.NativeImage;
+import tfc.assortedutils.utils.Color;
 import tfc.dynamicweaponry.utils.Point;
 
 public class ToolTexture {

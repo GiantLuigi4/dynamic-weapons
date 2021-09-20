@@ -2,8 +2,6 @@ package tfc.dynamicweaponry.client;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.tfc.assortedutils.API.gui.screen.SimpleContainerScreen;
-import com.tfc.assortedutils.utils.Color;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
@@ -15,6 +13,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.*;
+import tfc.assortedutils.API.gui.screen.SimpleContainerScreen;
+import tfc.assortedutils.utils.Color;
 import tfc.dynamicweaponry.DynamicWeaponry;
 import tfc.dynamicweaponry.block.ToolForgeContainer;
 import tfc.dynamicweaponry.client.renderer.Shading;

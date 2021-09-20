@@ -1,9 +1,9 @@
 package tfc.dynamicweaponry.registry;
 
-import com.tfc.assortedutils.API.gui.screen.SimpleContainerScreenFactory;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
+import tfc.assortedutils.API.gui.screen.SimpleContainerScreenFactory;
 import tfc.dynamicweaponry.client.ToolCreationScreen;
 
 public class RegistryClient {

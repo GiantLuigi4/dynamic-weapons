@@ -1,11 +1,11 @@
 package tfc.dynamicweaponry.block;
 
-import com.tfc.assortedutils.API.gui.container.SimpleContainer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import tfc.assortedutils.API.gui.container.SimpleContainer;
 import tfc.dynamicweaponry.item.tool.Tool;
 import tfc.dynamicweaponry.registry.Registry;
 

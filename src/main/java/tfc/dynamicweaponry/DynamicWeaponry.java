@@ -1,6 +1,5 @@
 package tfc.dynamicweaponry;
 
-import com.tfc.assortedutils.API.networking.AutomatedSimpleChannel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
@@ -18,6 +17,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tfc.assortedutils.API.networking.AutomatedSimpleChannel;
 import tfc.dynamicweaponry.block.ToolForgeContainer;
 import tfc.dynamicweaponry.block.ToolForgeTileEntity;
 import tfc.dynamicweaponry.client.AssetLoader;

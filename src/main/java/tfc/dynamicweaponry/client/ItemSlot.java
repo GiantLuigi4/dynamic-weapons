@@ -2,13 +2,13 @@ package tfc.dynamicweaponry.client;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.tfc.assortedutils.utils.Color;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import tfc.assortedutils.utils.Color;
 
 public class ItemSlot {
 	public IInventory inventory;
