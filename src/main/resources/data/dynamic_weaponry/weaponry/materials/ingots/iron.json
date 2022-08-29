@@ -1,9 +1,0 @@
-{
-  "durability": 250,
-  "weight": 2,
-  "efficiency": 1.8,
-  "attack": 6,
-  "item": "minecraft:iron_ingot",
-  "harvestLevel": 2,
-  "drawSpeed": 0.5
-}

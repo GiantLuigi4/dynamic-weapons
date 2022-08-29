@@ -1,9 +1,0 @@
-{
-  "durability": 123,
-  "weight": 0.8,
-  "efficiency": 0.9,
-  "attack": 3.2,
-  "item": "minecraft:granite",
-  "harvestLevel": 1,
-  "drawSpeed": 0.2
-}

@@ -1,9 +1,0 @@
-{
-  "durability": 10,
-  "weight": 0.9,
-  "efficiency": 1,
-  "attack": 10,
-  "item": "minecraft:quartz",
-  "harvestLevel": 1.5,
-  "drawSpeed": 2
-}
