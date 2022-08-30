@@ -23,8 +23,11 @@ public class AwtTesting {
 	private static void run(String dir) throws IOException {
 		BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
 		
-		Material gray = new Material(new Color(106, 80, 31).getRGB(), new Color(134, 101, 38).getRGB(), 0.15f);
+		Material gray = new Material(new Color(125, 97, 55).getRGB(), new Color(149, 115, 65).getRGB(), 0.15f);
+//		Material gray = new Material(new Color(106, 80, 31).getRGB(), new Color(134, 101, 38).getRGB(), 0.15f);
 		Material gold = new Material(new Color(126, 126, 126).getRGB(), new Color(153, 153, 153).getRGB(), 0.15f);
+//		Material gold = new Material(new Color(172, 92, 50).getRGB(), new Color(193, 108, 63).getRGB(), 0.15f);
+//		Material gold = gray;
 		
 		ToolLayer layer0 = new ToolLayer();
 		load(ImageIO.read(new File(dir + "/layer0.png")), layer0, gray);
@@ -233,7 +236,7 @@ public class AwtTesting {
 	}
 	
 	private static int index(int x, int y) {
-		return x * 16 + y;
+		return x * 15 + y;
 	}
 	
 	private static float shade(float scl, ToolLayer[] layers, int x, int y, Vector3f light) {
