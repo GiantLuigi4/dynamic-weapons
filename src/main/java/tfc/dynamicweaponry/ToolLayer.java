@@ -22,4 +22,8 @@ public class ToolLayer {
 	public Material get(int x, int y) {
 		return materials[index(x, y)];
 	}
+	
+	public Material[] array() {
+		return materials;
+	}
 }

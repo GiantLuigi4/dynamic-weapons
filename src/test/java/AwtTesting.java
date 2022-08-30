@@ -40,6 +40,9 @@ public class AwtTesting {
 		ArrayList<ToolLayer> incompleteLayers = new ArrayList<>() {{
 			this.addAll(Arrays.asList(layers));
 		}};
+		ArrayList<ToolLayer> otherLayersList = new ArrayList<>() {{
+			this.addAll(Arrays.asList(layers));
+		}};
 		
 		for (ToolLayer layer : layers) {
 			Material[] innerShape = new Material[16 * 16];
@@ -54,11 +57,16 @@ public class AwtTesting {
 			
 			ToolLayer[] singletonLayer = new ToolLayer[]{layer};
 			
+			otherLayersList.remove(layer);
+			ToolLayer[] outlineLayers = otherLayersList.toArray(new ToolLayer[0]);
+			otherLayersList.add(layer);
+			
 			for (int x = 0; x < 16; x++) {
 				for (int y = 0; y < 16; y++) {
 					Material pixel0 = layer.get(x, y);
 					if (pixel0 != null) {
-						float singletonOutline = shade(0, singletonLayer, x, y, light);
+//						float singletonOutline = shade(0, singletonLayer, x, y, light);
+						float singletonOutline = outlineShade(outlineLayers, singletonLayer, shadeLayers, pixel0, x, y, light);
 						if (singletonOutline == 1) // if it is not an outline pixel, then it can get highlights
 							innerShape[index(x, y)] = pixel0;
 						
@@ -68,9 +76,10 @@ public class AwtTesting {
 						// adds a bit of extra shading around the edge of the layer
 						scl = Mth.lerp(0.3f, scl, shade(0.75f, otherLayersDirt, x, y, light));
 						// compute the outline scalar
-						float outline = shade(pixel0.shininess, shadeLayers, x, y, light);
+//						float outline = shade(pixel0.shininess, shadeLayers, x, y, light);
 						// take whichever one makes it darker
-						scl = Math.min(scl, outline);
+//						scl = Math.min(scl, outline);
+						scl = Math.min(scl, singletonOutline);
 						ExpandedColor expandedColor = new ExpandedColor(pixel0.color);
 						// hue shift+darken
 						expandedColor = expandedColor.darker(scl, 5);
@@ -114,6 +123,71 @@ public class AwtTesting {
 		System.out.println(img);
 		ImageIO.write(img, "png", new File(dir + "/output.png"));
 		// TODO
+	}
+	
+	private static boolean containsPixel(ToolLayer[] layers, int x, int y) {
+		for (ToolLayer layer : layers) {
+			if (layer.get(x, y) != null) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private static float outlineShade(ToolLayer[] otherLayers, ToolLayer[] singletonLayer, ToolLayer[] shadeLayers, Material material, int x, int y, Vector3f light) {
+		if (containsPixel(otherLayers, x, y)) {
+			if (!edgeDetect(otherLayers, x, y).equals(new Vector3f(0, 0, 0))) {
+				return shade(material.shininess, singletonLayer, x, y, light);
+			} else {
+				return 1;
+			}
+		}
+		if (edgesMatchedExcluding(otherLayers, singletonLayer[0].array(), x, y) > 1) {
+			return shade(material.shininess, singletonLayer, x, y, light);
+		}
+		return shade(material.shininess, shadeLayers, x, y, light);
+//		if (containsPixel(otherLayers, x, y)) {
+//			if (!edgeDetect(otherLayers, x, y).equals(new Vector3f(0, 0, 0))) {
+////				if (edgeDetect(currentLayer) == yesEdges) {
+////					outline = true;
+////				}
+//				return shade(material.shininess, singletonLayer, x, y, light);
+//			} else {
+//				return 1;
+//			}
+//		}
+	}
+	
+	private static int edgesMatchedExcluding(ToolLayer[] layers, Material[] exclude, int x, int y) {
+		int count = 0;
+		
+		for (int i = -1; i <= 1; i += 2) {
+			int offsetX = x + i;
+			if (offsetX >= 0 && offsetX < 16) {
+				if (exclude[index(offsetX, y)] == null) {
+					for (ToolLayer layer : layers) {
+						if (layer.get(offsetX, y) != null) {
+							count++;
+							break;
+						}
+					}
+				}
+			}
+			
+			int offsetY = y + i;
+			if (offsetX >= 0 && offsetX < 16) {
+				if (exclude[index(x, offsetY)] == null) {
+					for (ToolLayer layer : layers) {
+						if (layer.get(x, offsetY) != null) {
+							count++;
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		return count;
 	}
 	
 	private static int edgesMatched(Material[] materials, int x, int y) {
