@@ -1,4 +1,6 @@
 {
-  "color": 14211288,
+  "color": 12632256,
+  "highlight": 16777215,
+  "shininess": 0.2,
   "item": "minecraft:iron_ingot"
 }

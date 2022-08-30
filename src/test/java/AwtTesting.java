@@ -23,8 +23,8 @@ public class AwtTesting {
 	private static void run(String dir) throws IOException {
 		BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
 		
-		Material gray = new Material(new Color(138, 103, 39).getRGB(), new Color(134, 101, 38).getRGB(), 0.15f);
-		Material gold = new Material(new Color(233, 177, 18).getRGB(), new Color(253, 255, 118).getRGB(), 0.25f);
+		Material gray = new Material(new Color(106, 80, 31).getRGB(), new Color(134, 101, 38).getRGB(), 0.15f);
+		Material gold = new Material(new Color(126, 126, 126).getRGB(), new Color(153, 153, 153).getRGB(), 0.15f);
 		
 		ToolLayer layer0 = new ToolLayer();
 		load(ImageIO.read(new File(dir + "/layer0.png")), layer0, gray);
@@ -61,13 +61,15 @@ public class AwtTesting {
 			ToolLayer[] outlineLayers = otherLayersList.toArray(new ToolLayer[0]);
 			otherLayersList.add(layer);
 			
+			// edge detection based shading
 			for (int x = 0; x < 16; x++) {
 				for (int y = 0; y < 16; y++) {
 					Material pixel0 = layer.get(x, y);
 					if (pixel0 != null) {
-//						float singletonOutline = shade(0, singletonLayer, x, y, light);
-						float singletonOutline = outlineShade(outlineLayers, singletonLayer, shadeLayers, pixel0, x, y, light);
-						if (singletonOutline == 1) // if it is not an outline pixel, then it can get highlights
+						// compute the outline scalar
+						// used to determine if the pixel is an inner pixel, and also the shading of the outline
+						float outline = outlineShade(outlineLayers, singletonLayer, shadeLayers, pixel0, x, y, light);
+						if (outline == 1) // if it is not an outline pixel, then it can get highlights
 							innerShape[index(x, y)] = pixel0;
 						
 						// compute the bump scalar
@@ -75,11 +77,8 @@ public class AwtTesting {
 						scl *= scl;
 						// adds a bit of extra shading around the edge of the layer
 						scl = Mth.lerp(0.3f, scl, shade(0.75f, otherLayersDirt, x, y, light));
-						// compute the outline scalar
-//						float outline = shade(pixel0.shininess, shadeLayers, x, y, light);
 						// take whichever one makes it darker
-//						scl = Math.min(scl, outline);
-						scl = Math.min(scl, singletonOutline);
+						scl = Math.min(scl, outline);
 						ExpandedColor expandedColor = new ExpandedColor(pixel0.color);
 						// hue shift+darken
 						expandedColor = expandedColor.darker(scl, 5);
@@ -88,6 +87,7 @@ public class AwtTesting {
 				}
 			}
 			
+			// highlights
 			ToolLayer[] tempLayer = new ToolLayer[]{new ToolLayer(innerShape)};
 			for (int x = 0; x < 16; x++) {
 				for (int y = 0; y < 16; y++) {

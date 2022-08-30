@@ -76,8 +76,8 @@ public class ExpandedColor {
 		float hue = 0;
 		if (delta == 0) ;
 		else if (colorMax == r) hue = 60 * (((g - b) / delta) % 6);
-		else if (colorMax == g) hue = 60 * ((b - r) + 2);
-		else if (colorMax == b) hue = 60 * ((r - g) + 4);
+		else if (colorMax == g) hue = 60 * (((b - r) / delta) + 2);
+		else if (colorMax == b) hue = 60 * (((r - g) / delta) + 4);
 		
 		float saturation = 0;
 		if (colorMax != 0) saturation = delta / colorMax;
@@ -190,7 +190,7 @@ public class ExpandedColor {
 		
 		float num = (hue / 60f);
 		if ((0 <= num) && (num < 2)) {
-			rPrime = num < 1 ? c : c; // thanks to andrew0030 for finding an issue with this line
+			rPrime = num < 1 ? c : x; // thanks to andrew0030 for finding an issue with this line
 			gPrime = num < 1 ? x : c;
 		} else if ((2 <= num) && (num < 4)) {
 			gPrime = num < 3 ? c : x;
