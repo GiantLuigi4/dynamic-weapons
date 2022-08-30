@@ -23,11 +23,8 @@ public class AwtTesting {
 	private static void run(String dir) throws IOException {
 		BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
 		
-		Material gray = new Material(new Color(125, 97, 55).getRGB(), new Color(149, 115, 65).getRGB(), 0.15f);
-//		Material gray = new Material(new Color(106, 80, 31).getRGB(), new Color(134, 101, 38).getRGB(), 0.15f);
-		Material gold = new Material(new Color(126, 126, 126).getRGB(), new Color(153, 153, 153).getRGB(), 0.15f);
-//		Material gold = new Material(new Color(172, 92, 50).getRGB(), new Color(193, 108, 63).getRGB(), 0.15f);
-//		Material gold = gray;
+		Material gray = new Material(new Color(149, 115, 65).getRGB(), new Color(158, 131, 77).getRGB(), 0.15f);
+		Material gold = new Material(new Color(111, 81, 46).getRGB(), new Color(121, 89, 52).getRGB(), 0.15f);
 		
 		ToolLayer layer0 = new ToolLayer();
 		load(ImageIO.read(new File(dir + "/layer0.png")), layer0, gray);
@@ -50,7 +47,8 @@ public class AwtTesting {
 		for (ToolLayer layer : layers) {
 			Material[] innerShape = new Material[16 * 16];
 			
-			// this is important for shading
+			// I don't even know how to describe this part
+			// but this is important for shading
 			ToolLayer[] otherLayers = completedLayers.toArray(new ToolLayer[0]);
 			completedLayers.add(layer);
 			ToolLayer[] shadeLayers = completedLayers.toArray(new ToolLayer[0]);
@@ -98,15 +96,20 @@ public class AwtTesting {
 					
 					Material pixel = innerShape[index];
 					if (pixel != null) {
+						// ray step is probably the least expensive calculation
+						// it simply checks a few surrounding pixels, then walks up left three times
 						float step = rayStep(layer, innerShape, x, y);
 						if (step != 0) {
+							// in vanilla, outlines only end up on the edge of the tool
 							if (edgesMatched(innerShape, x, y) > 0) {
 								Vector3f vec = edgeDetect(tempLayer, x, y);
-								float edgeDetect = shade(0, tempLayer, x, y, light);
-								if (edgeDetect != 0) {
-									if (!vec.equals(new Vector3f(0, 0, 0))) {
+								if (!vec.equals(new Vector3f(0, 0, 0))) {
+									float edgeDetect = shade(0, tempLayer, x, y, light);
+									if (edgeDetect != 0) {
 										ExpandedColor color = new ExpandedColor(innerShape[index].highlightColor);
 										float shine = (1 - pixel.shininess);
+										// modifications to the values
+										// makes the highlights look better, but I have no idea how to describe what this is doing
 										float v = (shine * (1 - step));
 										if (v > 0.5f) v = 0.5f;
 										v = 0.5f - v;
@@ -228,7 +231,6 @@ public class AwtTesting {
 							(y + i) > 15 ||
 							materials[index(x - i, y + i)] == null
 			) {
-//				if (i <= 1) return 1 / 3f;
 				return i / 3f;
 			}
 		}
@@ -236,7 +238,7 @@ public class AwtTesting {
 	}
 	
 	private static int index(int x, int y) {
-		return x * 15 + y;
+		return x * 16 + y;
 	}
 	
 	private static float shade(float scl, ToolLayer[] layers, int x, int y, Vector3f light) {

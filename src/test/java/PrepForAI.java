@@ -57,7 +57,7 @@ public class PrepForAI {
 				break;
 			}
 			
-			if (x + y > 16) return -1;
+			if (x + y > 15) return -1;
 			
 			for (ToolLayer layer : layers) {
 				if (x + y >= 0)

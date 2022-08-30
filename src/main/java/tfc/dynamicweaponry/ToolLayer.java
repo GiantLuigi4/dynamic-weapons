@@ -12,7 +12,7 @@ public class ToolLayer {
 	}
 	
 	private static int index(int x, int y) {
-		return x * 15 + y;
+		return x * 16 + y;
 	}
 	
 	public void set(int i, int i1, Material mat) {
