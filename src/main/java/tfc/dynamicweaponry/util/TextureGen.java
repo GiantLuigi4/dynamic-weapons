@@ -1,38 +1,29 @@
+package tfc.dynamicweaponry.util;
+
+import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.math.Vector3f;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import tfc.dynamicweaponry.Material;
 import tfc.dynamicweaponry.ToolLayer;
-import tfc.dynamicweaponry.util.ExpandedColor;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class AwtTesting {
-	public static void main(String[] args) throws IOException {
-		File fl = new File("tests");
-		for (File file : fl.listFiles()) {
-			run(file.getAbsolutePath());
+public class TextureGen {
+	public static ToolImage generate(ToolLayer[] layers, int texId, boolean registerTexture) {
+		ToolImage img;
+		if (registerTexture) {
+			NativeImage image = new NativeImage(16, 16, false);
+			DynamicTexture texture = new DynamicTexture(image);
+			ResourceLocation location = new ResourceLocation("dynamic_weaponry:" + texId);
+			Minecraft.getInstance().textureManager.register(location, texture);
+			img = new ToolImage(image, texture, location);
+		} else {
+			img = new ToolImage(null, null, null);
 		}
-	}
-	
-	private static void run(String dir) throws IOException {
-		BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-		
-		Material gold = new Material(new Color(15315218).getRGB(), new Color(16646006).getRGB(), 0.15f);
-		Material gray = new Material(new Color(9794369).getRGB(), new Color(10388301).getRGB(), 0.15f);
-		
-		ToolLayer layer0 = new ToolLayer();
-		load(ImageIO.read(new File(dir + "/layer0.png")), layer0, gray);
-		ToolLayer layer1 = new ToolLayer();
-		load(ImageIO.read(new File(dir + "/layer1.png")), layer1, gold);
-		ToolLayer[] layers = new ToolLayer[]{
-				layer0, layer1
-		};
 		
 		Vector3f light = new Vector3f(2, 1, 0);
 		light.normalize();
@@ -125,10 +116,11 @@ public class AwtTesting {
 				}
 			}
 		}
+
+//		System.out.println(img);
+//		ImageIO.write(img, "png", new File(dir + "/output.png"));
 		
-		System.out.println(img);
-		ImageIO.write(img, "png", new File(dir + "/output.png"));
-		// TODO
+		return img;
 	}
 	
 	private static boolean containsPixel(ToolLayer[] layers, int x, int y) {
@@ -301,19 +293,5 @@ public class AwtTesting {
 		);
 		horizVec.normalize();
 		return horizVec;
-	}
-	
-	private static void load(BufferedImage from, ToolLayer to, Material mat) {
-		BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-		img.getGraphics().drawImage(from, 0, 0, 16, 16, null);
-		from = img;
-		for (int x = 0; x < from.getWidth(); x++) {
-			for (int y = 0; y < from.getHeight(); y++) {
-				int pixel = from.getRGB(x, y);
-				Color c = new Color(pixel, true);
-				if (c.getAlpha() != 0)
-					to.set(x, 15 - y, mat);
-			}
-		}
 	}
 }

@@ -2,6 +2,7 @@ package tfc.dynamicweaponry.util;
 
 import net.minecraft.util.Mth;
 
+import java.awt.*;
 import java.util.Objects;
 
 public class ExpandedColor {
@@ -9,6 +10,14 @@ public class ExpandedColor {
 	
 	public ExpandedColor(int rgb) {
 		value = 0xff000000 | rgb;
+	}
+	
+	public ExpandedColor(int rgb, boolean hasAlpha) {
+		if (hasAlpha) {
+			value = rgb;
+		} else {
+			value = 0xff000000 | rgb;
+		}
 	}
 	
 	public ExpandedColor(int r, int g, int b) {
