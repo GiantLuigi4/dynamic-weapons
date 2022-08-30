@@ -96,8 +96,9 @@ public class AwtTesting {
 										ExpandedColor color = new ExpandedColor(innerShape[index].highlightColor);
 										float shine = (1 - pixel.shininess);
 										float v = (shine * (1 - step));
+										if (v > 0.5f) v = 0.5f;
 										v = 0.5f - v;
-										v /= 2;
+										v /= 3;
 										v = 1 - v;
 										color = color.darker(v, 10);
 										img.setRGB(x, 15 - y, color.getRGB());
