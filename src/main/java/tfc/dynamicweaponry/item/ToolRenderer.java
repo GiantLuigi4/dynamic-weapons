@@ -10,7 +10,8 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.world.item.ItemStack;
-import tfc.dynamicweaponry.Temp;
+import tfc.dynamicweaponry.access.IMayHoldATool;
+import tfc.dynamicweaponry.tool.Tool;
 import tfc.dynamicweaponry.util.ToolImage;
 
 public class ToolRenderer extends BlockEntityWithoutLevelRenderer {
@@ -36,7 +37,10 @@ public class ToolRenderer extends BlockEntityWithoutLevelRenderer {
 	
 	@Override
 	public void renderByItem(ItemStack pStack, ItemTransforms.TransformType pTransformType, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight, int pPackedOverlay) {
-		ToolImage image = Temp.image;
+		pStack.getItem().inventoryTick(pStack, null, Minecraft.getInstance().cameraEntity, 0, false);
+		Tool tool = ((IMayHoldATool) (Object) pStack).myTool();
+		if (tool == null) return;
+		ToolImage image = tool.getImage();
 		VertexConsumer consumer = pBuffer.getBuffer(RenderType.entityTranslucentCull(image.location));
 		float step = 1f / 16;
 		

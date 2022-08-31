@@ -2,11 +2,10 @@ package tfc.dynamicweaponry.util;
 
 import net.minecraft.util.Mth;
 
-import java.awt.*;
 import java.util.Objects;
 
 public class ExpandedColor {
-	private int value;
+	private final int value;
 	
 	public ExpandedColor(int rgb) {
 		value = 0xff000000 | rgb;
@@ -28,7 +27,7 @@ public class ExpandedColor {
 		value = ((a & 0xFF) << 24) |
 				((r & 0xFF) << 16) |
 				((g & 0xFF) << 8) |
-				((b & 0xFF) << 0);
+				((b & 0xFF));
 	}
 	
 	public int getRed() {
@@ -83,11 +82,11 @@ public class ExpandedColor {
 		float delta = colorMax - colorMin;
 		
 		float hue = 0;
-		if (delta == 0) ;
-		else if (colorMax == r) hue = 60 * (((g - b) / delta) % 6);
-		else if (colorMax == g) hue = 60 * (((b - r) / delta) + 2);
-		else if (colorMax == b) hue = 60 * (((r - g) / delta) + 4);
-		
+		if (delta != 0) {
+			if (colorMax == r) hue = 60 * (((g - b) / delta) % 6);
+			else if (colorMax == g) hue = 60 * (((b - r) / delta) + 2);
+			else if (colorMax == b) hue = 60 * (((r - g) / delta) + 4);
+		}
 		float saturation = 0;
 		if (colorMax != 0) saturation = delta / colorMax;
 		
@@ -136,7 +135,7 @@ public class ExpandedColor {
 		b = (int) Mth.lerp(amt, b, 255);
 		
 		ExpandedColor brighter = new ExpandedColor(r, g, b, alpha);
-		
+
 //		ExpandedColor brighter = null;
 //
 //		/* From 2D group:

@@ -1,5 +1,8 @@
 package tfc.dynamicweaponry;
 
+import net.minecraft.resources.ResourceLocation;
+import tfc.dynamicweaponry.loading.Materials;
+import tfc.dynamicweaponry.tool.ToolLayer;
 import tfc.dynamicweaponry.util.TextureGen;
 import tfc.dynamicweaponry.util.ToolImage;
 
@@ -13,22 +16,22 @@ public class Temp {
 	private static ToolLayer layer1;
 	
 	public static ToolImage image;
+	public static ToolLayer[] layers;
 	
 	static {
 		try {
 			BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
 			
-			Material gold = new Material(new Color(15315218).getRGB(), new Color(16646006).getRGB(), 0.15f);
-			Material gray = new Material(new Color(9794369).getRGB(), new Color(10388301).getRGB(), 0.15f);
+			Material gray = Materials.get(new ResourceLocation("dynamic_weaponry:oak_wood"));
+			Material gold = Materials.get(new ResourceLocation("dynamic_weaponry:gold"));
 			
 			String dir = ".";
 			
-			File fl = new File(dir + "/layer0.png").getAbsoluteFile();
 			layer0 = new ToolLayer();
 			load(ImageIO.read(new File(dir + "/layer0.png")), layer0, gray);
 			layer1 = new ToolLayer();
 			load(ImageIO.read(new File(dir + "/layer1.png")), layer1, gold);
-			ToolLayer[] layers = new ToolLayer[]{
+			layers = new ToolLayer[]{
 					layer0, layer1
 			};
 			

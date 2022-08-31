@@ -7,13 +7,13 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import tfc.dynamicweaponry.Material;
-import tfc.dynamicweaponry.ToolLayer;
+import tfc.dynamicweaponry.tool.ToolLayer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class TextureGen {
-	public static ToolImage generate(ToolLayer[] layers, int texId, boolean registerTexture) {
+	public static ToolImage generate(ToolLayer[] layers, long texId, boolean registerTexture) {
 		ToolImage img;
 		if (registerTexture) {
 			NativeImage image = new NativeImage(16, 16, false);
@@ -117,9 +117,6 @@ public class TextureGen {
 			}
 		}
 
-//		System.out.println(img);
-//		ImageIO.write(img, "png", new File(dir + "/output.png"));
-		
 		return img;
 	}
 	
