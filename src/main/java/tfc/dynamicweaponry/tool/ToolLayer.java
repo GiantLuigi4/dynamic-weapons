@@ -7,6 +7,7 @@ import tfc.dynamicweaponry.Material;
 import tfc.dynamicweaponry.loading.Materials;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ToolLayer {
 	Material[] materials;
@@ -40,6 +41,19 @@ public class ToolLayer {
 			return layer;
 		}
 		return null;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		ToolLayer layer = (ToolLayer) o;
+		return Arrays.equals(materials, layer.materials);
+	}
+	
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(materials);
 	}
 	
 	protected static String getIfPresent(CompoundTag tg, String name, String value) {

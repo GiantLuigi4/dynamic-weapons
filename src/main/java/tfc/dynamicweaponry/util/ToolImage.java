@@ -11,11 +11,13 @@ public class ToolImage {
 	private final NativeImage image;
 	private final DynamicTexture texture;
 	public final ResourceLocation location;
+	public final long id;
 	
-	public ToolImage(NativeImage image, DynamicTexture texture, ResourceLocation location) {
+	public ToolImage(NativeImage image, DynamicTexture texture, ResourceLocation location, long id) {
 		this.image = image;
 		this.texture = texture;
 		this.location = location;
+		this.id = id;
 	}
 	
 	public void setRGB(int x, int y, int rgb) {
@@ -37,22 +39,8 @@ public class ToolImage {
 		texture.upload();
 	}
 	
-	private boolean wasFinalized = false;
-	
-	@SuppressWarnings("UnnecessaryLocalVariable")
-	@Override
-	protected void finalize() throws Throwable {
-		super.finalize();
-		if (wasFinalized) return;
-		wasFinalized = true;
-		try {
-			final DynamicTexture texture1 = texture;
-			final ResourceLocation location1 = location;
-			Minecraft.getInstance().executeIfPossible(() -> {
-				Minecraft.getInstance().textureManager.release(location1);
-				texture1.close();
-			});
-		} catch (Throwable ignored) {
-		}
+	public void close() {
+		Minecraft.getInstance().textureManager.release(location);
+		texture.close();
 	}
 }

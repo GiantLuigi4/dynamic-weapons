@@ -9,26 +9,29 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import tfc.dynamicweaponry.tool.Tool;
 import tfc.dynamicweaponry.access.IMayHoldATool;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 @Mixin(ItemStack.class)
 public class ItemStackMixin implements IMayHoldATool {
 	@Inject(at = @At("RETURN"), method = "copy")
 	public void postCopy(CallbackInfoReturnable<ItemStack> cir) {
 		ItemStack out = cir.getReturnValue();
 		if (out != ItemStack.EMPTY) {
-			((IMayHoldATool) (Object) out).setTool(myTool());
+			Tool tl = myTool();
+			((IMayHoldATool) (Object) out).setTool(tl);
 		}
 	}
 	
 	@Unique
-	Tool heldTool;
+	AtomicReference<Tool> heldTool = new AtomicReference<>(null);
 	
 	@Override
 	public Tool myTool() {
-		return heldTool;
+		return heldTool.get();
 	}
 	
 	@Override
 	public void setTool(Tool tool) {
-		heldTool = tool;
+		heldTool.set(tool);
 	}
 }

@@ -34,9 +34,6 @@ public class Temp {
 			layers = new ToolLayer[]{
 					layer0, layer1
 			};
-			
-			image = TextureGen.generate(layers, img.getTransparency(), true);
-			image.write();
 		} catch (Throwable err) {
 			throw new RuntimeException();
 		}

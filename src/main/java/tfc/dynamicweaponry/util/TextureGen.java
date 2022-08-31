@@ -20,9 +20,9 @@ public class TextureGen {
 			DynamicTexture texture = new DynamicTexture(image);
 			ResourceLocation location = new ResourceLocation("dynamic_weaponry:" + texId);
 			Minecraft.getInstance().textureManager.register(location, texture);
-			img = new ToolImage(image, texture, location);
+			img = new ToolImage(image, texture, location, texId);
 		} else {
-			img = new ToolImage(null, null, null);
+			img = new ToolImage(null, null, null, 0);
 		}
 		
 		Vector3f light = new Vector3f(2, 1, 0);

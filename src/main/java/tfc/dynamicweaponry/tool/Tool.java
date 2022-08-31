@@ -1,56 +1,67 @@
 package tfc.dynamicweaponry.tool;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import tfc.dynamicweaponry.util.TextureGen;
 import tfc.dynamicweaponry.util.ToolImage;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Tool {
 	public static final String formatVersion = "a";
 	
-	private ToolImage image;
+	private AtomicReference<ToolImage> image;
 	private final ToolLayer[] layers;
 	
-	private static final ArrayList<Integer> freeInts = new ArrayList<>();
-	private static int latest = 0;
-	private int id;
+	private static final HashMap<Tool, ToolImage> images = new HashMap<>();
+	
+	boolean hashed = false;
+	int hashCode = 0;
 	
 	public ToolImage getImage() {
-		if (image == null) {
-			synchronized (freeInts) { // safety measure
-				int number = 0;
-				if (freeInts.isEmpty()) {
-					number = latest;
-					latest++;
-				} else number = freeInts.remove(0);
-				image = TextureGen.generate(layers, number, true);
-				image.write();
-				id = number;
+		if (!images.containsKey(this) || image == null) {
+			if (image == null) {
+				if (images.containsKey(this)) {
+					image = new AtomicReference<>(images.get(this));
+					return image.get();
+				}
+			}
+			synchronized (images) {
+				long id = images.size();
+				if (images.size() > 3000) {
+					ToolImage image = images.remove((Tool) images.keySet().toArray()[0]);
+					id = image.id;
+					image.close();
+				}
+				image = new AtomicReference<>(TextureGen.generate(layers, id, true));
+				images.put(this, image.get());
+				image.get().write();
 			}
 		}
-		return image;
+		return image.get();
 	}
 	
-	private boolean wasFinalized = false;
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Tool tool = (Tool) o;
+		return Arrays.equals(layers, tool.layers);
+	}
 	
 	@Override
-	protected void finalize() throws Throwable {
-		super.finalize();
-		if (wasFinalized) return;
-		wasFinalized = true;
-		try {
-			final int id = this.id;
-			Minecraft.getInstance().executeIfPossible(() -> {
-				synchronized (freeInts) { // safety measure
-					if (!freeInts.contains(id))
-						freeInts.add(id);
-				}
-			});
-		} catch (Throwable ignored) {
-		}
+	public int hashCode() {
+		if (hashed) return hashCode;
+		
+		int result = Arrays.hashCode(layers);
+		hashCode = result;
+		hashed = true;
+		
+		return result;
 	}
 	
 	public Tool(ToolLayer[] layers) {
