@@ -33,7 +33,7 @@ public class Tool {
 			}
 			synchronized (images) {
 				long id = images.size();
-				if (images.size() > 3000) {
+				if (images.size() > 300) {
 					ToolImage image = images.remove((Tool) images.keySet().toArray()[0]);
 					id = image.id;
 					image.close();

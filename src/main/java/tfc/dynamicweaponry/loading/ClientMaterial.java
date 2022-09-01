@@ -1,5 +1,7 @@
 package tfc.dynamicweaponry.loading;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
@@ -28,5 +30,13 @@ public class ClientMaterial {
 	@Override
 	public int hashCode() {
 		return Objects.hash(color, highlightColor, shininess, regName);
+	}
+	
+	public Tag toTag() {
+		CompoundTag tag = new CompoundTag();
+		tag.putInt("color", color);
+		tag.putInt("highlight", highlightColor);
+		tag.putFloat("shininess", shininess);
+		tag.putString("name", regName.toString());
 	}
 }
