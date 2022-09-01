@@ -1,6 +1,6 @@
 {
   "color": 8289918,
-  "highlights": 10066329,
+  "highlight": 10066329,
   "shininess": 0.15,
-  "item": "minecraft:stone"
+  "name": "dynamic_weaponry:stone"
 }

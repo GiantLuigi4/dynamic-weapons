@@ -6,7 +6,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import tfc.dynamicweaponry.Material;
+import tfc.dynamicweaponry.loading.ClientMaterial;
+import tfc.dynamicweaponry.loading.Material;
 import tfc.dynamicweaponry.tool.ToolLayer;
 
 import java.util.ArrayList;
@@ -56,13 +57,14 @@ public class TextureGen {
 			// edge detection based shading
 			for (int x = 0; x < 16; x++) {
 				for (int y = 0; y < 16; y++) {
-					Material pixel0 = layer.get(x, y);
-					if (pixel0 != null) {
+					Material pixel = layer.get(x, y);
+					if (pixel != null) {
+						ClientMaterial pixel0 = layer.get(x, y).clientMaterial;
 						// compute the outline scalar
 						// used to determine if the pixel is an inner pixel, and also the shading of the outline
 						float outline = outlineShade(outlineLayers, singletonLayer, shadeLayers, pixel0, x, y, light);
 						if (outline == 1) // if it is not an outline pixel, then it can get highlights
-							innerShape[index(x, y)] = pixel0;
+							innerShape[index(x, y)] = pixel;
 						
 						// compute the bump scalar
 						float scl = shade(0.5f, otherLayers, x, y, light);
@@ -85,8 +87,9 @@ public class TextureGen {
 				for (int y = 0; y < 16; y++) {
 					int index = index(x, y);
 					
-					Material pixel = innerShape[index];
-					if (pixel != null) {
+					Material pixel0 = innerShape[index];
+					if (pixel0 != null) {
+						ClientMaterial pixel = pixel0.clientMaterial;
 						// ray step is probably the least expensive calculation
 						// it simply checks a few surrounding pixels, then walks up left three times
 						float step = rayStep(layer, innerShape, x, y);
@@ -97,7 +100,7 @@ public class TextureGen {
 								if (!vec.equals(new Vector3f(0, 0, 0))) {
 									float edgeDetect = shade(0, tempLayer, x, y, light);
 									if (edgeDetect != 0) {
-										ExpandedColor color = new ExpandedColor(innerShape[index].highlightColor);
+										ExpandedColor color = new ExpandedColor(innerShape[index].clientMaterial.highlightColor);
 										float shine = (1 - pixel.shininess);
 										// modifications to the values
 										// makes the highlights look better, but I have no idea how to describe what this is doing
@@ -129,7 +132,7 @@ public class TextureGen {
 		return false;
 	}
 	
-	private static float outlineShade(ToolLayer[] otherLayers, ToolLayer[] singletonLayer, ToolLayer[] shadeLayers, Material material, int x, int y, Vector3f light) {
+	private static float outlineShade(ToolLayer[] otherLayers, ToolLayer[] singletonLayer, ToolLayer[] shadeLayers, ClientMaterial material, int x, int y, Vector3f light) {
 		if (containsPixel(otherLayers, x, y)) {
 			if (!edgeDetect(otherLayers, x, y).equals(new Vector3f(0, 0, 0))) {
 				return shade(material.shininess, singletonLayer, x, y, light);

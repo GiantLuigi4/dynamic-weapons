@@ -1,5 +1,5 @@
 import net.minecraft.resources.ResourceLocation;
-import tfc.dynamicweaponry.Material;
+import tfc.dynamicweaponry.loading.ClientMaterial;
 import tfc.dynamicweaponry.tool.ToolLayer;
 
 import javax.imageio.ImageIO;
@@ -34,8 +34,8 @@ public class PrepForAI {
 	
 	public static int[] prep(String dir) throws IOException {
 		System.out.println(dir);
-		Material gray = new Material(new Color(106, 80, 31).getRGB(), new Color(134, 101, 38).getRGB(), 0.15f, new ResourceLocation("a"));
-		Material gold = new Material(new Color(126, 126, 126).getRGB(), new Color(153, 153, 153).getRGB(), 0.15f, new ResourceLocation("a"));
+		ClientMaterial gray = new ClientMaterial(new Color(106, 80, 31).getRGB(), new Color(134, 101, 38).getRGB(), 0.15f, new ResourceLocation("a"));
+		ClientMaterial gold = new ClientMaterial(new Color(126, 126, 126).getRGB(), new Color(153, 153, 153).getRGB(), 0.15f, new ResourceLocation("a"));
 		
 		ToolLayer layer0 = new ToolLayer();
 		load(ImageIO.read(new File(dir + "/layer0.png")), layer0, gray);
@@ -70,7 +70,7 @@ public class PrepForAI {
 		return -1;
 	}
 	
-	private static void load(BufferedImage from, ToolLayer to, Material mat) {
+	private static void load(BufferedImage from, ToolLayer to, ClientMaterial mat) {
 		BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
 		img.getGraphics().drawImage(from, 0, 0, 16, 16, null);
 		from = img;

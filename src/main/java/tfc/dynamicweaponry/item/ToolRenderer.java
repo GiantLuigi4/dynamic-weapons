@@ -3,6 +3,7 @@ package tfc.dynamicweaponry.item;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -20,7 +21,13 @@ public class ToolRenderer extends BlockEntityWithoutLevelRenderer {
 	}
 	
 	private static VertexConsumer vertex(VertexConsumer consumer, PoseStack poseStack, double x, double y, double z) {
-		return consumer.vertex(poseStack.last().pose(), (float) x, (float) y, (float) z);
+		Matrix4f pMatrix = poseStack.last().pose();
+		return consumer.vertex(
+				pMatrix.m00 * x + pMatrix.m01 * y + pMatrix.m02 * z + pMatrix.m03 * 1,
+				pMatrix.m10 * x + pMatrix.m11 * y + pMatrix.m12 * z + pMatrix.m13 * 1,
+				pMatrix.m20 * x + pMatrix.m21 * y + pMatrix.m22 * z + pMatrix.m23 * 1
+		);
+//		return consumer.vertex(poseStack.last().pose(), (float) x, (float) y, (float) z);
 	}
 	
 	private static VertexConsumer normal(VertexConsumer consumer, ItemTransforms.TransformType pTransformType, PoseStack stack, float x, float y, float z) {
@@ -37,14 +44,12 @@ public class ToolRenderer extends BlockEntityWithoutLevelRenderer {
 	
 	@Override
 	public void renderByItem(ItemStack pStack, ItemTransforms.TransformType pTransformType, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight, int pPackedOverlay) {
-		pStack.getItem().inventoryTick(pStack, null, Minecraft.getInstance().cameraEntity, 0, false);
+		pStack.getItem().inventoryTick(pStack, Minecraft.getInstance().level, Minecraft.getInstance().cameraEntity, 0, false);
 		Tool tool = ((IMayHoldATool) (Object) pStack).myTool();
 		if (tool == null) return;
 		ToolImage image = tool.getImage();
 		VertexConsumer consumer = pBuffer.getBuffer(RenderType.entityTranslucentCull(image.location));
 		float step = 1f / 16;
-		
-		// TODO: apply normal matrix
 		
 		for (int x = 0; x < 17; x++) {
 			float pctX = x / 16f;

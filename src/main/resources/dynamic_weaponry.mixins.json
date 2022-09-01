@@ -4,9 +4,12 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "dynamicweaponry.refmap.json",
   "client": [
-    "ItemStackMixin"
+    "data.ClientLevelMixin"
   ],
   "mixins": [
+    "ItemStackMixin",
+    "data.LevelMixin",
+    "data.ServerLevelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -3,7 +3,8 @@ package tfc.dynamicweaponry.tool;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
-import tfc.dynamicweaponry.Material;
+import tfc.dynamicweaponry.loading.Material;
+import tfc.dynamicweaponry.loading.MaterialLoader;
 import tfc.dynamicweaponry.loading.Materials;
 
 import java.util.ArrayList;
@@ -24,16 +25,17 @@ public class ToolLayer {
 		return x * 16 + y;
 	}
 	
-	public static ToolLayer fromTag(Tag tg) {
+	public static ToolLayer fromTag(MaterialLoader loader, Tag tg) {
 		if (tg instanceof CompoundTag tag) {
 			CompoundTag materialData = getCompound(tag, "pallet");
 			CompoundTag layerData = getCompound(tag, "layer");
 			ToolLayer layer = new ToolLayer();
+			Materials materials = loader.getMaterialHolder();
 			for (String allKey : layerData.getAllKeys()) {
 				try {
 					int index = Integer.parseInt(allKey);
 					String regName = materialData.getString(String.valueOf(layerData.getInt(allKey)));
-					layer.materials[index] = Materials.get(new ResourceLocation(regName));
+					layer.materials[index] = materials.get(new ResourceLocation(regName));
 				} catch (Throwable err) {
 					err.printStackTrace();
 				}

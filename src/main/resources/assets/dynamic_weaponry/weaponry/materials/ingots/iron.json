@@ -2,5 +2,5 @@
   "color": 12632256,
   "highlight": 16777215,
   "shininess": 0.2,
-  "item": "minecraft:iron_ingot"
+  "name": "dynamic_weaponry:iron"
 }

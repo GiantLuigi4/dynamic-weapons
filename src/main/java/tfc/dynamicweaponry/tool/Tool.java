@@ -2,6 +2,7 @@ package tfc.dynamicweaponry.tool;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import tfc.dynamicweaponry.loading.MaterialLoader;
 import tfc.dynamicweaponry.util.TextureGen;
 import tfc.dynamicweaponry.util.ToolImage;
 
@@ -14,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Tool {
 	public static final String formatVersion = "a";
 	
-	private AtomicReference<ToolImage> image;
+	private ToolImage image;
 	private final ToolLayer[] layers;
 	
 	private static final HashMap<Tool, ToolImage> images = new HashMap<>();
@@ -26,8 +27,8 @@ public class Tool {
 		if (!images.containsKey(this) || image == null) {
 			if (image == null) {
 				if (images.containsKey(this)) {
-					image = new AtomicReference<>(images.get(this));
-					return image.get();
+					image = images.get(this);
+					return image;
 				}
 			}
 			synchronized (images) {
@@ -37,12 +38,12 @@ public class Tool {
 					id = image.id;
 					image.close();
 				}
-				image = new AtomicReference<>(TextureGen.generate(layers, id, true));
-				images.put(this, image.get());
-				image.get().write();
+				image = TextureGen.generate(layers, id, true);
+				images.put(this, image);
+				image.write();
 			}
 		}
-		return image.get();
+		return image;
 	}
 	
 	@Override
@@ -68,7 +69,7 @@ public class Tool {
 		this.layers = layers;
 	}
 	
-	public static Tool fromTag(Tag tg) {
+	public static Tool fromTag(MaterialLoader loader, Tag tg) {
 		if (tg instanceof CompoundTag tag) {
 			String ver = getIfPresent(tag, "version", null);
 			if (ver == null) return null;
@@ -81,7 +82,7 @@ public class Tool {
 				for (String allKey : layersTag.getAllKeys()) {
 					try {
 						int index = Integer.parseInt(allKey);
-						layers[index] = ToolLayer.fromTag(layersTag.get(allKey));
+						layers[index] = ToolLayer.fromTag(loader, layersTag.get(allKey));
 					} catch (Throwable err) {
 						err.printStackTrace();
 					}

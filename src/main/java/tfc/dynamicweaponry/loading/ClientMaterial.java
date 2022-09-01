@@ -1,16 +1,16 @@
-package tfc.dynamicweaponry;
+package tfc.dynamicweaponry.loading;
 
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
 
-public class Material {
+public class ClientMaterial {
 	public final int color;
 	public final int highlightColor;
 	public final float shininess;
 	public final ResourceLocation regName;
 	
-	public Material(int color, int highlightColor, float shininess, ResourceLocation regName) {
+	public ClientMaterial(int color, int highlightColor, float shininess, ResourceLocation regName) {
 		this.color = color;
 		this.highlightColor = highlightColor;
 		this.shininess = shininess;
@@ -21,7 +21,7 @@ public class Material {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-		Material material = (Material) o;
+		ClientMaterial material = (ClientMaterial) o;
 		return color == material.color && highlightColor == material.highlightColor && Float.compare(material.shininess, shininess) == 0 && Objects.equals(regName, material.regName);
 	}
 	

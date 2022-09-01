@@ -7,6 +7,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.client.IItemRenderProperties;
 import tfc.dynamicweaponry.Temp;
+import tfc.dynamicweaponry.access.IHoldADataLoader;
 import tfc.dynamicweaponry.access.IMayHoldATool;
 import tfc.dynamicweaponry.tool.Tool;
 
@@ -31,7 +32,10 @@ public class DynamicTool extends Item {
 			tag.put("tool", tool.toTag());
 		} else {
 			if (((IMayHoldATool) (Object) pStack).myTool() == null)
-				((IMayHoldATool) (Object) pStack).setTool(Tool.fromTag(pStack.getOrCreateTag().get("tool")));
+				((IMayHoldATool) (Object) pStack).setTool(Tool.fromTag(
+						((IHoldADataLoader) pLevel).myLoader(),
+						pStack.getOrCreateTag().get("tool")
+				));
 		}
 	}
 }
