@@ -1,0 +1,6 @@
+{
+  "name": "dynamic_weaponry:amethyst",
+  "item": "minecraft:amethyst_shard",
+  "damage": 6.5,
+  "layer": "gems"
+}

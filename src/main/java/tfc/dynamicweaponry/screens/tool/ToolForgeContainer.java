@@ -16,6 +16,7 @@ public class ToolForgeContainer extends AbstractContainerMenu {
 	public static final MenuType<ToolForgeContainer> MENU_TYPE;
 	
 	static {
+		//noinspection unchecked
 		MenuType<ToolForgeContainer>[] type = new MenuType[1];
 		type[0] = new MenuType<>((a, inv)-> new ToolForgeContainer(type[0], a, inv));
 		MENU_TYPE = type[0];

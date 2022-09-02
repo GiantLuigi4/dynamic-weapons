@@ -6,11 +6,8 @@ import tfc.dynamicweaponry.loading.MaterialLoader;
 import tfc.dynamicweaponry.util.TextureGen;
 import tfc.dynamicweaponry.util.ToolImage;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class Tool {
 	public static final String formatVersion = "a";
@@ -23,24 +20,46 @@ public class Tool {
 	boolean hashed = false;
 	int hashCode = 0;
 	
-	public ToolImage getImage() {
-		if (!images.containsKey(this) || image == null) {
-			if (image == null) {
-				if (images.containsKey(this)) {
-					image = images.get(this);
-					return image;
+	public static void clearImages() {
+		synchronized (images) {
+			while (true) {
+				try {
+					for (Tool tool : images.keySet()) {
+						tool.regenImage();
+					}
+					images.clear();
+					return;
+				} catch (Throwable ignored) {
 				}
 			}
-			synchronized (images) {
-				long id = images.size();
-				if (images.size() > 300) {
-					ToolImage image = images.remove((Tool) images.keySet().toArray()[0]);
-					id = image.id;
-					image.close();
+		}
+	}
+	
+	public void regenImage() {
+		image.close();
+		image = null;
+	}
+	
+	public ToolImage getImage() {
+		synchronized (images) {
+			if (!images.containsKey(this) || image == null) {
+				if (image == null) {
+					if (images.containsKey(this)) {
+						image = images.get(this);
+						return image;
+					}
 				}
-				image = TextureGen.generate(layers, id, true);
-				images.put(this, image);
-				image.write();
+				synchronized (images) {
+					long id = images.size();
+					if (images.size() > 300) {
+						ToolImage image = images.remove((Tool) images.keySet().toArray()[0]);
+						id = image.id;
+						image.close();
+					}
+					image = TextureGen.generate(layers, id, true);
+					images.put(this, image);
+					image.write();
+				}
 			}
 		}
 		return image;
@@ -65,8 +84,16 @@ public class Tool {
 		return result;
 	}
 	
-	public Tool(ToolLayer[] layers) {
-		this.layers = layers;
+	MaterialLoader loader;
+	
+	public Tool(ToolLayer[] layers, MaterialLoader loader) {
+		this.layers = new ToolLayer[layers.length];
+		for (int i = 0; i < layers.length; i++) {
+			if (layers[i] != null)
+				// copies the layer
+				this.layers[i] = ToolLayer.fromTag(loader, layers[i].toTag());
+		}
+		this.loader = loader;
 	}
 	
 	public static Tool fromTag(MaterialLoader loader, Tag tg) {
@@ -78,7 +105,8 @@ public class Tool {
 				if (layersTag == null) return null;
 				int count = layersTag.size();
 				ToolLayer[] layers = new ToolLayer[count];
-				Tool tool = new Tool(layers);
+				Tool tool = new Tool(layers, loader);
+				layers = tool.layers;
 				for (String allKey : layersTag.getAllKeys()) {
 					try {
 						int index = Integer.parseInt(allKey);
@@ -93,11 +121,13 @@ public class Tool {
 		return null;
 	}
 	
+	@SuppressWarnings("SameParameterValue")
 	protected static String getIfPresent(CompoundTag tg, String name, String value) {
 		if (tg.contains(name, Tag.TAG_STRING)) return tg.getString(name);
 		return value;
 	}
 	
+	@SuppressWarnings("SameParameterValue")
 	protected static CompoundTag getCompound(CompoundTag tg, String name) {
 		if (tg.contains(name, Tag.TAG_COMPOUND)) return tg.getCompound(name);
 		return null;

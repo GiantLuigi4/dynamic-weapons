@@ -23,6 +23,6 @@ public class ServerLevelMixin {
 	@Inject(at = @At("TAIL"), method = "<init>")
 	public void postInit(MinecraftServer p_203762_, Executor p_203763_, LevelStorageSource.LevelStorageAccess p_203764_, ServerLevelData p_203765_, ResourceKey p_203766_, Holder p_203767_, ChunkProgressListener p_203768_, ChunkGenerator p_203769_, boolean p_203770_, long p_203771_, List p_203772_, boolean p_203773_, CallbackInfo ci) {
 		// TODO: swap this for a server asset loader
-		((IHoldADataLoader) this).setLoader(DynamicWeaponry.clientAssetLoader);
+		((IHoldADataLoader) this).setLoader(DynamicWeaponry.serverDataLoader);
 	}
 }

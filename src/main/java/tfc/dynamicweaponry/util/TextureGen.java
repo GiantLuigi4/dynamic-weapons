@@ -60,6 +60,7 @@ public class TextureGen {
 					Material pixel = layer.get(x, y);
 					if (pixel != null) {
 						ClientMaterial pixel0 = layer.get(x, y).clientMaterial;
+						if (pixel0 == null) continue;
 						// compute the outline scalar
 						// used to determine if the pixel is an inner pixel, and also the shading of the outline
 						float outline = outlineShade(outlineLayers, singletonLayer, shadeLayers, pixel0, x, y, light);
@@ -82,7 +83,7 @@ public class TextureGen {
 			}
 			
 			// highlights
-			ToolLayer[] tempLayer = new ToolLayer[]{new ToolLayer(innerShape)};
+			ToolLayer[] tempLayer = new ToolLayer[]{new ToolLayer(innerShape, layer.getMaterialList())};
 			for (int x = 0; x < 16; x++) {
 				for (int y = 0; y < 16; y++) {
 					int index = index(x, y);

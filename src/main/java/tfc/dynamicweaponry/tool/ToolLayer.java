@@ -11,31 +11,54 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ToolLayer {
-	Material[] materials;
+	ResourceLocation[] materials;
 	
 	public ToolLayer() {
-		materials = new Material[16 * 16];
+		materials = new ResourceLocation[16 * 16];
 	}
 	
+	@Deprecated(forRemoval = true)
 	public ToolLayer(Material[] materials) {
-		this.materials = materials;
+		this();
+		for (int i = 0; i < materials.length; i++) {
+			if (materials[i] != null)
+				this.materials[i] = materials[i].regName;
+		}
+	}
+	
+	public ToolLayer(Material[] materials, Materials materialList) {
+		this(materials);
+		this.materialList = materialList;
+		assert materialList != null;
 	}
 	
 	private static int index(int x, int y) {
 		return x * 16 + y;
 	}
 	
+	Materials materialList;
+	
+	public Materials getMaterialList() {
+		assert materialList != null;
+		return materialList;
+	}
+	
 	public static ToolLayer fromTag(MaterialLoader loader, Tag tg) {
 		if (tg instanceof CompoundTag tag) {
 			CompoundTag materialData = getCompound(tag, "pallet");
 			CompoundTag layerData = getCompound(tag, "layer");
+			assert layerData != null;
+			assert materialData != null;
+			
 			ToolLayer layer = new ToolLayer();
-			Materials materials = loader.getMaterialHolder();
+			layer.materialList = loader.getMaterialHolder();
+			assert layer.materialList != null;
+			
 			for (String allKey : layerData.getAllKeys()) {
 				try {
 					int index = Integer.parseInt(allKey);
 					String regName = materialData.getString(String.valueOf(layerData.getInt(allKey)));
-					layer.materials[index] = materials.get(new ResourceLocation(regName));
+					layer.materials[index] = new ResourceLocation(regName);
 				} catch (Throwable err) {
 					err.printStackTrace();
 				}
@@ -74,36 +97,45 @@ public class ToolLayer {
 	}
 	
 	public void set(int i, int i1, Material mat) {
-		materials[index(i, i1)] = mat;
+		materials[index(i, i1)] = mat.regName;
 	}
 	
 	public Material get(int x, int y) {
-		return materials[index(x, y)];
+		return get(index(x, y));
 	}
 	
 	public Material[] array() {
+		Material[] materials = new Material[this.materials.length];
+		for (int i = 0; i < materials.length; i++) {
+			materials[i] = get(i);
+		}
 		return materials;
+	}
+	
+	protected Material get(int i) {
+		ResourceLocation rl = materials[i];
+		if (rl != null) return materialList.get(rl);
+		return null;
 	}
 	
 	public Tag toTag() {
 		ArrayList<String> usedRegNames = new ArrayList<>();
 		CompoundTag materialData = new CompoundTag();
 		CompoundTag materialDataReverse = new CompoundTag();
-		for (Material pxl : materials) {
-			if (pxl != null) {
-				if (!usedRegNames.contains(pxl.regName.toString())) {
-					materialData.putInt(pxl.regName.toString(), usedRegNames.size());
-					materialDataReverse.putString(String.valueOf(usedRegNames.size()), pxl.regName.toString());
-					usedRegNames.add(pxl.regName.toString());
-				}
+		for (ResourceLocation px1 : materials) {
+			if (px1 == null) continue;
+			if (!usedRegNames.contains(px1.toString())) {
+				materialData.putInt(px1.toString(), usedRegNames.size());
+				materialDataReverse.putString(String.valueOf(usedRegNames.size()), px1.toString());
+				usedRegNames.add(px1.toString());
 			}
 		}
 		
 		CompoundTag layer = new CompoundTag();
 		for (int i = 0; i < materials.length; i++) {
-			Material pxl = materials[i];
-			if (pxl != null)
-				layer.putInt(String.valueOf(i), materialData.getInt(pxl.regName.toString()));
+			ResourceLocation px1 = materials[i];
+			if (px1 == null) continue;
+			layer.putInt(String.valueOf(i), materialData.getInt(px1.toString()));
 		}
 		
 		CompoundTag layerTag = new CompoundTag();

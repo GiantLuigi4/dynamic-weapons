@@ -15,7 +15,7 @@ public class ToolForgeBlockEntity extends BlockEntity {
 		super(Register.TOOL_FORGE_BLOCK_ENTITY.get(), pWorldPosition, pBlockState);
 	}
 	
-	protected Tool heldTool = new Tool(Temp.layers);
+	protected Tool heldTool;
 	
 	public Tool getHeldTool() {
 		return heldTool;
@@ -27,7 +27,8 @@ public class ToolForgeBlockEntity extends BlockEntity {
 		if (tag != null) {
 			heldTool = Tool.fromTag(((IHoldADataLoader) level).myLoader(), tag);
 			tag = null;
-		}
+		} else if (heldTool == null)
+			heldTool = new Tool(Temp.layers, ((IHoldADataLoader) level).myLoader());
 		return heldTool;
 	}
 	

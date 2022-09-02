@@ -11,10 +11,12 @@ import net.minecraft.util.profiling.ProfilerFiller;
 
 import java.util.Map;
 
-public class JsonAssetLoader extends SimpleJsonResourceReloadListener implements MaterialLoader {
+public class JsonDataLoader extends SimpleJsonResourceReloadListener implements MaterialLoader {
 	Gson gson;
 	
-	public JsonAssetLoader(Gson p_10768_) {
+	protected boolean needsSending = false;
+	
+	public JsonDataLoader(Gson p_10768_) {
 		super(p_10768_, "weaponry/materials");
 		this.gson = p_10768_;
 	}
@@ -29,6 +31,7 @@ public class JsonAssetLoader extends SimpleJsonResourceReloadListener implements
 				parseElement(location, e);
 			});
 		}
+		needsSending = true;
 	}
 	
 	public void parseElement(ResourceLocation location, JsonElement element) {
@@ -40,41 +43,15 @@ public class JsonAssetLoader extends SimpleJsonResourceReloadListener implements
 			return;
 		}
 		String path = location.toString();
-		ClientMaterial material = ClientMaterial.parse(path, object);
+		Material material = Material.parse(path, object);
 		if (material == null) return;
-		myMaterials.add(new Material(material));
+		myMaterials.add(material);
 	}
 	
-	// client only
 	private final Materials myMaterials = new Materials();
-	
-	// client and server materials
-	private final Materials pairedMaterials = new Materials() {
-		@Override
-		public void add(Material matr) {
-			Material m = myMaterials.get(matr.regName);
-			if (m != null)
-				super.add(new Material(m.clientMaterial, matr));
-			else
-				super.add(matr);
-		}
-		
-		@Override
-		public Material get(ResourceLocation regName) {
-			Material m = super.get(regName);
-			if (m != null) return m;
-			return myMaterials.get(regName);
-		}
-	};
 	
 	@Override
 	public Materials getMaterialHolder() {
-		return pairedMaterials;
-	}
-	
-	public void pair(Materials materials) {
-		pairedMaterials.clear();
-		for (ResourceLocation key : materials.keys())
-			pairedMaterials.add(materials.get(key));
+		return myMaterials;
 	}
 }

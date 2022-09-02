@@ -28,14 +28,15 @@ public class DynamicTool extends Item {
 		if (!pStack.getOrCreateTag().contains("tool")) {
 			CompoundTag tag = pStack.getOrCreateTag();
 			Tool tool = ((IMayHoldATool) (Object) pStack).myTool();
-			if (tool == null) tool = new Tool(Temp.layers);
+			if (tool == null) tool = new Tool(Temp.layers, ((IHoldADataLoader) pLevel).myLoader());
 			tag.put("tool", tool.toTag());
 		} else {
-			if (((IMayHoldATool) (Object) pStack).myTool() == null)
+			if (((IMayHoldATool) (Object) pStack).myTool() == null) {
 				((IMayHoldATool) (Object) pStack).setTool(Tool.fromTag(
 						((IHoldADataLoader) pLevel).myLoader(),
 						pStack.getOrCreateTag().get("tool")
 				));
+			}
 		}
 	}
 }

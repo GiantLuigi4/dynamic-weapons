@@ -57,6 +57,24 @@ public class ClientMaterial {
 		}
 	}
 	
+	public static ClientMaterial fromTag(CompoundTag client) {
+		return new ClientMaterial(
+				client.getInt("color"),
+				client.getInt("highlight"),
+				client.getFloat("shininess"),
+				new ResourceLocation(client.getString("name"))
+		);
+	}
+	
+	public Tag toTag() {
+		CompoundTag tag = new CompoundTag();
+		tag.putInt("color", color);
+		tag.putInt("highlight", highlightColor);
+		tag.putFloat("shininess", shininess);
+		tag.putString("name", regName.toString());
+		return tag;
+	}
+	
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -68,14 +86,5 @@ public class ClientMaterial {
 	@Override
 	public int hashCode() {
 		return Objects.hash(color, highlightColor, shininess, regName);
-	}
-	
-	public Tag toTag() {
-		CompoundTag tag = new CompoundTag();
-		tag.putInt("color", color);
-		tag.putInt("highlight", highlightColor);
-		tag.putFloat("shininess", shininess);
-		tag.putString("name", regName.toString());
-		return tag;
 	}
 }

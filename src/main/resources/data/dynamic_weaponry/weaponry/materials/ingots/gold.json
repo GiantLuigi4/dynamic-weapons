@@ -1,0 +1,6 @@
+{
+  "name": "dynamic_weaponry:gold",
+  "item": "minecraft:gold_ingot",
+  "damage": 5,
+  "layer": "metals"
+}
