@@ -1,0 +1,6 @@
+{
+  "name": "dynamic_weaponry:diamond",
+  "item": "minecraft:diamond",
+  "damage": 7,
+  "layer": "gems"
+}

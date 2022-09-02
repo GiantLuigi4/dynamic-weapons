@@ -1,0 +1,6 @@
+{
+  "name": "dynamic_weaponry:stone",
+  "item": "minecraft:stone",
+  "damage": 5,
+  "layer": "rocks"
+}

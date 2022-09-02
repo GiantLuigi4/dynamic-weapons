@@ -97,7 +97,10 @@ public class ToolLayer {
 	}
 	
 	public void set(int i, int i1, Material mat) {
-		materials[index(i, i1)] = mat.regName;
+		int index = index(i, i1);
+		if (index < 0 || index > materials.length) return;
+		if (mat == null) materials[index] = null;
+		else materials[index] = mat.regName;
 	}
 	
 	public Material get(int x, int y) {

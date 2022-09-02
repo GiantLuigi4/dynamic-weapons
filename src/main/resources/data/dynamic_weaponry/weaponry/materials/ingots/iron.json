@@ -1,0 +1,6 @@
+{
+  "name": "dynamic_weaponry:iron",
+  "item": "minecraft:iron_ingot",
+  "damage": 6,
+  "layer": "metals"
+}

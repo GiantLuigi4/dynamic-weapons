@@ -15,6 +15,10 @@ public class Tool {
 	private ToolImage image;
 	private final ToolLayer[] layers;
 	
+	public ToolLayer[] getLayers() {
+		return layers;
+	}
+	
 	private static final HashMap<Tool, ToolImage> images = new HashMap<>();
 	
 	boolean hashed = false;
@@ -36,7 +40,14 @@ public class Tool {
 	}
 	
 	public void regenImage() {
-		image.close();
+		hashed = false;
+		if (image != null)
+			image.close();
+		image = null;
+	}
+	
+	public void markDirty() {
+		hashed = false;
 		image = null;
 	}
 	

@@ -1,5 +1,6 @@
 import net.minecraft.resources.ResourceLocation;
 import tfc.dynamicweaponry.loading.ClientMaterial;
+import tfc.dynamicweaponry.loading.Material;
 import tfc.dynamicweaponry.tool.ToolLayer;
 import tfc.dynamicweaponry.util.TextureGen;
 import tfc.dynamicweaponry.util.ToolImage;
@@ -52,7 +53,7 @@ public class AwtTesting {
 				int pixel = from.getRGB(x, y);
 				Color c = new Color(pixel, true);
 				if (c.getAlpha() != 0)
-					to.set(x, 15 - y, mat);
+					to.set(x, 15 - y, new Material(mat));
 			}
 		}
 	}

@@ -2,9 +2,15 @@ package tfc.dynamicweaponry.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 import tfc.dynamicweaponry.Register;
 import tfc.dynamicweaponry.Temp;
 import tfc.dynamicweaponry.access.IHoldADataLoader;
@@ -34,16 +40,41 @@ public class ToolForgeBlockEntity extends BlockEntity {
 	
 	// TODO:
 	@Override
-	public void deserializeNBT(CompoundTag nbt) {
-		super.deserializeNBT(nbt);
-		this.tag = nbt;
+	public void load(CompoundTag nbt) {
+		super.load(nbt);
+		this.tag = nbt.getCompound("tool");
 	}
 	
 	@Override
-	public CompoundTag serializeNBT() {
-		CompoundTag tag = super.serializeNBT();
-		if (this.tag != null) tag.put("tool", this.tag);
-		else tag.put("tool", heldTool.toTag());
+	protected void saveAdditional(CompoundTag pTag) {
+		super.saveAdditional(pTag);
+		if (this.tag != null) pTag.put("tool", this.tag);
+		else if (level != null) pTag.put("tool", getTool(level).toTag());
+		else if (heldTool != null) pTag.put("tool", heldTool.toTag());
+	}
+	
+	@Override
+	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+		super.onDataPacket(net, pkt);
+		heldTool = null;
+	}
+	
+	@Nullable
+	@Override
+	public Packet<ClientGamePacketListener> getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
+	}
+	
+	@Override
+	public CompoundTag getUpdateTag() {
+		CompoundTag tag = new CompoundTag();
+		saveAdditional(tag);
 		return tag;
+	}
+	
+	@Override
+	public void handleUpdateTag(CompoundTag tag) {
+		super.handleUpdateTag(tag);
+		heldTool = null;
 	}
 }

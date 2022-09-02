@@ -1,0 +1,6 @@
+{
+  "name": "dynamic_weaponry:oak",
+  "item": "minecraft:oak_planks",
+  "damage": 4,
+  "layer": "woods"
+}

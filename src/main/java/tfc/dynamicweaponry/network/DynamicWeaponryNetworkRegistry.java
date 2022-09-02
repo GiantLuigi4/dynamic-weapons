@@ -4,6 +4,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 import tfc.dynamicweaponry.network.gui.SendBlockPosPacket;
+import tfc.dynamicweaponry.network.gui.SetPixelsPacket;
 import tfc.dynamicweaponry.network.sync.SendMaterialsPacket;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class DynamicWeaponryNetworkRegistry {
 		ArrayList<NetworkEntry<?>> entries = new ArrayList<>();
 		entries.add(new NetworkEntry<>(SendBlockPosPacket.class, SendBlockPosPacket::new));
 		entries.add(new NetworkEntry<>(SendMaterialsPacket.class, SendMaterialsPacket::new));
+		entries.add(new NetworkEntry<>(SetPixelsPacket.class, SetPixelsPacket::new));
 		
 		for (int i = 0; i < entries.size(); i++) entries.get(i).register(i, NETWORK_INSTANCE);
 	}
