@@ -11,9 +11,11 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.registries.ForgeRegistries;
 import tfc.dynamicweaponry.block.ToolForgeRenderer;
 import tfc.dynamicweaponry.loading.JsonAssetLoader;
+import tfc.dynamicweaponry.network.DynamicWeaponryNetworkRegistry;
+import tfc.dynamicweaponry.screens.tool.ToolForgeContainer;
+import tfc.dynamicweaponry.screens.tool.ToolForgeScreen;
 
 @Mod("dynamic_weaponry")
 public class DynamicWeaponry {
@@ -21,6 +23,7 @@ public class DynamicWeaponry {
 	
 	public DynamicWeaponry() {
 		Register.init();
+		DynamicWeaponryNetworkRegistry.init();
 		if (FMLEnvironment.dist.isClient()) {
 			ReloadableResourceManager reloadableResourceManager = (ReloadableResourceManager) Minecraft.getInstance().getResourceManager();
 			reloadableResourceManager.registerReloadListener(clientAssetLoader);
@@ -31,5 +34,6 @@ public class DynamicWeaponry {
 	public static void setup(FMLClientSetupEvent event) {
 		ItemBlockRenderTypes.setRenderLayer(Register.TOOL_FORGE_BLOCK.get(), RenderType.cutoutMipped());
 		BlockEntityRenderers.register(Register.TOOL_FORGE_BLOCK_ENTITY.get(), (a) -> new ToolForgeRenderer());
+		MenuScreens.register(ToolForgeContainer.MENU_TYPE, ToolForgeScreen::new);
 	}
 }
