@@ -1,6 +1,7 @@
 package tfc.dynamicweaponry;
 
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -25,6 +26,7 @@ public class Register {
 	
 	public static final RegistryObject<Item> TOOL_ITEM = Register.ITEM_REGISTER.register("dynamic_tool", () -> new DynamicTool(new Item.Properties().stacksTo(1)));
 	public static final RegistryObject<Block> TOOL_FORGE_BLOCK = Register.BLOCK_REGISTER.register("tool_forge", () -> new ToolForgeBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY)));
+	public static final RegistryObject<Item> TOOL_FORGE = Register.ITEM_REGISTER.register("tool_forge", () -> new BlockItem(TOOL_FORGE_BLOCK.get(), new Item.Properties()));
 	public static final RegistryObject<BlockEntityType<ToolForgeBlockEntity>> TOOL_FORGE_BLOCK_ENTITY = Register.BLOCK_ENTITY_REGISTER.register("tool_forge", () -> BlockEntityType.Builder.of(ToolForgeBlockEntity::new, TOOL_FORGE_BLOCK.get()).build(null));
 	public static final RegistryObject<MenuType<ToolForgeContainer>> TOOL_FORGE_CONTAINER = Register.MENU_TYPE_REGISTER.register("tool_forge", () -> ToolForgeContainer.MENU_TYPE);
 	

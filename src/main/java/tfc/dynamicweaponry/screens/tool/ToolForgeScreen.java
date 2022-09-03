@@ -19,11 +19,18 @@ import tfc.dynamicweaponry.network.gui.SendBlockPosPacket;
 import tfc.dynamicweaponry.network.gui.SetPixelsPacket;
 import tfc.dynamicweaponry.tool.Tool;
 import tfc.dynamicweaponry.tool.ToolLayer;
+import tfc.dynamicweaponry.tool.requirements.HandleRequirement;
+import tfc.dynamicweaponry.tool.requirements.Requirement;
 import tfc.dynamicweaponry.util.ExpandedColor;
+import tfc.dynamicweaponry.util.Point;
 
 public class ToolForgeScreen extends AbstractContainerScreen<ToolForgeContainer> {
 	private final ResourceLocation ASSET = new ResourceLocation("dynamic_weaponry:textures/gui/gui.png");
 	private final ResourceLocation ASSET_ALT = new ResourceLocation("dynamic_weaponry:textures/gui/gui_alt.png");
+	
+	private static final Requirement[] renderableRequirements = new Requirement[]{
+			HandleRequirement.INSTANCE
+	};
 	
 	public ToolForgeScreen(ToolForgeContainer pMenu, Inventory pPlayerInventory, Component pTitle) {
 		super(pMenu, pPlayerInventory, pTitle);
@@ -58,23 +65,16 @@ public class ToolForgeScreen extends AbstractContainerScreen<ToolForgeContainer>
 			if (isMaterial) {
 				for (ResourceLocation key : DynamicWeaponry.clientAssetLoader.getMaterialHolder().keys()) {
 					material = DynamicWeaponry.clientAssetLoader.getMaterialHolder().get(key);
-					if (material.isValid(slot.getItem())) {
+					if (material.isValid(slot.getItem()))
 						break;
-					}
 					material = null;
 				}
 				if (material == null) isMaterial = false;
 			}
 			
 			if (isMaterial || selectedSlot == slot.index) {
-				if (!isMaterial)
-					RenderSystem.setShaderColor(1, 0, 0, 1);
-				else if (selectedSlot == slot.index)
-					RenderSystem.setShaderColor(0, 1, 0, 1);
-				else {
-					ExpandedColor color = new ExpandedColor(material.clientMaterial.color);
-					RenderSystem.setShaderColor(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, 1);
-				}
+				float[] c = getSlotColor(material, isMaterial, slot);
+				RenderSystem.setShaderColor(c[0], c[1], c[2], c[3]);
 				this.blit(pPoseStack, i + slot.x - 1, j + slot.y - 1, 176, 0, 18, 18);
 			}
 		}
@@ -89,6 +89,7 @@ public class ToolForgeScreen extends AbstractContainerScreen<ToolForgeContainer>
 		if (menu.blockEntity != null) {
 			Tool tool = menu.blockEntity.getTool(Minecraft.getInstance().level);
 			int fontHeight = font.lineHeight + 2;
+			// TODO: clean this up and decide upon how to do this
 			for (int i1 = 0; i1 < tool.getLayers().length; i1++) {
 				int left = sx + 16 * 4 + 30;
 				int top = sy + i1 * fontHeight;
@@ -151,6 +152,28 @@ public class ToolForgeScreen extends AbstractContainerScreen<ToolForgeContainer>
 						this.blit(pPoseStack, left, top, 176 + 18, 14, 4, 4);
 					}
 					
+					if (false) {
+						Requirement requirement = renderableRequirements[0];
+						float r = 0, g = 0, b = 0;
+						boolean inverse = true;
+						if (!requirement.test(tool)) {
+							r = 1;
+							inverse = false;
+						} else g = 1;
+						for (Point point : requirement.requiredPoints(tool)) {
+							if (point.x == x && point.y == y) {
+								boolean foundAny = false;
+								for (ToolLayer toolLayer : tool.getLayers())
+									if (foundAny = toolLayer.get(x, 15 - y) != null)
+										break;
+								RenderSystem.setShaderColor(r, g, b, 0.5f);
+								if (inverse) foundAny = !foundAny;
+								if (!foundAny)
+									this.blit(pPoseStack, left, top, 176 + 18, 14, 4, 4);
+							}
+						}
+					}
+					
 					if (left - 1 < pMouseX && top - 1 < pMouseY) {
 						if (left + 4 > pMouseX && top + 4 > pMouseY) {
 							int b = Math.max(color.getRed(), Math.max(color.getBlue(), color.getGreen()));
@@ -163,6 +186,18 @@ public class ToolForgeScreen extends AbstractContainerScreen<ToolForgeContainer>
 				}
 			}
 		}
+	}
+	
+	protected float[] getSlotColor(Material material, boolean isMaterial, Slot slot) {
+		float[] c;
+		if (!isMaterial)
+			return new float[]{1, 0, 0, 1};
+		if (selectedSlot == slot.index)
+			return new float[]{0, 1, 0, 1};
+		ExpandedColor color;
+		if (material.clientMaterial == null) color = new ExpandedColor(0, 0, 0);
+		else color = new ExpandedColor(material.clientMaterial.color);
+		return new float[]{color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f};
 	}
 	
 	private int selectedSlot = -1;

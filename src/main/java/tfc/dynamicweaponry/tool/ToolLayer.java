@@ -12,6 +12,7 @@ import java.util.Arrays;
 
 public class ToolLayer {
 	ResourceLocation[] materials;
+	String layerType = "";
 	
 	public ToolLayer() {
 		materials = new ResourceLocation[16 * 16];
@@ -24,6 +25,10 @@ public class ToolLayer {
 			if (materials[i] != null)
 				this.materials[i] = materials[i].regName;
 		}
+	}
+	public ToolLayer(Materials materials) {
+		this();
+		this.materialList = materials;
 	}
 	
 	public ToolLayer(Material[] materials, Materials materialList) {
@@ -63,6 +68,10 @@ public class ToolLayer {
 					err.printStackTrace();
 				}
 			}
+			
+			if (((CompoundTag) tg).contains("layerType"))
+				layer.layerType = ((CompoundTag) tg).getString("layerType");
+			
 			return layer;
 		}
 		return null;
@@ -96,11 +105,25 @@ public class ToolLayer {
 		return null;
 	}
 	
+	// TODO: count pixels
 	public void set(int i, int i1, Material mat) {
+		if (mat != null) {
+			if (layerType == null || layerType.equals("")) {
+				layerType = mat.getLayer();
+			} else if (!mat.getLayer().equals(layerType))
+				return;
+		}
+		
 		int index = index(i, i1);
 		if (index < 0 || index > materials.length) return;
 		if (mat == null) materials[index] = null;
 		else materials[index] = mat.regName;
+		
+		if (mat == null) {
+			boolean foundAny = false;
+			for (ResourceLocation material : materials) if (foundAny = material != null) break;
+			if (!foundAny) layerType = "";
+		}
 	}
 	
 	public Material get(int x, int y) {
@@ -109,9 +132,7 @@ public class ToolLayer {
 	
 	public Material[] array() {
 		Material[] materials = new Material[this.materials.length];
-		for (int i = 0; i < materials.length; i++) {
-			materials[i] = get(i);
-		}
+		for (int i = 0; i < materials.length; i++) materials[i] = get(i);
 		return materials;
 	}
 	
@@ -125,6 +146,7 @@ public class ToolLayer {
 		ArrayList<String> usedRegNames = new ArrayList<>();
 		CompoundTag materialData = new CompoundTag();
 		CompoundTag materialDataReverse = new CompoundTag();
+		
 		for (ResourceLocation px1 : materials) {
 			if (px1 == null) continue;
 			if (!usedRegNames.contains(px1.toString())) {
@@ -144,8 +166,9 @@ public class ToolLayer {
 		CompoundTag layerTag = new CompoundTag();
 		layerTag.put("layer", layer);
 		layerTag.put("pallet", materialDataReverse);
-		layerTag.putInt("width", 16);
-		layerTag.putInt("height", 16);
+		layerTag.putInt("resolution", 16);
+		layerTag.putString("layerType", layerType);
+		
 		return layerTag;
 	}
 }

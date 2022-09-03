@@ -1,0 +1,6 @@
+{
+  "name": "dynamic_weaponry:flint",
+  "item": "minecraft:flint",
+  "damage": 5.5,
+  "layer": "rocks"
+}

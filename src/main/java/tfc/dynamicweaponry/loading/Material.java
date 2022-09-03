@@ -20,6 +20,24 @@ public class Material {
 	
 	protected double damage;
 	
+	protected String layer;
+	
+	public TagKey<Item> getTag() {
+		return tag;
+	}
+	
+	public ResourceLocation getItem() {
+		return item;
+	}
+	
+	public double getDamage() {
+		return damage;
+	}
+	
+	public String getLayer() {
+		return layer;
+	}
+	
 	public Material(ClientMaterial clientMaterial) {
 		this.clientMaterial = clientMaterial;
 		this.regName = clientMaterial.regName;
@@ -39,6 +57,7 @@ public class Material {
 		tag = parent.tag;
 		item = parent.item;
 		damage = parent.damage;
+		layer = parent.layer;
 	}
 	
 	public Material(ClientMaterial material, JsonObject object) {
@@ -51,10 +70,11 @@ public class Material {
 		else this.item = new ResourceLocation(item);
 		
 		damage = object.get("damage").getAsDouble();
+		layer = object.get("layer").getAsString();
 	}
 	
 	public static Material fromTag(CompoundTag tag) {
-		Material m = null;
+		Material m;
 		if (tag.contains("client", Tag.TAG_COMPOUND))
 			m = new Material(ClientMaterial.fromTag(tag.getCompound("client")));
 		else m = new Material(null, new ResourceLocation(tag.getString("name")));
@@ -63,6 +83,7 @@ public class Material {
 		else if (tag.contains("tag")) TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(tag.getString("tag")));
 		
 		m.damage = tag.getDouble("damage");
+		m.layer = tag.getString("layer");
 		
 		return m;
 	}
@@ -79,6 +100,7 @@ public class Material {
 			tag.putString("tag", this.tag.location().toString());
 		
 		tag.putDouble("damage", damage);
+		tag.putString("layer", layer);
 		
 		return tag;
 	}

@@ -25,5 +25,6 @@
   "problem.dynamic_weaponry.part_dependency": "%type1% requires %type2%, but only %type1% is present.",
   "button.dynamic_weaponry.toggle_tool_switcher": "Toggle Tool Switcher",
   "button.dynamic_weaponry.toggle_part_switcher": "Toggle Part Switcher",
+  "": "",
   "": ""
 }

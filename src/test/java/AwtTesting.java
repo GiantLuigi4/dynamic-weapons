@@ -1,7 +1,9 @@
 import net.minecraft.resources.ResourceLocation;
 import tfc.dynamicweaponry.loading.ClientMaterial;
 import tfc.dynamicweaponry.loading.Material;
+import tfc.dynamicweaponry.loading.Materials;
 import tfc.dynamicweaponry.tool.ToolLayer;
+import tfc.dynamicweaponry.util.ExpandedColor;
 import tfc.dynamicweaponry.util.TextureGen;
 import tfc.dynamicweaponry.util.ToolImage;
 
@@ -23,14 +25,17 @@ public class AwtTesting {
 	private static void run(String dir) throws IOException {
 		BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
 		
-		ClientMaterial gray = new ClientMaterial(new Color(4730391).getRGB(), new Color(5388058).getRGB(), 0.15f, new ResourceLocation("a"));
+		ClientMaterial gray = new ClientMaterial(new Color(9794369).getRGB(), new Color(10388301).getRGB(), 0.15f, new ResourceLocation("a"));
 //		Material gold = new Material(new Color(9794369).getRGB(), new Color(10388301).getRGB(), 0.15f, new ResourceLocation("a"));
-		ClientMaterial gold = new ClientMaterial(new Color(11767537).getRGB(), new Color(13607153).getRGB(), 0.15f, new ResourceLocation("a"));
-		gray = gold;
+		ClientMaterial gold = new ClientMaterial(new ExpandedColor(60, 59, 59).brighter(0.075f, 0).getRGB(), new Color(126, 126, 126).getRGB(), 0.1f, new ResourceLocation("b"));
 		
-		ToolLayer layer0 = new ToolLayer();
+		Materials materials = new Materials();
+		materials.add(new Material(gray));
+		materials.add(new Material(gold));
+		
+		ToolLayer layer0 = new ToolLayer(materials);
 		load(ImageIO.read(new File(dir + "/layer0.png")), layer0, gray);
-		ToolLayer layer1 = new ToolLayer();
+		ToolLayer layer1 = new ToolLayer(materials);
 		load(ImageIO.read(new File(dir + "/layer1.png")), layer1, gold);
 		ToolLayer[] layers = new ToolLayer[]{
 				layer0, layer1

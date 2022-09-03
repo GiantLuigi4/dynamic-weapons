@@ -64,8 +64,10 @@ public class Tool {
 					long id = images.size();
 					if (images.size() > 300) {
 						ToolImage image = images.remove((Tool) images.keySet().toArray()[0]);
-						id = image.id;
-						image.close();
+						if (image != null) {
+							id = image.id;
+							image.close();
+						}
 					}
 					image = TextureGen.generate(layers, id, true);
 					images.put(this, image);
