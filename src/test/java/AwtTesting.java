@@ -26,7 +26,6 @@ public class AwtTesting {
 		BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
 		
 		ClientMaterial gray = new ClientMaterial(new Color(9794369).getRGB(), new Color(10388301).getRGB(), 0.15f, new ResourceLocation("a"));
-//		Material gold = new Material(new Color(9794369).getRGB(), new Color(10388301).getRGB(), 0.15f, new ResourceLocation("a"));
 		ClientMaterial gold = new ClientMaterial(new ExpandedColor(60, 59, 59).brighter(0.075f, 0).getRGB(), new Color(126, 126, 126).getRGB(), 0.1f, new ResourceLocation("b"));
 		
 		Materials materials = new Materials();

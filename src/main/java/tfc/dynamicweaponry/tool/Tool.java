@@ -14,6 +14,7 @@ public class Tool {
 	
 	private ToolImage image;
 	private final ToolLayer[] layers;
+	private ToolStats stats;
 	
 	public ToolLayer[] getLayers() {
 		return layers;

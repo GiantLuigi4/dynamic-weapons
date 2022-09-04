@@ -2,8 +2,9 @@ import net.minecraft.resources.ResourceLocation;
 import tfc.dynamicweaponry.loading.ClientMaterial;
 import tfc.dynamicweaponry.loading.Material;
 import tfc.dynamicweaponry.loading.Materials;
-import tfc.dynamicweaponry.tool.stat_calc.ToolFlattener;
 import tfc.dynamicweaponry.tool.ToolLayer;
+import tfc.dynamicweaponry.tool.stat_calc.BladeDetection;
+import tfc.dynamicweaponry.tool.stat_calc.ToolFlattener;
 import tfc.dynamicweaponry.util.ExpandedColor;
 
 import javax.imageio.ImageIO;
@@ -13,49 +14,17 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
-public class PrepForAI {
+public class BladeDetectionTest {
 	public static void main(String[] args) throws IOException {
 		File fl = new File("tests");
 		for (File file : Objects.requireNonNull(fl.listFiles())) {
-			int[][] ints = prep(file.getAbsolutePath());
-			BufferedImage img = new BufferedImage(32, 2, BufferedImage.TYPE_INT_RGB);
-			for (int y = 0; y < ints.length; y++) {
-				int[] row = ints[y];
-				for (int x = 0; x < row.length; x++) {
-					int val = row[x];
-					if (val == -1) val = 15;
-					val = 15 - val;
-					float v = val / 15f;
-					val = (int) (v * 255);
-					img.setRGB(x, y, new Color(val, val, val).getRGB());
-				}
-			}
-//			for (int i = 0; i < ints.length / 2; i++) {
-//				int val = ints[i];
-//				if (val == -1) val = 15;
-//				val = 15 - val;
-//				float v = val / 15f;
-//				val = (int) (v * 255);
-//				img.setRGB(i, 0, new Color(val, val, val).getRGB());
-//			}
-//			for (int i = 0; i < ints.length / 2; i++) {
-//				int val = ints[i + 32];
-//				if (val == -1) val = 15;
-//				val = 15 - val;
-//				float v = val / 15f;
-//				val = (int) (v * 255);
-//				img.setRGB(i, 1, new Color(val, val, val).getRGB());
-//			}
-			Image img1 = img.getScaledInstance(img.getWidth() * 128, img.getHeight() * 128, BufferedImage.SCALE_FAST);
-			img = new BufferedImage(img.getWidth() * 128, img.getHeight() * 128, BufferedImage.TYPE_BYTE_GRAY);
-			Graphics g = img.getGraphics();
-			g.drawImage(img1, 0, 0, null);
-			ImageIO.write(img, "png", new File(file.getAbsolutePath() + "/ai_input.png"));
+			run(file.getAbsolutePath());
 		}
 	}
 	
-	public static int[][] prep(String dir) throws IOException {
-		System.out.println(dir);
+	private static void run(String dir) throws IOException {
+		BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+		
 		ClientMaterial gray = new ClientMaterial(new Color(9794369).getRGB(), new Color(10388301).getRGB(), 0.15f, new ResourceLocation("a"));
 		ClientMaterial gold = new ClientMaterial(new ExpandedColor(60, 59, 59).brighter(0.075f, 0).getRGB(), new Color(126, 126, 126).getRGB(), 0.1f, new ResourceLocation("b"));
 		
@@ -71,7 +40,20 @@ public class PrepForAI {
 				layer0, layer1
 		};
 		
-		return ToolFlattener.prep2D(layers);
+		boolean[] blade = new boolean[16];
+		boolean[] edge = new boolean[16];
+		BladeDetection.findAxe(blade, edge, layers);
+		
+		int[] ints = ToolFlattener.prep2D(layers)[1];
+		for (int i = 0; i < ints.length / 2; i++) {
+			if (ints[i + 16] != -1) {
+				if (blade[i]) img.setRGB(i, ints[i + 16], new Color(0, 255, 0).getRGB());
+				else if (edge[i]) img.setRGB(i, ints[i + 16], new Color(0, 0, 0).getRGB());
+				else img.setRGB(i, ints[i + 16], new Color(255, 255, 255).getRGB());
+			}
+		}
+		
+		ImageIO.write(img, "png", new File(dir + "/blade.png"));
 	}
 	
 	private static void load(BufferedImage from, ToolLayer to, ClientMaterial mat) {
